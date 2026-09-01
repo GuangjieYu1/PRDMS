@@ -36,6 +36,14 @@ class _Unset:
 
 UNSET = _Unset()
 
+# 写方法 → 写视图回调（PATCH/DELETE 已由客户端实现，未来工具按此扩展）
+_METHODS = {
+    "POST": lambda client, path, body: client.post(path, json=body),
+    "PUT": lambda client, path, body: client.put(path, json=body),
+    "PATCH": lambda client, path, body: client.patch(path, json=body),
+    "DELETE": lambda client, path, body: client.delete(path),
+}
+
 
 def provided(**kwargs: Any) -> dict[str, Any]:
     """只保留「已提供」的参数（显式 None 保留——清空语义；UNSET 丢弃）。"""
@@ -109,8 +117,7 @@ def write_request(
 
     try:
         client = get_runtime().writer(decision.token)
-        fn = {"POST": client.post, "PUT": client.put}[method.upper()]
-        result = fn(path, json=body)
+        result = _METHODS[method.upper()](client, path, body)
         _log("approved", decision.entry, None, "ok", status=client.last_status)
         return result
     except UpstreamError as exc:
@@ -118,6 +125,11 @@ def write_request(
         raise
     except TransportError as exc:
         _log("approved", decision.entry, None, "transport_error")
+        raise
+    except HarnessError as exc:
+        # 登录/会话失效等认证侧失败（ensure_ready 期间）——环境侧失败路径同样记审计
+        # （结果枚举无认证类目，按「未抵达上游/环境失败」归入 transport_error）
+        _log("approved", decision.entry, None, "transport_error", deny_reason=f"认证/会话失败: {exc}")
         raise
 
 

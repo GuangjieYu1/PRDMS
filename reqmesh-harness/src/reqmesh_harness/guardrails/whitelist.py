@@ -80,7 +80,12 @@ class WhitelistStore:
         return removed
 
     def replace(self, entries: list[WhitelistEntry]) -> None:
-        """整体替换（CLI remove 复用；空列表 = 清空白名单）。"""
+        """整体替换（CLI remove 复用；空列表 = 清空白名单）。
+
+        覆盖前先校验现有文件（损坏 → ApprovalConfigError，绝不静默覆盖）。
+        """
+        if self._path.exists():
+            self.load()  # 校验；损坏即抛
         if len(entries) >= MAX_ENTRIES:
             raise ApprovalConfigError(f"白名单条目数已达上限 {MAX_ENTRIES}")
         self._save(entries)

@@ -29,14 +29,14 @@ def annotations_for(level: str) -> ToolAnnotations:
     """权限层级 → MCP annotations（单向映射；对比 spec/ADR-0002）。
 
     - READ → readOnlyHint=True（P1 行为不变）；
-    - DRAFT/MUTATE → readOnlyHint=False, destructiveHint=False（ToolAnnotations 默认值）；
+    - DRAFT/MUTATE → readOnlyHint=False, destructiveHint=False（spec L173 字面语义）；
     - ADMIN → destructiveHint=True（危险操作标注；P2 预留，无 ADMIN 工具注册）。
     """
     if level == "READ":
         return ToolAnnotations(readOnlyHint=True)
     if level == "ADMIN":
         return ToolAnnotations(destructiveHint=True)
-    return ToolAnnotations()
+    return ToolAnnotations(readOnlyHint=False, destructiveHint=False)
 
 
 @dataclass(frozen=True)

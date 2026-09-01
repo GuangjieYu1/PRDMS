@@ -20,6 +20,7 @@ ROUTES = {
 }
 WRITE_ROUTES = {
     "POST /api/projects/cessna-172/requirements": "requirement_get.json",
+    "PUT /api/projects/cessna-172/requirements/ACFT0000": "requirement_get.json",
 }
 
 
@@ -81,6 +82,47 @@ async def test_stdio_write_tool_via_mcp(stub, tmp_path) -> None:
     assert row["upstream"] == {"method": "POST", "path": "/api/projects/cessna-172/requirements"}
     assert row["http_status"] == 200
     assert row["version"] == 1
+
+
+@pytest.mark.asyncio
+async def test_stdio_put_partial_update_via_mcp(stub, tmp_path) -> None:
+    """PUT 部分更新经 MCP 路径成立：FastMCP 会以默认值填充缺省参数，
+    但工具层靠 UNSET 哨兵还原「未提供」——请求体只含已提供字段（含显式 null）。"""
+    approvals = tmp_path / "approvals.toml"
+    approvals.write_text('[[approvals]]\ntool = "update_requirement"\nproject = "cessna-172"\n', encoding="utf-8")
+    env = dict(os.environ)
+    env.update(
+        {
+            "REQMESH_BASE_URL": stub.url,
+            "REQMESH_USERNAME": "dev",
+            "REQMESH_PASSWORD": "dev-pass",
+            "REQMESH_TOKEN": "",
+            "REQMESH_SESSION_FILE": str(tmp_path / "session.json"),
+            "REQMESH_APPROVALS_FILE": str(approvals),
+            "REQMESH_AUDIT_FILE": str(tmp_path / "audit.jsonl"),
+            "REQMESH_TIMEOUT": "10",
+        }
+    )
+    params = StdioServerParameters(
+        command=sys.executable,
+        args=["-m", "reqmesh_harness.server", "--transport", "stdio"],
+        env=env,
+    )
+    async with stdio_client(params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            await session.list_tools()
+            # 只提供 description + reason：其余字段未提供（MCP 层不会发送）
+            result = await session.call_tool(
+                "update_requirement",
+                {"project_id": "cessna-172", "req_id": "ACFT0000", "reason": "SMOKE 更新",
+                 "description": "updated-by-mcp"},
+            )
+            assert result.isError is False
+    puts = [b for b in stub.bodies() if b"updated-by-mcp" in b]
+    assert puts, [r for r in stub.requests]
+    body = json.loads(puts[0])
+    assert body == {"description": "updated-by-mcp"}  # 未提供字段不进请求体（exclude_unset 语义）
 
 
 @pytest.mark.asyncio
