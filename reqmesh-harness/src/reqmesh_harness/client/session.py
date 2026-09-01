@@ -32,17 +32,22 @@ class AuthSession:
     def __init__(self, settings: Settings | None = None, client: httpx.Client | None = None) -> None:
         self.settings = settings or Settings()
         self.store = SessionStore(self.settings.resolved_session_file())
-        creds = (self.settings.username, self.settings.password.get_secret_value())
-        token = self.settings.token.get_secret_value()
-        self._use_bearer = bool(token) and not (creds[0] and creds[1])  # 兜底：无凭据才用
+        # Bearer 兜底：仅在未配置用户名/密码时使用（cookie 流程优先）
+        self._use_bearer = bool(self.settings.token.get_secret_value()) and not (
+            self.settings.has_password_credentials()
+        )
         self._csrf = ""
         self._authenticated = False
-        self._client = client or httpx.Client(
-            base_url=self.settings.base_url.rstrip("/"),
-            timeout=self.settings.timeout,
-            follow_redirects=False,
-        )
-        weakref.finalize(self, self._client.close)
+        if client is not None:
+            self._client = client
+        else:
+            self._client = httpx.Client(
+                base_url=self.settings.base_url.rstrip("/"),
+                timeout=self.settings.timeout,
+                follow_redirects=False,
+            )
+            # 只关闭自建的 client；注入的 client 生命周期归所有者
+            weakref.finalize(self, self._client.close)
 
     # ------------------------------------------------------------------ 登录/登出
     def login(self) -> dict:
@@ -124,19 +129,25 @@ class AuthSession:
         - 401：重登一次并重试；
         - 仍失败：类型化错误（不含凭据）。
         """
-        return self._get_retrying(path, params, connect_attempts=0, reauths=0)
+        return self._get_retrying(path, params, retried_connect=False, retried_401=False)
 
-    def _get_retrying(self, path: str, params: dict | None, connect_attempts: int, reauths: int) -> Any:
+    def _get_retrying(
+        self,
+        path: str,
+        params: dict | None,
+        retried_connect: bool,
+        retried_401: bool,
+    ) -> Any:
         self.ensure_ready(validate=False)
         try:
             resp = self._client.get(path, params=params, headers=self._auth_headers())
         except httpx.TransportError as exc:
-            if connect_attempts < 1:
-                return self._get_retrying(path, params, connect_attempts + 1, reauths)
+            if not retried_connect:
+                return self._get_retrying(path, params, True, retried_401)
             raise TransportError(f"实例不可达: {exc}") from exc
-        if resp.status_code == 401 and reauths < 1:
+        if resp.status_code == 401 and not retried_401:
             self.login()
-            return self._get_retrying(path, params, connect_attempts, reauths + 1)
+            return self._get_retrying(path, params, retried_connect, True)
         if resp.status_code == 401:
             raise SessionExpiredError("会话已失效且自动重登后仍被拒绝（401）。请检查凭据。")
         if resp.status_code != 200:

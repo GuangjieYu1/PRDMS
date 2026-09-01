@@ -12,7 +12,7 @@ __all__ = ["ToolRegistry", "ToolSpec", "build_registry"]
 
 
 def _spec(name: str, title: str, domain: str, fn) -> ToolSpec:
-    return ToolSpec(name=name, title=title, domain=domain, level="READ", fn=fn)
+    return ToolSpec(name=name, title=title, domain=domain, level="READ", fn=fn)  # P1 全工具层均为 READ
 
 
 def build_registry() -> ToolRegistry:

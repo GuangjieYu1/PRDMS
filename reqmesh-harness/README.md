@@ -25,6 +25,7 @@ uv run pytest                 # 全部离线单测
 uv run pytest -m network      # 网络冒烟（需 REQMESH_USERNAME/REQMESH_PASSWORD）
 uv run python -m reqmesh_harness.server                       # stdio transport
 uv run python -m reqmesh_harness.server --transport http      # streamable-HTTP transport
+# （可加 --host/--port 覆盖监听地址/端口；默认见 REQMESH_HARNESS_HOST/PORT）
 ```
 
 ## 认证

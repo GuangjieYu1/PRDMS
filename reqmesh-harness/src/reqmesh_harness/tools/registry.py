@@ -17,12 +17,17 @@ description 的唯一来源是处理器的 docstring（注册表经 `ToolSpec.de
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
-ANNOTATIONS_READ = ToolAnnotations(readOnlyHint=True)
+Level = Literal["READ", "DRAFT", "MUTATE", "ADMIN"]
+
+
+def annotations_for(level: str) -> ToolAnnotations:
+    """权限层级 → MCP annotations（单向映射；对比 spec/ADR-0002：readOnlyHint 由层级推导）。"""
+    return ToolAnnotations(readOnlyHint=True) if level == "READ" else ToolAnnotations()
 
 
 @dataclass(frozen=True)
@@ -30,7 +35,7 @@ class ToolSpec:
     name: str
     title: str
     domain: str
-    level: str
+    level: Level
     fn: Callable[..., Any]
 
     @property
@@ -66,6 +71,10 @@ class ToolRegistry:
                 name=spec.name,
                 title=spec.title,
                 description=spec.description,
-                annotations=ANNOTATIONS_READ,
+                annotations=annotations_for(spec.level),
                 meta={"domain": spec.domain, "permission": spec.level},
             )
+
+    def call(self, name: str, **kwargs: Any) -> Any:
+        """以注册表为入口调用工具（冒烟等外部方不再穿透到 fn 属性）。"""
+        return self.get(name).fn(**kwargs)

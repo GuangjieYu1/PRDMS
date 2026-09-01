@@ -35,28 +35,28 @@ def main() -> int:
     out_path = Path(os.environ.get("REQMESH_SMOKE_OUT", str(DEFAULT_OUT)))
 
     try:
-        client = AuthSession(settings)
-        client.ensure_ready(validate=True)  # 登录（或复用已有会话 → whoami 校验）
+        auth_session = AuthSession(settings)
+        auth_session.ensure_ready(validate=True)  # 预热：建立认证会话（工具调用共享会话文件）
 
         tools = build_registry()
-        whoami = tools.get("whoami").fn()
+        whoami = tools.call("whoami")
         assert whoami.get("username"), "whoami 未返回用户"
 
-        projects = tools.get("list_projects").fn()
+        projects = tools.call("list_projects")
         project_ids = [p.get("id") for p in projects]
         assert PROJECT_ID in project_ids, f"项目列表缺 {PROJECT_ID}"
 
-        requirements = tools.get("list_requirements").fn(project_id=PROJECT_ID)
+        requirements = tools.call("list_requirements", project_id=PROJECT_ID)
         total = requirements.get("total")
         assert total == EXPECTED_REQUIREMENTS_TOTAL, f"需求总数 {total} != {EXPECTED_REQUIREMENTS_TOTAL}"
 
-        coverage = tools.get("get_coverage").fn(project_id=PROJECT_ID)
+        coverage = tools.call("get_coverage", project_id=PROJECT_ID)
         assert coverage.get("total") is not None
 
-        gap = tools.get("get_gap_analysis").fn(project_id=PROJECT_ID)
+        gap = tools.call("get_gap_analysis", project_id=PROJECT_ID)
         gap_count = gap.get("gaps", 0) if isinstance(gap, dict) else len(gap)
 
-        traces = tools.get("get_traces").fn(project_id=PROJECT_ID)
+        traces = tools.call("get_traces", project_id=PROJECT_ID)
         assert traces.get("links") is not None
     except AssertionError as exc:
         print(f"冒烟失败: {exc}", file=sys.stderr)
@@ -83,7 +83,7 @@ def main() -> int:
 | whoami | ok | username={whoami.get('username')} role={whoami.get('role')} |
 | list_projects | ok | 项目数 {len(projects)}，含 {PROJECT_ID} |
 | list_requirements | ok | total={total}（基线 {EXPECTED_REQUIREMENTS_TOTAL}） |
-| get_coverage | ok | covered={coverage.get('total')} coverage_pct={coverage.get('coverage_pct')} |
+| get_coverage | ok | total={coverage.get('total')} shallow_covered={coverage.get('shallow_covered')} deep_covered={coverage.get('deep_covered')} coverage_pct={coverage.get('coverage_pct')} |
 | get_gap_analysis | ok | 缺口 {gap_count} |
 | get_traces | ok | links={len(traces.get('links'))} |
 

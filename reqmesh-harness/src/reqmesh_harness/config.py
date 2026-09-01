@@ -45,8 +45,11 @@ class Settings(BaseSettings):
             state_home = Path(os.environ["XDG_STATE_HOME"])
         return state_home / "reqmesh-harness" / "session.json"
 
+    def has_password_credentials(self) -> bool:
+        return bool(self.username and self.password.get_secret_value())
+
     def has_credentials(self) -> bool:
-        return bool(self.username and self.password.get_secret_value()) or bool(self.token.get_secret_value())
+        return self.has_password_credentials or bool(self.token.get_secret_value())
 
 
 def get_settings() -> Settings:
