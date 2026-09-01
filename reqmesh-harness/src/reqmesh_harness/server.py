@@ -39,7 +39,7 @@ def create_server(settings: Settings | None = None) -> FastMCP:
     return mcp
 
 
-def main(argv: list[str] | None = None) -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="reqmesh-harness", description="reqmesh MCP server")
     parser.add_argument(
         "--transport",
@@ -49,7 +49,11 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument("--host", default=None, help="HTTP transport 监听地址")
     parser.add_argument("--port", type=int, default=None, help="HTTP transport 端口")
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
 
     settings = get_settings()
     if args.host is not None:

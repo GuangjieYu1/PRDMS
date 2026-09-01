@@ -83,19 +83,6 @@ def test_descriptions_start_with_read_only() -> None:
         assert spec.description.startswith("READ-ONLY"), spec.name
 
 
-def test_mcp_annotations_read_only_hint() -> None:
-    from mcp.server.fastmcp import FastMCP
-
-    mcp = FastMCP("reqmesh")
-    registry().install(mcp)
-    by_name_reg = {s.name: s for s in registry().all()}
-    for t in mcp._tool_manager.list_tools():
-        spec = by_name_reg[t.name]
-        assert t.annotations.readOnlyHint is True
-        # meta 来自注册表（唯一事实源）：域与权限层级逐一比对
-        assert t.meta == {"domain": spec.domain, "permission": spec.level}
-
-
 def test_description_single_source_is_docstring() -> None:
     """description 唯一来源 = 处理器 docstring；注册表与处理器之间不得存在第二份文本。"""
     for spec in registry().all():
@@ -145,19 +132,24 @@ def test_case_passthrough_readonly(reqmesh_env, toolmap: ToolMap, case) -> None:
             assert dict(calls[0].request.url.params) == {}
 
 
-def test_report_enum_invalid_rejected_by_schema() -> None:
-    from reqmesh_harness.tools.groups.components_report import get_project_report
+def test_schema_rejects_invalid_values_at_call_boundary() -> None:
+    """MCP 调用路径的校验 = 处理器函数的 arg model（FastMCP 在协议边界用它预解析）。
+    非法值必须被拒绝（#13 AC2：report 枚举非法值被 schema 拒绝；#3 分页上限 2000）。"""
+    from pydantic import ValidationError
 
-    tool = Tool.from_function(get_project_report, name="get_project_report", description="x")
-    params = tool.parameters
-    assert "enum" in params["properties"]["report"]
+    tool = Tool.from_function(
+        registry().get("list_requirements").fn, name="list_requirements", description="x"
+    )
+    model = tool.fn_metadata.arg_model
+    assert model.model_validate({"project_id": "cessna-172"})
+    with pytest.raises(ValidationError):
+        model.model_validate({"project_id": "cessna-172", "limit": 5000})
+    with pytest.raises(ValidationError):
+        model.model_validate({"project_id": "cessna-172", "offset": -1})
 
-
-def test_pagination_bounds_in_schema() -> None:
-    from reqmesh_harness.tools.groups.requirements import list_requirements
-
-    tool = Tool.from_function(list_requirements, name="list_requirements", description="x")
-    limit = tool.parameters["properties"]["limit"]
-    assert limit["minimum"] == 1
-    assert limit["maximum"] == 2000
-    assert tool.parameters["properties"]["offset"]["minimum"] == 0
+    report_tool = Tool.from_function(
+        registry().get("get_project_report").fn, name="get_project_report", description="x"
+    )
+    report_model = report_tool.fn_metadata.arg_model
+    with pytest.raises(ValidationError):
+        report_model.model_validate({"project_id": "cessna-172", "report": "bogus"})

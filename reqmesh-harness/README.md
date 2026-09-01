@@ -23,8 +23,8 @@ uv sync                       # 安装依赖（uv.lock 锁定）
 uv run python scripts/gen_models.py   # 重生成模型（重跑后 git diff 应为空）
 uv run pytest                 # 全部离线单测
 uv run pytest -m network      # 网络冒烟（需 REQMESH_USERNAME/REQMESH_PASSWORD）
-uv run python -m reqmesh_harness.server            # stdio transport
-uv run python -m reqmesh_harness.server --http     # streamable-HTTP transport
+uv run python -m reqmesh_harness.server                       # stdio transport
+uv run python -m reqmesh_harness.server --transport http      # streamable-HTTP transport
 ```
 
 ## 认证

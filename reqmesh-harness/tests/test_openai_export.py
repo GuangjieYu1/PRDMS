@@ -76,6 +76,24 @@ def test_golden_snapshot(exported) -> None:
     assert exported == golden
 
 
+def test_converter_strips_non_openai_keys() -> None:
+    """子集转换定向测试：title/\$defs/additionalProperties 被剥离，其余保留。"""
+    schema = {
+        "title": "T",
+        "type": "object",
+        "properties": {"a": {"title": "A", "type": "string"}},
+        "required": ["a"],
+        "additionalProperties": False,
+        "$defs": {"X": {"type": "string"}},
+    }
+    out = to_openai_schema(schema)
+    assert "title" not in out
+    assert "$defs" not in out
+    assert "additionalProperties" not in out
+    assert out["properties"]["a"] == {"type": "string"}
+    assert out["required"] == ["a"]
+
+
 def test_golden_is_fresh_and_deterministic(exported) -> None:
     """导出结果确定性：两次导出字节一致。"""
     again = export_openai_functions(build_registry())

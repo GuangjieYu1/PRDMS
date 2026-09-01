@@ -52,9 +52,11 @@ async def test_streamable_http_list_tools_and_call(stub, tmp_path, monkeypatch) 
                 assert len(names) == 25
                 # 与 stdio/注册集合对账
                 assert names == sorted(s.name for s in build_registry().all())
+                specs = {s.name: s for s in build_registry().all()}
                 for t in tools.tools:
                     assert t.description.startswith("READ-ONLY"), t.name
                     assert t.annotations.readOnlyHint is True, t.name
+                    assert t.meta == {"domain": specs[t.name].domain, "permission": specs[t.name].level}, t.name
                 for _ in range(2):
                     result = await session.call_tool("list_requirements", {"project_id": "cessna-172"})
                     assert result.isError is False
@@ -100,6 +102,15 @@ def test_cli_transport_mapping() -> None:
     from reqmesh_harness.server import MCP_TRANSPORT
 
     assert MCP_TRANSPORT == {"stdio": "stdio", "http": "streamable-http"}
+
+
+def test_cli_args_parse() -> None:
+    from reqmesh_harness.server import parse_args
+
+    ns = parse_args(["--transport", "http", "--host", "0.0.0.0", "--port", "9000"])
+    assert (ns.transport, ns.host, ns.port) == ("http", "0.0.0.0", 9000)
+    ns2 = parse_args([])
+    assert (ns2.transport, ns2.host, ns2.port) == ("stdio", None, None)
 
 
 def test_host_port_configurable() -> None:

@@ -233,6 +233,23 @@ def test_logout_sends_csrf_header_and_clears_state(tmp_path) -> None:
         assert session.store.load() is None
 
 
+def test_logs_never_contain_password(caplog, tmp_path) -> None:
+    """凭据不进日志：登录成败日志只含用户名，不出现密码。"""
+    import logging
+
+    with caplog.at_level(logging.INFO, logger="reqmesh_harness.auth"):
+        session = AuthSession(_settings(tmp_path))
+        with respx.mock(base_url=BASE) as router:
+            router.post("/api/auth/login").mock(return_value=Response(200, json=LOGIN_BODY, headers=LOGIN_HEADERS))
+            session.login()
+        with respx.mock(base_url=BASE) as router:
+            router.post("/api/auth/login").mock(return_value=Response(401, json={"detail": "Invalid credentials"}))
+            with pytest.raises(LoginFailedError):
+                session.login()
+    assert "dev" in " ".join(r.message for r in caplog.records)
+    assert all("dev-pass" not in r.message for r in caplog.records)
+
+
 def test_corrupt_session_file_falls_back_to_login(tmp_path) -> None:
     session = AuthSession(_settings(tmp_path))
     session.store.path.write_text("{not-json", encoding="utf-8")

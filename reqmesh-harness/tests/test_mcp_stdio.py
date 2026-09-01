@@ -52,9 +52,12 @@ async def test_stdio_list_tools_and_call_requirement(stub, tmp_path) -> None:
             names = sorted(t.name for t in tools.tools)
             assert len(names) == 25
             assert names == sorted(s.name for s in build_registry().all())
+            specs = {s.name: s for s in build_registry().all()}
             for t in tools.tools:
                 assert t.description.startswith("READ-ONLY"), t.name
                 assert t.annotations.readOnlyHint is True, t.name
+                # 分组/层级经 meta 随协议下发（对客户端可见），且与注册表同源
+                assert t.meta == {"domain": specs[t.name].domain, "permission": specs[t.name].level}, t.name
             result = await session.call_tool("list_requirements", {"project_id": "cessna-172"})
             assert result.isError is False
             payload = json.loads(result.content[0].text)

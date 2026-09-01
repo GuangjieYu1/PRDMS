@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -42,6 +43,20 @@ def test_generated_header() -> None:
     assert text.startswith("# 此文件由 scripts/gen_models.py 从 vendored openapi 快照确定性生成——请勿手改。")
     assert "datamodel-code-generator" in text
     assert "reqmesh-0.5.0.json" in text
+    # #7 AC3：头部注明生成器版本 + 来源快照（版本号必须真实存在于文中）
+    assert re.search(r"datamodel-code-generator \d+\.\d+\.\d+", text)
+
+
+def test_generator_is_pinned_dev_dependency() -> None:
+    """#7 AC4：生成器为 dev 依赖且版本锁定（pyproject 声明 + uv.lock 锁定）。"""
+    import tomllib
+
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    dev = pyproject.get("dependency-groups", {}).get("dev", [])
+    assert any("datamodel-code-generator" in d for d in dev)
+    lock = (ROOT / "uv.lock").read_text(encoding="utf-8")
+    assert "name = \"datamodel-code-generator\"" in lock
+    assert "version = \"0.76.0" in lock
 
 
 def test_generated_models_import() -> None:

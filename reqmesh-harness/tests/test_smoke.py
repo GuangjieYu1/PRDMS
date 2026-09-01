@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -32,3 +33,8 @@ def test_smoke_cessna172(tmp_path) -> None:
     assert "**通过**" in record
     assert "无副作用声明" in record
     assert "total=57" in record
+    # #16 AC4：记录含时间戳、实例 URL、每步结果与关键计数
+    assert re.search(r"^- 时间：\\d{4}-\\d{2}-\\d{2}T", record, re.MULTILINE)
+    assert re.search(r"^- 实例：http", record, re.MULTILINE)
+    assert "| list_requirements | ok | total=57" in record
+    assert "| whoami | ok |" in record

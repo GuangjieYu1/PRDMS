@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import weakref
 from typing import Any
 
@@ -14,6 +15,8 @@ from .state import SessionState, SessionStore, cookie_targets
 _LOGIN_PATH = "/api/auth/login"
 _LOGOUT_PATH = "/api/auth/logout"
 _WHOAMI_PATH = "/api/auth/whoami"
+
+logger = logging.getLogger("reqmesh_harness.auth")
 
 
 class AuthSession:
@@ -53,6 +56,7 @@ class AuthSession:
         except httpx.TransportError as exc:
             raise TransportError(f"实例不可达: {exc}") from exc
         if resp.status_code == 401:
+            logger.info("登录被拒：%s", username)  # 记录用户但不记录密码
             raise LoginFailedError("登录被拒绝：凭据错误或账号被禁用")
         if resp.status_code != 200:
             raise UpstreamError(resp.status_code, self._detail_of(resp))
@@ -66,6 +70,7 @@ class AuthSession:
             cookies=self._cookies_from_jar(),
         )
         self.store.save(state)
+        logger.info("登录成功: %s (role=%s)", username, body.get("role", ""))
         return body
 
     def logout(self) -> dict:
