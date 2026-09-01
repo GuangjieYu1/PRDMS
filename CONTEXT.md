@@ -44,6 +44,10 @@ _Avoid_: 试运行、模拟执行
 harness 的一次对话。**只**用于此义。
 _Avoid_: 用它指工程对话（那是「工作会话」）
 
+**认证会话（auth session）**:
+harness 客户端与 reqmesh 之间的 HTTP 认证状态（cookie + CSRF token，经会话文件持久化，重启免重登）。与「运行时会话」是两个概念，不得混用。
+_Avoid_: session、会话（若指运行时会话）
+
 ### 工程流程
 
 **工作会话**:

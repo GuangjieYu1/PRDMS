@@ -70,7 +70,10 @@ async def test_streamable_http_list_tools_and_call(stub, tmp_path, monkeypatch) 
     # stateless HTTP：每个请求作用域构建会话，但会话文件共享——仅首次登录
     assert counts.get("POST") == 1
     assert counts.get("GET") == 2
-    assert set(counts) <= {"GET", "POST"}
+    methods = {m for m, _, _ in stub.requests}
+    assert methods == {"GET", "POST"}
+    post_paths = {path for m, path, _ in stub.requests if m == "POST"}
+    assert post_paths == {"/api/auth/login"}
 
 
 @pytest.mark.asyncio
@@ -90,6 +93,13 @@ async def test_streamable_http_protocol_error_response(stub, tmp_path, monkeypat
                 assert result.isError is True
     finally:
         stop_app(server, thread)
+
+
+def test_cli_transport_mapping() -> None:
+    """CLI --transport http → FastMCP 的 streamable-http（用户友好别名）。"""
+    from reqmesh_harness.server import MCP_TRANSPORT
+
+    assert MCP_TRANSPORT == {"stdio": "stdio", "http": "streamable-http"}
 
 
 def test_host_port_configurable() -> None:

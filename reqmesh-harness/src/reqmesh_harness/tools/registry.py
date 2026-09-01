@@ -1,15 +1,17 @@
 """工具注册表：P1 的唯一事实源。
 
-每个 READ 工具在注册表声明：name（ADR-0002 verb_entity）、title、description
-（READ-ONLY 开头、中文）、domain（实体域分组）、处理器函数（显式参数签名）。
-注册表统一驱动三处：
+每个 READ 工具在注册表声明：name（ADR-0002 verb_entity）、title、domain（实体域
+分组）、权限层级（level，P2 审批门从这里映射，绝不解析名字）与处理器函数。
+description 的唯一来源是处理器的 docstring（注册表经 `ToolSpec.description`
+属性读取），注册表与处理器之间不存在第二份描述文本。
+注册表统一驱动：
 
-- FastMCP 工具注册（name/description/annotations(readOnlyHint)/meta(domain)）；
-- OpenAI function JSON 导出（同一处理器函数经 Tool.from_function 推导同一份 schema）；
+- FastMCP 工具注册（name/description/annotations(readOnlyHint)/meta(domain,level)）；
+- OpenAI function JSON 导出（同一处理器函数经 Tool.from_function 推导同一份参数 schema）；
 - schema/只读对账测试（与 spec 映射表逐项比对）。
 
-MCP 协议的低层 Tool 类型没有 tags 字段（0.5.0 及 1.x 均无），实体域分组经
-`meta.domain` 呈现（对客户端可见），与注册表、OpenAI 导出保持同一来源。
+实现注记（对照 ADR-0002 的 tags）：MCP 协议低层 Tool 类型没有 tags 字段
+（mcp 0.5.0 与 1.x 均无），实体域分组经 meta.domain 呈现——已回写 ADR-0002。
 """
 
 from __future__ import annotations
@@ -18,7 +20,6 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from mcp.server.fastmcp import FastMCP
-from mcp.server.fastmcp.tools.base import Tool
 from mcp.types import ToolAnnotations
 
 ANNOTATIONS_READ = ToolAnnotations(readOnlyHint=True)
@@ -28,9 +29,16 @@ ANNOTATIONS_READ = ToolAnnotations(readOnlyHint=True)
 class ToolSpec:
     name: str
     title: str
-    description: str
     domain: str
+    level: str
     fn: Callable[..., Any]
+
+    @property
+    def description(self) -> str:
+        doc = (self.fn.__doc__ or "").strip()
+        if not doc:
+            raise ValueError(f"工具 {self.name} 缺 docstring（description 唯一来源）")
+        return doc
 
 
 class ToolRegistry:
@@ -59,26 +67,5 @@ class ToolRegistry:
                 title=spec.title,
                 description=spec.description,
                 annotations=ANNOTATIONS_READ,
-                meta={"domain": spec.domain, "permission": "READ"},
+                meta={"domain": spec.domain, "permission": spec.level},
             )
-
-    def openai_tools(self) -> list[dict[str, Any]]:
-        """导出 OpenAI function-calling JSON：与 MCP 注册共用同一处理器函数，
-        经 Tool.from_function 推导与 MCP 侧逐字一致的 parameters。"""
-        out: list[dict[str, Any]] = []
-        for spec in self.all():
-            tool = Tool.from_function(spec.fn, name=spec.name, description=spec.description)
-            out.append(
-                {
-                    "name": spec.name,
-                    "description": spec.description,
-                    "parameters": tool.parameters,
-                }
-            )
-        return out
-
-    def mcp_tools(self) -> list[Tool]:
-        return [
-            Tool.from_function(spec.fn, name=spec.name, description=spec.description)
-            for spec in self.all()
-        ]

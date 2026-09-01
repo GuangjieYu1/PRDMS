@@ -22,6 +22,9 @@ logger = logging.getLogger("reqmesh_harness.server")
 
 SERVER_NAME = "reqmesh"
 
+# CLI 参数值 → FastMCP.transport 取值（"http" 是用户友好的别名）
+MCP_TRANSPORT = {"stdio": "stdio", "http": "streamable-http"}
+
 
 def create_server(settings: Settings | None = None) -> FastMCP:
     """构建 FastMCP server（stateless HTTP：每个请求作用域一个会话）。"""
@@ -64,7 +67,7 @@ def main(argv: list[str] | None = None) -> None:
             logger.warning("启动会话校验失败（将按需求逐次重试）: %s", exc)
 
     mcp = create_server(settings)
-    mcp.run(transport=args.transport)
+    mcp.run(transport=MCP_TRANSPORT[args.transport])
 
 
 if __name__ == "__main__":

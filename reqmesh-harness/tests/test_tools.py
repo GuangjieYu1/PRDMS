@@ -88,9 +88,18 @@ def test_mcp_annotations_read_only_hint() -> None:
 
     mcp = FastMCP("reqmesh")
     registry().install(mcp)
+    by_name_reg = {s.name: s for s in registry().all()}
     for t in mcp._tool_manager.list_tools():
+        spec = by_name_reg[t.name]
         assert t.annotations.readOnlyHint is True
-        assert t.meta == {"domain": t.meta["domain"], "permission": "READ"}
+        # meta 来自注册表（唯一事实源）：域与权限层级逐一比对
+        assert t.meta == {"domain": spec.domain, "permission": spec.level}
+
+
+def test_description_single_source_is_docstring() -> None:
+    """description 唯一来源 = 处理器 docstring；注册表与处理器之间不得存在第二份文本。"""
+    for spec in registry().all():
+        assert spec.description == (spec.fn.__doc__ or "").strip()
 
 
 def test_readonly_client_structurally_exposes_only_get() -> None:

@@ -1,7 +1,7 @@
 # P1 cessna-172 冒烟记录
 
-- 时间：2026-09-01T08:22:51.111081+00:00
-- 实例：http://172.16.100.2:8000（rt profile: personal）
+- 时间：2026-09-01T08:30:27.870870+00:00
+- 实例：http://172.16.100.2:8000
 - 项目：cessna-172
 - 结果：**通过**（全链路 200，无副作用）
 
@@ -19,4 +19,6 @@
 
 ## 无副作用声明
 
-本冒烟仅发起：登录（POST /api/auth/login）与 6 个 GET（whoami/projects/requirements/coverage/gap-analysis/traces）；未调用任何写端点，未修改 reqmesh 数据（git 历史无新增提交）。凭据未落库、未写入本记录。
+本冒烟仅发起：登录（POST /api/auth/login）与 6 个工具调用（whoami/list_projects/
+list_requirements/coverage/gap-analysis/traces，全部为 GET）；未调用任何写端点，
+未修改 reqmesh 数据（git 历史无新增提交）。凭据未落库、未写入本记录。

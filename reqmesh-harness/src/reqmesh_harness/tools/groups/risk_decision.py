@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..runtime import get_runtime
-from ._common import PageLimit, PageOffset, get_params, paginate, project_path
+from ._common import PageLimit, PageOffset, merged_list_or_get, project_path, read_json
 
 
 def list_risks(
@@ -15,16 +14,12 @@ def list_risks(
     limit: PageLimit = 500,
 ) -> Any:
     """READ-ONLY 列出风险（risk_id 给出时返回单个风险）。"""
-    if risk_id:
-        return get_params(get_runtime().reader(), project_path(project_id, f"/risks/{risk_id}"))
-    return get_params(
-        get_runtime().reader(), project_path(project_id, "/risks"), paginate(offset, limit)
-    )
+    return merged_list_or_get(project_id, "risks", risk_id, offset, limit)
 
 
 def get_risk_matrix(project_id: str) -> Any:
     """READ-ONLY 返回风险矩阵（可能性×严重度）。"""
-    return get_params(get_runtime().reader(), project_path(project_id, "/risk-matrix"))
+    return read_json(project_path(project_id, "/risk-matrix"))
 
 
 def list_decisions(
@@ -34,11 +29,7 @@ def list_decisions(
     limit: PageLimit = 500,
 ) -> Any:
     """READ-ONLY 列出决策记录（dec_id 给出时返回单条）。"""
-    if dec_id:
-        return get_params(get_runtime().reader(), project_path(project_id, f"/decisions/{dec_id}"))
-    return get_params(
-        get_runtime().reader(), project_path(project_id, "/decisions"), paginate(offset, limit)
-    )
+    return merged_list_or_get(project_id, "decisions", dec_id, offset, limit)
 
 
 def list_verification_cases(
@@ -48,11 +39,7 @@ def list_verification_cases(
     limit: PageLimit = 500,
 ) -> Any:
     """READ-ONLY 列出验证用例（vc_id 给出时返回单个）。"""
-    if vc_id:
-        return get_params(get_runtime().reader(), project_path(project_id, f"/verification/{vc_id}"))
-    return get_params(
-        get_runtime().reader(), project_path(project_id, "/verification"), paginate(offset, limit)
-    )
+    return merged_list_or_get(project_id, "verification", vc_id, offset, limit)
 
 
 def list_analysis_cases(
@@ -62,11 +49,7 @@ def list_analysis_cases(
     limit: PageLimit = 500,
 ) -> Any:
     """READ-ONLY 列出分析案例（case_id 给出时返回单个）。"""
-    if case_id:
-        return get_params(get_runtime().reader(), project_path(project_id, f"/analysis/{case_id}"))
-    return get_params(
-        get_runtime().reader(), project_path(project_id, "/analysis"), paginate(offset, limit)
-    )
+    return merged_list_or_get(project_id, "analysis", case_id, offset, limit)
 
 
 def list_specifications(
@@ -76,13 +59,7 @@ def list_specifications(
     limit: PageLimit = 500,
 ) -> Any:
     """READ-ONLY 列出规格文档（spec_id 给出时返回单个）。"""
-    if spec_id:
-        return get_params(
-            get_runtime().reader(), project_path(project_id, f"/specifications/{spec_id}")
-        )
-    return get_params(
-        get_runtime().reader(), project_path(project_id, "/specifications"), paginate(offset, limit)
-    )
+    return merged_list_or_get(project_id, "specifications", spec_id, offset, limit)
 
 
 def list_definitions(
@@ -92,8 +69,4 @@ def list_definitions(
     limit: PageLimit = 500,
 ) -> Any:
     """READ-ONLY 列出定义/术语（def_id 给出时返回单个）。"""
-    if def_id:
-        return get_params(get_runtime().reader(), project_path(project_id, f"/definitions/{def_id}"))
-    return get_params(
-        get_runtime().reader(), project_path(project_id, "/definitions"), paginate(offset, limit)
-    )
+    return merged_list_or_get(project_id, "definitions", def_id, offset, limit)

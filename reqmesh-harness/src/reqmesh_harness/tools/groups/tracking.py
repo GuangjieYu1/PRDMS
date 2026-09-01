@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..runtime import get_runtime
-from ._common import get_params, project_path
+from ._common import project_path, read_json
 
 
 def get_traces(
@@ -18,19 +17,18 @@ def get_traces(
         params: dict[str, Any] = {}
         if collection is not None:
             params["collection"] = collection
-        path = project_path(project_id, f"/entities/{entity_id}/backlinks")
-        return get_params(get_runtime().reader(), path, params or None)
-    return get_params(get_runtime().reader(), project_path(project_id, "/traces"))
+        return read_json(project_path(project_id, f"/entities/{entity_id}/backlinks"), params or None)
+    return read_json(project_path(project_id, "/traces"))
 
 
 def get_coverage(project_id: str) -> Any:
     """READ-ONLY 返回覆盖率分析（需求-验证/分析覆盖）。"""
-    return get_params(get_runtime().reader(), project_path(project_id, "/coverage"))
+    return read_json(project_path(project_id, "/coverage"))
 
 
 def get_gap_analysis(project_id: str) -> Any:
     """READ-ONLY 返回覆盖缺口分析（未覆盖/欠覆盖集）。"""
-    return get_params(get_runtime().reader(), project_path(project_id, "/gap-analysis"))
+    return read_json(project_path(project_id, "/gap-analysis"))
 
 
 def get_allocation_matrix(
@@ -50,9 +48,9 @@ def get_allocation_matrix(
         params["search"] = search
     if filter_type is not None:
         params["filter_type"] = filter_type
-    return get_params(get_runtime().reader(), project_path(project_id, "/allocation-matrix"), params or None)
+    return read_json(project_path(project_id, "/allocation-matrix"), params or None)
 
 
 def get_suspect_links(project_id: str) -> Any:
     """READ-ONLY 返回可疑追踪链接（编辑后失配）。"""
-    return get_params(get_runtime().reader(), project_path(project_id, "/suspect-links"))
+    return read_json(project_path(project_id, "/suspect-links"))

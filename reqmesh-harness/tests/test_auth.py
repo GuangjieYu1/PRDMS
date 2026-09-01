@@ -85,6 +85,7 @@ def test_instance_unreachable_transport_error(tmp_path) -> None:
         router.post("/api/auth/login").mock(side_effect=httpx.ConnectError("boom"))
         with pytest.raises(TransportError):
             session.login()
+        assert len(router.calls) == 1  # POST 不重试（仅幂等 GET 允许有限重试）
 
 
 def test_401_rerelogin_once_then_success(tmp_path) -> None:
@@ -159,7 +160,8 @@ def test_stale_session_falls_back_to_login(tmp_path) -> None:
 
 
 def test_bearer_fallback_no_login(tmp_path) -> None:
-    session = AuthSession(_settings(tmp_path, token="bearer-token"))
+    # 兜底：未配置用户名/密码时才用 Bearer
+    session = AuthSession(Settings(base_url=BASE, username="", password="", token="bearer-token", session_file=tmp_path / "s.json"))
     seen: list[httpx.Request] = []
 
     def _proj(request):
@@ -173,6 +175,40 @@ def test_bearer_fallback_no_login(tmp_path) -> None:
         assert len(seen) == 1
         assert seen[0].headers["authorization"] == "Bearer bearer-token"
         assert all(c.request.method == "GET" for c in router.calls)
+
+
+def test_bearer_is_not_priority_when_credentials_set(tmp_path) -> None:
+    """已配置用户名/密码时：token 仅兜底，cookie 流程优先（不发 Bearer 头）。"""
+    session = AuthSession(_settings(tmp_path, token="bearer-token"))
+    _preseed_session(session)
+    seen: list[httpx.Request] = []
+
+    def _proj(request):
+        seen.append(request)
+        return Response(200, json={"ok": True})
+
+    with respx.mock(base_url=BASE) as router:
+        router.get("/api/projects").mock(side_effect=_proj)
+        session.get("/api/projects")
+    assert "authorization" not in seen[0].headers
+
+
+def test_get_connect_error_retried_once(tmp_path) -> None:
+    session = AuthSession(_settings(tmp_path))
+    _preseed_session(session)
+    state = {"n": 0}
+
+    def _proj(request):
+        state["n"] += 1
+        if state["n"] == 1:
+            raise httpx.ConnectError("boom")
+        return Response(200, json={"items": ["a"]})
+
+    with respx.mock(base_url=BASE) as router:
+        router.get("/api/projects").mock(side_effect=_proj)
+        result = session.get("/api/projects")
+    assert result == {"items": ["a"]}
+    assert state["n"] == 2  # 连接错误重试一次
 
 
 def test_upstream_error_typed_with_detail(tmp_path) -> None:

@@ -63,7 +63,11 @@ async def test_stdio_list_tools_and_call_requirement(stub, tmp_path) -> None:
     counts = stub.method_counts()
     assert counts.get("POST") == 1  # 启动即登录一次
     assert counts.get("GET", 0) == 1  # list_requirements
-    assert set(counts) <= {"GET", "POST"}
+    # 只读口径：除登录外全部为 GET
+    methods = {m for m, _, _ in stub.requests}
+    assert methods == {"GET", "POST"}
+    post_paths = {path for m, path, _ in stub.requests if m == "POST"}
+    assert post_paths == {"/api/auth/login"}
 
 
 @pytest.mark.asyncio

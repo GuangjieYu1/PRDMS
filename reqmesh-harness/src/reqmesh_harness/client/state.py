@@ -50,11 +50,11 @@ class SessionStore:
 
     def save(self, state: SessionState) -> None:
         self._file.parent.mkdir(parents=True, exist_ok=True)
-        dispatch = asdict(state)
+        data = asdict(state)
         fd, tmp = tempfile.mkstemp(dir=self._file.parent, prefix=".session-", suffix=".tmp")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as fh:
-                json.dump(dispatch, fh, ensure_ascii=False)
+                json.dump(data, fh, ensure_ascii=False)
             os.chmod(tmp, 0o600)
             os.replace(tmp, self._file)
         finally:

@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Any
 
 
 class ReadOnlyClient:
@@ -19,9 +19,3 @@ class ReadOnlyClient:
 
     def get(self, path: str, params: dict | None = None) -> Any:
         return self._session.get(path, params=params)
-
-
-class ReadOnlyClientLike(Protocol):
-    """工具处理器的最小依赖类型（便于打桩与类型检查）。"""
-
-    def get(self, path: str, params: dict | None = None) -> Any: ...

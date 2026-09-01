@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import weakref
 from typing import Any
 
 import httpx
@@ -16,26 +17,29 @@ _WHOAMI_PATH = "/api/auth/whoami"
 
 
 class AuthSession:
-    """一个面向 reqmesh 实例的认证会话。
+    """一个面向 reqmesh 实例的认证会话（认证会话，非运行时会话——见 CONTEXT.md 词表）。
 
     - 凭据仅来自 Settings（环境变量），不落盘、不进日志；
     - 登录后把 cookie + csrf_token 持久化到会话文件（0600），重启免重登；
-    - 任何请求遇 401 → 自动重登一次并重试；仍 401 → SessionExpiredError；
-    - REQMESH_TOKEN 设置时使用 Authorization: Bearer 兜底（cookie 流程跳过）。
+    - 任何 GET 遇 401 → 自动重登一次并重试；仍 401 → SessionExpiredError；
+    - 幂等 GET 连接错误允许重试一次（POST 不重试，登录/登出失败即类型化错误）；
+    - Bearer 兜底：仅在未配置用户名/密码时使用 REQMESH_TOKEN（cookie 流程优先）。
     """
 
     def __init__(self, settings: Settings | None = None, client: httpx.Client | None = None) -> None:
         self.settings = settings or Settings()
         self.store = SessionStore(self.settings.resolved_session_file())
-        self._bearer = self.settings.token.get_secret_value()
+        creds = (self.settings.username, self.settings.password.get_secret_value())
+        token = self.settings.token.get_secret_value()
+        self._use_bearer = bool(token) and not (creds[0] and creds[1])  # 兜底：无凭据才用
         self._csrf = ""
         self._authenticated = False
         self._client = client or httpx.Client(
             base_url=self.settings.base_url.rstrip("/"),
             timeout=self.settings.timeout,
             follow_redirects=False,
-            transport=httpx.HTTPTransport(retries=2),
         )
+        weakref.finalize(self, self._client.close)
 
     # ------------------------------------------------------------------ 登录/登出
     def login(self) -> dict:
@@ -66,7 +70,7 @@ class AuthSession:
 
     def logout(self) -> dict:
         """登出：带 X-CSRF-Token 调 /api/auth/logout 并清除会话文件。"""
-        if not self._authenticated and not self._bearer:
+        if not self._authenticated and not self._use_bearer:
             state = self.store.load()
             if state is not None:
                 self._restore(state)
@@ -85,11 +89,11 @@ class AuthSession:
     def ensure_ready(self, validate: bool = True) -> None:
         """确保会话就绪。
 
-        - Bearer 兜底：设置过则直接复用（不做 cookie 校验）；
+        - Bearer 兜底：未配置凭据且设置 REQMESH_TOKEN 时直接复用（不做 cookie 校验）；
         - 有持久化会话：载入；validate=True 时以 whoami 校验，失效则重新登录；
         - 无持久化会话：登录。
         """
-        if self._bearer:
+        if self._use_bearer:
             return
         state = self.store.load()
         if state is None:
@@ -109,18 +113,25 @@ class AuthSession:
 
     # ------------------------------------------------------------------ 只读请求
     def get(self, path: str, params: dict | None = None) -> Any:
-        """GET 并返回解析后的 JSON（原始响应透传）；401 → 重登一次并重试。"""
-        return self._get_with_retry(path, params, retried=False)
+        """GET 并返回解析后的 JSON（原始响应透传）。
 
-    def _get_with_retry(self, path: str, params: dict | None, retried: bool) -> Any:
+        - 连接错误：重试一次（幂等 GET 仅允许的有限重试）；
+        - 401：重登一次并重试；
+        - 仍失败：类型化错误（不含凭据）。
+        """
+        return self._get_retrying(path, params, connect_attempts=0, reauths=0)
+
+    def _get_retrying(self, path: str, params: dict | None, connect_attempts: int, reauths: int) -> Any:
         self.ensure_ready(validate=False)
         try:
             resp = self._client.get(path, params=params, headers=self._auth_headers())
         except httpx.TransportError as exc:
+            if connect_attempts < 1:
+                return self._get_retrying(path, params, connect_attempts + 1, reauths)
             raise TransportError(f"实例不可达: {exc}") from exc
-        if resp.status_code == 401 and not retried:
+        if resp.status_code == 401 and reauths < 1:
             self.login()
-            return self._get_with_retry(path, params, retried=True)
+            return self._get_retrying(path, params, connect_attempts, reauths + 1)
         if resp.status_code == 401:
             raise SessionExpiredError("会话已失效且自动重登后仍被拒绝（401）。请检查凭据。")
         if resp.status_code != 200:
@@ -150,8 +161,8 @@ class AuthSession:
         return {"X-CSRF-Token": self._csrf} if self._csrf else {}
 
     def _auth_headers(self) -> dict[str, str]:
-        if self._bearer:
-            return {"Authorization": f"Bearer {self._bearer}"}
+        if self._use_bearer:
+            return {"Authorization": f"Bearer {self.settings.token.get_secret_value()}"}
         return {}
 
     def __repr__(self) -> str:  # 防泄漏：不打印密码
