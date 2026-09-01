@@ -1,0 +1,1 @@
+{"states":["proposed","in_review","approved","implemented","verified","rejected","deprecated"],"transitions":{"proposed":["in_review","approved","rejected"],"in_review":["approved","proposed","rejected"],"approved":["implemented","rejected","deprecated"],"implemented":["verified","rejected"],"verified":["deprecated"],"rejected":["proposed"],"deprecated":[]},"default":"proposed"}

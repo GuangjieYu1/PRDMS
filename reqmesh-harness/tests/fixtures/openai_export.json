@@ -1,0 +1,797 @@
+[
+  {
+    "name": "get_allocation_matrix",
+    "description": "READ-ONLY 返回分配矩阵（axis/rows/search/filter_type 过滤）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "search": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "filter_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_coverage",
+    "description": "READ-ONLY 返回覆盖率分析（需求-验证/分析覆盖）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_gap_analysis",
+    "description": "READ-ONLY 返回覆盖缺口分析（未覆盖/欠覆盖集）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_item_history",
+    "description": "READ-ONLY 返回任一实体项的变更历史。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "item_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "item_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_project_report",
+    "description": "READ-ONLY 返回计算型项目报告（report: quality/compliance/metrics/evaluation/validation/workflow）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "report": {
+          "enum": [
+            "quality",
+            "compliance",
+            "metrics",
+            "evaluation",
+            "validation",
+            "workflow"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "report"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_requirement",
+    "description": "READ-ONLY 按 id 返回单个需求完整内容。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "req_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "req_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_requirement_tree",
+    "description": "READ-ONLY 返回需求树（父子结构）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_risk_matrix",
+    "description": "READ-ONLY 返回风险矩阵（可能性×严重度）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_suspect_links",
+    "description": "READ-ONLY 返回可疑追踪链接（编辑后失配）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_traces",
+    "description": "READ-ONLY 返回追踪矩阵；给出 entity_id 时返回该实体的回链（backlinks）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_unreviewed_requirements",
+    "description": "READ-ONLY 列出未评审需求。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_analysis_cases",
+    "description": "READ-ONLY 列出分析案例（case_id 给出时返回单个）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_baselines",
+    "description": "READ-ONLY 列出基线（里程碑）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_change_requests",
+    "description": "READ-ONLY 列出变更请求（cr_id 给出时返回单个）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "cr_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_comments",
+    "description": "READ-ONLY 列出实体评论（可按 entity_kind/entity_id 过滤）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "entity_kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_components",
+    "description": "READ-ONLY 列出组件（component_id 给出时返回单个；as_tree=true 返回组件树；search/type/satisfies 过滤）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "component_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "search": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "satisfies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "as_tree": {
+          "default": false,
+          "type": "boolean"
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_decisions",
+    "description": "READ-ONLY 列出决策记录（dec_id 给出时返回单条）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "dec_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_definitions",
+    "description": "READ-ONLY 列出定义/术语（def_id 给出时返回单个）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "def_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_projects",
+    "description": "READ-ONLY 列出项目；给出 project_id 时返回单个项目详情。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_requirements",
+    "description": "READ-ONLY 按过滤器列出需求（search/type/status/priority；分页 offset/limit 透传，默认 limit=500）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "search": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_risks",
+    "description": "READ-ONLY 列出风险（risk_id 给出时返回单个风险）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "risk_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_specifications",
+    "description": "READ-ONLY 列出规格文档（spec_id 给出时返回单个）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "spec_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_verification_cases",
+    "description": "READ-ONLY 列出验证用例（vc_id 给出时返回单个）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "vc_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "default": 0,
+          "description": "偏移量（从 0 开始）",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "limit": {
+          "default": 500,
+          "description": "每页条数，最大 2000，默认 500",
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "search_requirements",
+    "description": "READ-ONLY 项目内全文搜索（可限定 kind）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "project_id",
+        "q"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "whoami",
+    "description": "READ-ONLY 返回当前登录用户与角色（身份核验）。",
+    "parameters": {
+      "properties": {},
+      "type": "object"
+    }
+  }
+]

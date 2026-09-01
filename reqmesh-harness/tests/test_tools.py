@@ -1,0 +1,154 @@
+"""#9–#13 工具层契约测试：注册表对账、schema 与映射表一致、只读、envelope 透传。
+
+测试助手（schema 对账 + 只读断言）面向后续工具组复用：任何新工具只需在
+mapping.py 登记即可纳入校验。
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from functools import lru_cache
+
+import pytest
+import respx
+from httpx import Response
+from mcp.server.fastmcp.tools.base import Tool
+
+from reqmesh_harness.client.reader import ReadOnlyClient
+from reqmesh_harness.tools import build_registry
+from reqmesh_harness.tools.registry import ToolSpec
+from tests.conftest import HTTP_FIXTURES
+from tests.mapping import EXPECTED_TOOL_COUNT, REPORT_ENUM, TOOLS, ToolMap, by_name
+
+NAME_RE = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+
+
+@lru_cache
+def registry():
+    return build_registry()
+
+
+def _schema_types(schema: dict) -> set[str] | None:
+    if "enum" in schema:
+        return {"enum"}
+    if "anyOf" in schema:
+        types = {item.get("type") for item in schema["anyOf"]}
+        return {t for t in types if t != "null"}  # 可选字段的 null 分支不算类型
+    if "type" in schema:
+        return {schema["type"]}
+    return None
+
+
+def assert_schema_matches_toolmap(spec: ToolSpec, toolmap: ToolMap) -> Tool:
+    """schema 对账助手：FastMCP Tool.parameters 与映射表逐参数一致。"""
+    tool = Tool.from_function(spec.fn, name=spec.name, description=spec.description)
+    params = tool.parameters
+    props = params.get("properties", {})
+    expected_names = [p.name for p in toolmap.params]
+    assert list(props.keys()) == expected_names
+    assert list(params.get("required", [])) == [p.name for p in toolmap.params if p.required]
+    for p in toolmap.params:
+        schema = props[p.name]
+        types = _schema_types(schema)
+        if p.types == ("enum",):
+            assert types == {"enum"}
+            vals = schema["enum"]
+            if p.name == "report":
+                assert vals == REPORT_ENUM
+        else:
+            assert types == set(p.types), f"{spec.name}.{p.name} 类型 {types} != {p.types}"
+        if p.default is not None and not p.required:
+            assert schema.get("default") == p.default
+        if p.required:
+            assert "default" not in schema
+    return tool
+
+
+# ------------------------------------------------------------------ 注册表
+def test_registry_has_exactly_25_tools() -> None:
+    assert len(registry()) == EXPECTED_TOOL_COUNT
+
+
+def test_registry_names_domains_match_mapping() -> None:
+    mapping = by_name()
+    for spec in registry().all():
+        assert spec.name in mapping
+        assert spec.domain == mapping[spec.name].domain
+        assert NAME_RE.match(spec.name), spec.name
+
+
+def test_descriptions_start_with_read_only() -> None:
+    for spec in registry().all():
+        assert spec.description.startswith("READ-ONLY"), spec.name
+
+
+def test_mcp_annotations_read_only_hint() -> None:
+    from mcp.server.fastmcp import FastMCP
+
+    mcp = FastMCP("reqmesh")
+    registry().install(mcp)
+    for t in mcp._tool_manager.list_tools():
+        assert t.annotations.readOnlyHint is True
+        assert t.meta == {"domain": t.meta["domain"], "permission": "READ"}
+
+
+def test_readonly_client_structurally_exposes_only_get() -> None:
+    public = [m for m in dir(ReadOnlyClient) if not m.startswith("_")]
+    assert public == ["get"]
+
+
+@pytest.mark.parametrize("toolmap", TOOLS, ids=lambda t: t.name)
+def test_schema_matches_mapping(toolmap: ToolMap) -> None:
+    spec = registry().get(toolmap.name)
+    assert_schema_matches_toolmap(spec, toolmap)
+
+
+# ------------------------------------------------------------------ 每个工具：路由 + 只读 + envelope
+def _load_fixture(name: str) -> dict:
+    return json.loads((HTTP_FIXTURES / name).read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize(
+    "toolmap,case",
+    [(t, c) for t in TOOLS for c in t.cases],
+    ids=lambda tc: f"{tc[0].name}.{tc[1].name}" if isinstance(tc, tuple) else tc.name,
+)
+def test_case_passthrough_readonly(reqmesh_env, toolmap: ToolMap, case) -> None:
+    spec = registry().get(toolmap.name)
+    fixture = _load_fixture(case.fixture)
+    with respx.mock(base_url="http://reqmesh.test") as router:
+        router.get(case.expect_path).mock(return_value=Response(200, json=fixture))
+        result = spec.fn(**case.args)
+        # envelope 透传：返回内容与上游响应逐字一致
+        assert result == fixture
+        # 只读护栏：会话内 HTTP 方法 ⊆ {GET}
+        methods = [c.request.method for c in router.calls]
+        assert set(methods) == {"GET"}, f"{spec.name}.{case.name} 非 GET 请求: {methods}"
+        # 路由与参数透传
+        calls = [c for c in router.calls if c.request.url.path == case.expect_path]
+        assert len(calls) == 1
+        if case.expect_query:
+            actual = {k: v for k, v in calls[0].request.url.params.items()}
+            expected = {k: str(v) for k, v in case.expect_query.items()}
+            assert actual == expected
+        else:
+            assert dict(calls[0].request.url.params) == {}
+
+
+def test_report_enum_invalid_rejected_by_schema() -> None:
+    from reqmesh_harness.tools.groups.components_report import get_project_report
+
+    tool = Tool.from_function(get_project_report, name="get_project_report", description="x")
+    params = tool.parameters
+    assert "enum" in params["properties"]["report"]
+
+
+def test_pagination_bounds_in_schema() -> None:
+    from reqmesh_harness.tools.groups.requirements import list_requirements
+
+    tool = Tool.from_function(list_requirements, name="list_requirements", description="x")
+    limit = tool.parameters["properties"]["limit"]
+    assert limit["minimum"] == 1
+    assert limit["maximum"] == 2000
+    assert tool.parameters["properties"]["offset"]["minimum"] == 0

@@ -1,0 +1,1 @@
+{"id":"avionics-upgrade","name":"Avionics upgrade (+12 kg)","doc":"Explore the empty-weight budget with a heavier avionics fit.","scope":["AFRM0000"],"scope_components":["AVIO01"],"overrides":{"AFRM0000.empty_mass":779}}

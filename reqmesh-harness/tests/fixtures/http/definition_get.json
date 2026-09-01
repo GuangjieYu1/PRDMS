@@ -1,0 +1,1 @@
+{"id":"MassBudget","type":"constraint","name":"Mass budget","parameters":["actual","limit"],"expr":"actual <= limit","unit":"","doc":"A rolled-up mass must fit within its allocated limit."}

@@ -1,0 +1,9 @@
+{
+  "username": "dev",
+  "role": "contributor",
+  "csrf_token": "csrf-body-token",
+  "cookies": {
+    "token": "fake.jwt.token",
+    "csrftoken": "csrf-body-token"
+  }
+}
