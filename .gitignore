@@ -1,0 +1,31 @@
+# ── Local deployment of upstream reqmesh (has its own .git) ─────────────
+# Not part of this repo's history; re-clone with the script below.
+reqmesh/
+
+# ── DSH harness workspace state (installed skills, session scratch) ────
+.dsh/
+
+# ── Python ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# ── Node ────────────────────────────────────────────────────────────────
+node_modules/
+dist/
+*.tsbuildinfo
+
+# ── Secrets & local env ─────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+
+# ── Editor / OS ─────────────────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
