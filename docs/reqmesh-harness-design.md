@@ -39,6 +39,10 @@ reqmesh-harness (独立 Python 服务, PRDMS 仓库内 reqmesh-harness/)
 | D10 | DSH 集成路线（事实核实） | DSH 暴露 loopback HTTP RPC（`/api/session.create`、`session.prompt` + `events.mux` SSE，无认证）；DSH 是 MCP **client**，可通过 `cordis.patch.yml` 注册外部 server | P5 的默认 provider 适配器走 loopback RPC；harness 的 MCP server 可直接被当前 DSH 消费 |
 | D11 | 会话术语 | `session` 只指运行时会话；工程对话叫「工作会话」（需求/开发） | 用户用法与运行时概念冲突，已拆分并写入 CONTEXT.md |
 
+### 实现注记（P2 开发会话核实后回写）
+
+- **D7 角色细化**：reqmesh v0.5.0 将账号角色映射到项目权限层（`backend/app/core/dependencies.py`：`contributor→propose`、`maintainer→edit`、`admin→admin`）；propose 层仅可写 风险/评论/决策/变更请求，P2 写面其余 10 个端点要求 edit 层。故 P2 专用服务账号取 **maintainer**（能覆盖 P2 全部写工具的最小角色，非 admin）——D7 表中「contributor」指非 admin 专用账号语义，「admin 动作显式开启」不变；具体角色以 [`docs/specs/p2-write-path.md`](specs/p2-write-path.md) 为准。
+
 ## 4. 阶段计划（epic 已建）
 
 | Phase | 内容 | Epic |

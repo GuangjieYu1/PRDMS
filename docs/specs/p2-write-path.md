@@ -54,7 +54,7 @@ P1 交付了认证客户端 + 25 个 READ 工具 + MCP 双 transport，但工具
 | 2 | `create_component` | `/api/projects/{project_id}/components` | POST | DRAFT | `ComponentCreate` | `id`* `name`? `description`? `type`? `parent`? 等 | dry_run；真实写后 `list_components` 可见 |
 | 3 | `create_verification_case` | `/api/projects/{project_id}/verification` | POST | DRAFT | `VerificationCaseCreate` | `id`* `name`? `description`? `method`? `case_type`? 等 | dry_run；真实写后 `list_verification_cases` 可见 |
 | 4 | `create_risk` | `/api/projects/{project_id}/risks` | POST | DRAFT | `RiskCreate` | `id`* `title`? `failure_mode`? `effect`? `cause`? `severity`? `likelihood`? | dry_run；真实写后 `list_risks` 可见 |
-| 5 | `create_comment` | `/api/projects/{project_id}/comments` | POST | DRAFT | `CommentCreate` | `entity_kind`* `entity_id`* `text`*（工具层强制；上游 schema 未标 required） | dry_run；真实写后 `list_comments` 可见该条 |
+| 5 | `create_comment` | `/api/projects/{project_id}/comments` | POST | DRAFT | `CommentCreate` | `entity_kind`* `entity_id`* `text`*（工具层强制；上游 schema 未标 required；`entity_kind` 以 `Literal` 锁定上游 422 复数词表 `requirements/components/verification_cases/…`，与 `list_comments` 过滤参数同词表） | dry_run；真实写后 `list_comments` 可见该条 |
 | 6 | `review_item` | `/api/projects/{project_id}/requirements/{req_id}/review` | POST | DRAFT | `ReviewRequest` | `req_id`* `comment`? | dry_run；真实写后 `get_unreviewed_requirements` 不含该需求 |
 | 7 | `update_requirement` | `/api/projects/{project_id}/requirements/{req_id}` | PUT | MUTATE | `RequirementUpdate` | `req_id`* `reason`* + 全部可空字段（`exclude_unset`） | dry_run；真实改 `description` 后回读生效 |
 | 8 | `set_relations` | `/api/projects/{project_id}/traces` | PUT | MUTATE | `TraceMatrix` | `links`*（`reason`*） | dry_run；真实写读-改-写回放（追加 SMOKE 链接后 `get_traces` 可见） |
@@ -163,10 +163,12 @@ tool = "create_requirement"   # 必填：工具名
 
 ### 服务账号（D7 落地）
 
-- **决策：约定新建专用账号 `reqmesh-harness`（role=contributor）**，由操作员用 admin 凭据在 reqmesh 一次性创建（人工前置步骤，写入冒烟前置与 README）。不复用 P1 冒烟用过的 `yugj`——那是个人账号，其密码/权限变更会击穿 harness，违背 D7 最小权限语义；harness 自身不含用户管理工具（`auth/users` 域属 ADMIN 层且不在 P2），不能自建账号。
+- **决策：约定新建专用账号 `reqmesh-harness`，角色 `maintainer`（2026-09-01 实测回写，见文末「实测偏差与决策」）**，由操作员用 admin 凭据在 reqmesh 一次性创建（人工前置步骤，写入 README）。不复用 P1 冒烟用过的 `yugj`——那是个人账号，其密码/权限变更会击穿 harness，违背 D7 最小权限语义；harness 自身不含用户管理工具（`auth/users` 域属 ADMIN 层且不在 P2），不能自建账号。
+- 角色依据（已核实）：reqmesh v0.5.0 将账号角色映射到项目权限层（`backend/app/core/dependencies.py`：`contributor→propose`、`maintainer→edit`、`admin→admin`）；propose 层仅可写 风险/评论/决策/变更请求，P2 写面中其余 10 个端点要求 edit 层（`require_maintain`）。故取能覆盖 P2 全部 12 工具的**最小角色 maintainer（非 admin）**——D7「admin 动作显式开启」不变；D7 结论中的「contributor」指非 admin 专用账号语义，具体角色以本 spec 为准。
 - **凭据注入**：`REQMESH_USERNAME` / `REQMESH_PASSWORD` 环境变量（沿用 P1 `Settings`，`.env` 已 gitignore）——不落库、不入 repo、不进日志与审计。
-- **冒烟断言**：`whoami` 返回 username==`reqmesh-harness` 且 role==`contributor`；若操作员未建号，允许降级为 `yugj`（现有 contributor）并在冒烟记录中显式标注降级。
-- **匿名只读验证**：不带凭据的客户端调用 READ 工具 → 上游 401/403 经 `UpstreamError` 透传为工具错误（断言错误形状与「不含凭据信息」）。「服务账号可写」由冒烟 B 段真实写闭环验证（contributor 角色对 P2 全部 12 个端点的写权限即冒烟断言点）。
+- **冒烟断言**：`whoami` 返回 username==`reqmesh-harness` 且 role==`maintainer`；账号未建时冒烟不降级（写面权限不可由 propose 层账号代替验证），由操作员先完成建号前置。
+- **匿名验证（条件化）**：恒真断言 =「匿名**写** → 上游 401/403 经 `UpstreamError` 透传为工具错误（错误不含凭据信息）」；若实例启用 `RT_REQUIRE_AUTH`，追加「匿名读 → 401」断言。本实例未启用强制认证、匿名读被上游放行（P2 实测），匿名读护栏属上游实例配置，harness 侧职责是写路径受控。
+- 「服务账号可写」由冒烟 B 段真实写闭环验证（maintainer 对 P2 全部 12 个端点的写权限即冒烟断言点）。
 
 ### 注册表与导出扩展
 
@@ -180,7 +182,7 @@ tool = "create_requirement"   # 必填：工具名
 
 - 脚本 `scripts/smoke_p2.py`（不进默认 pytest 集合，模式沿用 `smoke_p1.py`）：
   - **A 段（cessna-172，全量 dry_run，零副作用）**：临时空白名单下 `create_requirement` 被阻断（断言 `ApprovalDeniedError` 形状 + 审计记 `denied`）→ 添加白名单后 12 个工具逐一 `dry_run=true`，断言返回 `dry_run:true + would_send` 包裹、`checks` 正确、**全程 git 提交数不变**（冒烟脚本经客户端直连 `GET /api/projects/{project_id}/git/log` 计数断言——不经工具层，git 域 READ 工具仍延后）。
-  - **B 段（最小真实写闭环，SMOKE-P2- 前缀固定 id）**：`create_requirement(SMOKE-P2-001)` → `get_requirement` 回读断言 → `review_item`（断言后 `get_unreviewed_requirements` 不含该需求）→ `update_requirement`（改 description 回读生效）→ `create_risk`/`create_component`/`create_verification_case`/`create_comment` 各自回读可见 → `run_verification`（断言 execution_history 追加）→ `set_relations`/`set_allocation` 读-改-写回放（先 GET 现状再追加 SMOKE 条目写回，回读断言）。断言：**git 新提交数 == 真实写调用数**（dry_run 不产生提交）；**审计日志行数 == 全部写调用数**且字段齐全。
+  - **B 段（最小真实写闭环，SMOKE-P2- 前缀固定 id）**：`create_requirement(SMOKE-P2-001)` → `get_requirement` 回读断言 → `review_item`（断言后 `get_unreviewed_requirements` 不含该需求）→ `update_requirement`（改 description 回读生效）→ `create_risk`/`create_component`/`create_verification_case`/`create_comment` 各自回读可见 → `run_verification`（断言 execution_history 追加）→ `set_relations`/`set_allocation` 读-改-写回放（先 GET 现状再追加 SMOKE 条目写回，回读断言）。断言：**审计日志行数 == 全部写调用数**且字段齐全；git 提交计数断言**条件化**——项目已初始化 git 仓库（`is_repo=true`）时断言 **git 新提交数 == 真实写调用数**（dry_run 不产生提交），`is_repo=false` 时降级跳过并在记录注明（dry_run 不产生提交仍由「写路径不发 git 相关请求」+ A 段提交数不变支撑）。冒烟脚本**不得调用 `git/init`**（ADMIN 层端点）；如需恢复 B 段提交断言，由操作员/管理员初始化项目 git 仓库（人工步骤）。
   - 记录落盘 `docs/smoke/P2-cessna-172.md`：时间戳、实例 URL、服务账号与角色、每步结果与关键计数、**残渣清单**（新增实体 id 列表与 git 提交数）。注明：P1 冒烟的 `total==57` 断言自此只作为历史快照（P2 真实写后 `list_requirements` total 变为 58，P1 冒烟记录不再作为重跑断言）。
 
 ## Testing Decisions
@@ -202,6 +204,17 @@ tool = "create_requirement"   # 必填：工具名
 - 调用中途交互式确认（MCP elicitation）与审批门在 agent loop 中的交互时序——P5 开放问题。
 - 审计日志轮转/检索工具/远端上报——P6 运维范围。
 - 自然语言建需求、追踪/覆盖缺口报告（P3/P4）；内置运行时、project context（P5）；部署/evals（P6）。
+
+## 实测偏差与决策（开发会话核实后回写，2026-09-01，需求会话确认）
+
+开发会话对真实实例实测发现 4 处与初版 spec 的偏差，需求会话全部确认接受（证据：`docs/smoke/P2-cessna-172.md`「实测偏差与清理指引」；reqmesh 源码 `backend/app/core/dependencies.py` 角色映射）：
+
+1. **服务账号角色 contributor → maintainer**：reqmesh v0.5.0 中 `contributor→propose` 层仅可写 风险/评论/决策/变更请求，P2 写面其余 10 个端点需 edit 层（`maintainer`）→ 取**能覆盖 P2 全部 12 工具的最小角色 maintainer（非 admin）**。D7「admin 动作显式开启」不变；D7 表中「contributor」指非 admin 专用账号语义。冒烟不再降级 yugj（propose 层无法验证写面）。
+2. **git 提交计数断言条件化**：cessna-172 未初始化 git 仓库（`is_repo=false`）→ B 段提交计数断言在 `is_repo=true` 时执行、否则降级跳过并注明；dry_run 不产生提交仍由「写路径不发 git 相关请求」+ A 段提交数不变支撑。冒烟脚本不得调用 `git/init`（ADMIN 层）；恢复断言由操作员初始化仓库。
+3. **匿名断言改为「匿名写拒绝」**：实例未启用 `RT_REQUIRE_AUTH`（匿名读被上游放行 200），初版「匿名只读→401」不成立 → 恒真且更强的「匿名写 → 上游 401/403 经 `UpstreamError` 透传（不含凭据信息）」；若实例开启强制认证，追加匿名读断言。匿名读护栏属上游实例配置。
+4. **`create_comment` 的 `entity_kind` 词表**：上游 422 校验词表为复数集合名（`requirements`/`components`/`verification_cases`/…）→ 工具层以 `Literal` 枚举锁定（schema 层即可校验），与 `list_comments` 过滤参数同一词表。
+
+以上已回写本 spec 对应小节；design doc D7 附实现注记；#24 comment 记录确认。
 
 ## Further Notes
 

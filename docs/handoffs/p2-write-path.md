@@ -67,3 +67,14 @@ frontier 首步：#17、#18（可并行）；随后 #19、#22；再后 #20、#21
 - **本地提交，禁止 git push**（推送是方向层唯一职责，design §5）。
 - 术语遵循 `CONTEXT.md`（审批门/权限层级/dry-run/认证会话等）；与 ADR 冲突须显式指出。
 - 不动 `reqmesh/` 目录（上游部署克隆）；不动已关闭的 P1 资产（只扩展、不重构）。
+
+## 需求会话回流确认（2026-09-01，开发会话完成报告核实后）
+
+完成报告已实测核验：git 历史 `c0b8403→08580f2→169d739→1fcf125`（4 提交，本地未 push）；离线测试复跑 **215 passed / 2 deselected**；#17–#24 全部 CLOSED、epic #2 OPEN；冒烟记录 `docs/smoke/P2-cessna-172.md` 完整（审计 23 行 == 全部写调用数）。4 项实测偏差**全部确认接受**并回写：
+
+1. **服务账号角色 contributor → maintainer**：reqmesh v0.5.0 角色→权限层映射（`contributor→propose`、`maintainer→edit`，`backend/app/core/dependencies.py`）决定 maintainer 是覆盖 P2 全部 12 工具的最小角色（非 admin）；D7「admin 显式开启」不变。→ spec 服务账号节、design doc D7 实现注记已更新。
+2. **git 提交计数条件化**：cessna-172 未初始化 git 仓库（`is_repo=false`）→ B 段提交计数断言 `is_repo=true` 时执行、否则降级注明；冒烟脚本不得调用 `git/init`（ADMIN 层）。→ spec 冒烟节已更新。
+3. **匿名断言改为「匿名写拒绝」**：实例未启用 `RT_REQUIRE_AUTH`（匿名读被放行）→ 恒真更强的「匿名写 → 401/403 透传」；实例开启强制认证时追加匿名读断言。→ spec 服务账号节已更新。
+4. **`create_comment.entity_kind` 词表**：上游 422 复数词表 → 工具层 `Literal` 枚举锁定。→ spec 映射表已更新。
+
+回写已随本文件一并本地提交（未 push）；确认摘要已记 #24 comment。方向层可执行：推送 origin（`8b09bfe..HEAD`）→ 关闭 epic #2。
