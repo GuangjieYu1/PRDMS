@@ -63,7 +63,7 @@ reqmesh-harness (独立 Python 服务, PRDMS 仓库内 reqmesh-harness/)
 
 ## 6. 各 phase 开放问题（由对应需求会话决策）
 
-- **P1**：`openapi.json` → pydantic 模型生成方案（datamodel-code-generator 等）；工具命名前缀与分组方式
+- **P1**：~~`openapi.json` → pydantic 模型生成方案（datamodel-code-generator 等）；工具命名前缀与分组方式~~ → 已决策：datamodel-code-generator + vendored 快照（见 P1 spec）；命名/分组见 [ADR-0002](adr/0002-tool-naming-and-grouping.md)
 - **P2**：MUTATE 工具细分清单；审批确认的交互形态（CLI 确认 / 配置文件白名单）
 - **P5**：provider 默认值（本地 DSH；DeepSeek API 需另供 key）；流式输出与审批门交互时序
 - **P6**：部署端口与是否独立 systemd 单元；eval 集形态（脚本化断言）
