@@ -22,7 +22,7 @@ from reqmesh_harness.errors import HarnessError
 
 PROJECT_ID = "cessna-172"
 EXPECTED_REQUIREMENTS_TOTAL = 57  # design §7 基线
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent  # PRDMS 仓库根（与 spec/handoffs 同级 docs/）
 DEFAULT_OUT = REPO_ROOT / "docs" / "smoke" / "P1-cessna-172.md"
 
 
@@ -64,8 +64,8 @@ def main() -> int:
         assert coverage.get("total") is not None
 
         gap = step("get_gap_analysis", lambda: client.get(f"/api/projects/{PROJECT_ID}/gap-analysis"))
-        gaps = gap if isinstance(gap, list) else gap.get("gaps", [])
-        assert gaps is not None
+        gap_count = gap.get("gaps", 0) if isinstance(gap, dict) else len(gap)
+        assert gap_count is not None
 
         traces = step("get_traces", lambda: client.get(f"/api/projects/{PROJECT_ID}/traces"))
         assert traces.get("links") is not None
@@ -94,7 +94,7 @@ def main() -> int:
         f"| list_projects | ok | 项目数 {len(projects)}，含 {PROJECT_ID} |",
         f"| list_requirements | ok | total={total}（基线 {EXPECTED_REQUIREMENTS_TOTAL}） |",
         f"| get_coverage | ok | covered={coverage.get('total')} coverage_pct={coverage.get('coverage_pct')} |",
-        f"| get_gap_analysis | ok | 条目 {len(gaps)} |",
+        f"| get_gap_analysis | ok | 缺口 {gap_count} |",
         f"| get_traces | ok | links={len(traces.get('links'))} |",
         "",
         "## 无副作用声明",
@@ -105,8 +105,7 @@ def main() -> int:
         "",
     ]
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text("
-".join(lines), encoding="utf-8")
+    out_path.write_text(chr(10).join(lines), encoding="utf-8")
     print(f"冒烟通过，记录已落盘: {out_path}")
     return 0
 
