@@ -14,7 +14,7 @@ import pytest
 import respx
 from httpx import Response
 
-from reqmesh_harness.errors import ApprovalDeniedError, UpstreamError
+from reqmesh_harness.errors import ApprovalDeniedError, TransportError, UpstreamError
 from reqmesh_harness.guardrails.audit import AuditLog, summarize_params
 from reqmesh_harness.guardrails.whitelist import WhitelistEntry, WhitelistStore
 from reqmesh_harness.tools.groups import writes
@@ -134,6 +134,32 @@ def test_audit_file_0600_append_only(reqmesh_env, monkeypatch) -> None:
     assert first["tool"] == second["tool"] == "create_risk"
     assert first["params_summary"]["id"] == "R1"
     assert second["params_summary"]["id"] == "R2"
+
+
+def test_audit_connect_error_path(reqmesh_env, monkeypatch) -> None:
+    """运输错误（连接失败）也记审计：result=transport_error（非幂等写不重试）。"""
+    tmp = reqmesh_env["session_file"].parent
+    _approve(monkeypatch, tmp, "create_risk")
+    with respx.mock(base_url="http://reqmesh.test") as router:
+        router.post("/api/projects/cessna-172/risks").mock(side_effect=httpx.ConnectError("boom"))
+        with pytest.raises(TransportError):
+            writes.create_risk(project_id="cessna-172", id="R1")
+    row = _rows(tmp)[0]
+    assert row["result"] == "transport_error"
+    assert row["decision"] == "approved"
+    assert row["http_status"] is None
+
+
+def test_dry_run_checks_exception_never_breaks_preview(reqmesh_env, monkeypatch) -> None:
+    """本地校验异常 → 降级为 check 提示，dry_run 预览照常返回（且记审计）。"""
+    tmp = reqmesh_env["session_file"].parent
+    _approve(monkeypatch, tmp, "create_risk")
+    with respx.mock(base_url="http://reqmesh.test") as router:
+        # 不 stub checks 的 GET：respx 会抛 AllMockedAssertionError（非 HarnessError）
+        result = writes.create_risk(project_id="cessna-172", id="R1", dry_run=True)
+    assert result["dry_run"] is True
+    assert result["checks"][0]["kind"] == "check_error"
+    assert _rows(tmp)[0]["result"] == "ok"
 
 
 def test_audit_write_failure_does_not_block(reqmesh_env, monkeypatch, caplog) -> None:

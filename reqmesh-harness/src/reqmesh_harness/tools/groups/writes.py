@@ -49,6 +49,7 @@ from ...client.generated.models import (
     RequirementStatus,
     RequirementType,
     TestStep,
+    Measurement,
 )
 
 # 评论/实体的 entity_kind → 集合路径（dry_run 前置校验用）
@@ -84,6 +85,13 @@ def create_requirement(
     source: str | None = UNSET,
     allocated_to: str | None = UNSET,
     baselines: list[str] | None = UNSET,
+    reviewed: str | None = UNSET,
+    normative: bool | None = UNSET,
+    priorities: dict[str, int] | None = UNSET,
+    needs: list[str] | None = UNSET,
+    references: list[Reference] | None = UNSET,
+    system_states: list[str] | None = UNSET,
+    subject: str | None = UNSET,
     dry_run: bool = False,
 ) -> Any:
     """DRAFT 在项目下新建需求（只增不改；id 由调用方给定，与 reqmesh 契约一致）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。"""
@@ -93,7 +101,9 @@ def create_requirement(
                  status=status, parent=parent, attributes=attributes, parameters=parameters,
                  constraints=constraints, relations=relations, verification_cases=verification_cases,
                  cascade_from=cascade_from, rationale=rationale, source=source,
-                 allocated_to=allocated_to, baselines=baselines)
+                 allocated_to=allocated_to, baselines=baselines, reviewed=reviewed,
+                 normative=normative, priorities=priorities, needs=needs,
+                 references=references, system_states=system_states, subject=subject)
     ).model_dump(exclude_unset=True)
     return write_request(
         tool="create_requirement", level="DRAFT", project_id=project_id, method="POST",
@@ -260,6 +270,13 @@ def update_requirement(
     source: str | None = UNSET,
     allocated_to: str | None = UNSET,
     baselines: list[str] | None = UNSET,
+    reviewed: str | None = UNSET,
+    normative: bool | None = UNSET,
+    priorities: dict[str, int] | None = UNSET,
+    needs: list[str] | None = UNSET,
+    references: list[Reference] | None = UNSET,
+    system_states: list[str] | None = UNSET,
+    subject: str | None = UNSET,
     dry_run: bool = False,
 ) -> Any:
     """MUTATE 更新既有需求（PUT 部分更新：未提供字段不发送，显式 null 清空字段；reason 记入审计日志，不进 reqmesh 数据）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。"""
@@ -269,7 +286,9 @@ def update_requirement(
                  status=status, parent=parent, attributes=attributes, parameters=parameters,
                  constraints=constraints, relations=relations, verification_cases=verification_cases,
                  cascade_from=cascade_from, rationale=rationale, source=source,
-                 allocated_to=allocated_to, baselines=baselines)
+                 allocated_to=allocated_to, baselines=baselines, reviewed=reviewed,
+                 normative=normative, priorities=priorities, needs=needs,
+                 references=references, system_states=system_states, subject=subject)
     ).model_dump(exclude_unset=True)
     return write_request(
         tool="update_requirement", level="MUTATE", project_id=project_id, method="PUT",
@@ -385,15 +404,17 @@ def update_verification_case(
     case_type: CaseType | None = UNSET,
     environment: str | None = UNSET,
     decision_gate: str | None = UNSET,
+    measurements: list[Measurement] | None = UNSET,
     dry_run: bool = False,
 ) -> Any:
-    """MUTATE 更新既有验证用例（PUT 部分更新：未提供字段不发送，显式 null 清空字段；reason 记入审计日志，不进 reqmesh 数据）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。"""
+    """MUTATE 更新既有验证用例（execution_history 由 run_verification 统一追加，不在此直接覆写）（PUT 部分更新：未提供字段不发送，显式 null 清空字段；reason 记入审计日志，不进 reqmesh 数据）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。"""
     params = {k: v for k, v in locals().items() if v is not UNSET}
     body = VerificationCaseUpdate.model_validate(
         provided(name=name, description=description, method=method, status=status,
                  result=result, verified_requirements=verified_requirements,
                  test_procedure=test_procedure, steps=steps, case_type=case_type,
-                 environment=environment, decision_gate=decision_gate)
+                 environment=environment, decision_gate=decision_gate,
+                 measurements=measurements)
     ).model_dump(exclude_unset=True)
     return write_request(
         tool="update_verification_case", level="MUTATE", project_id=project_id, method="PUT",

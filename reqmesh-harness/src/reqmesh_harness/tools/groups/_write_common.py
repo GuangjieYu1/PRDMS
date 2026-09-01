@@ -102,7 +102,7 @@ def write_request(
         payload = {
             "dry_run": True,
             "would_send": upstream | {"body": body},
-            "checks": checks() if checks else [],
+            "checks": _run_checks(checks) if checks else [],
         }
         _log("approved", decision.entry, None, "ok")
         return payload
@@ -119,6 +119,14 @@ def write_request(
     except TransportError as exc:
         _log("approved", decision.entry, None, "transport_error")
         raise
+
+
+def _run_checks(checks: Callable[[], list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    """dry_run 前置校验：仅提示，**绝不阻断预览**（异常降级为一条 check 提示）。"""
+    try:
+        return checks()
+    except Exception as exc:  # noqa: BLE001 - 校验是信息性动作，任何异常都不应中断 dry_run
+        return [{"kind": "check_error", "hint": f"本地校验失败（仅提示，不影响预览）: {exc}"}]
 
 
 # ------------------------------------------------------------------ dry-run 前置校验（本地，不写库）
