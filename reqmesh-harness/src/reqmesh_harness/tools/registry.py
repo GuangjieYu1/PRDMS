@@ -26,8 +26,17 @@ Level = Literal["READ", "DRAFT", "MUTATE", "ADMIN"]
 
 
 def annotations_for(level: str) -> ToolAnnotations:
-    """权限层级 → MCP annotations（单向映射；对比 spec/ADR-0002：readOnlyHint 由层级推导）。"""
-    return ToolAnnotations(readOnlyHint=True) if level == "READ" else ToolAnnotations()
+    """权限层级 → MCP annotations（单向映射；对比 spec/ADR-0002）。
+
+    - READ → readOnlyHint=True（P1 行为不变）；
+    - DRAFT/MUTATE → readOnlyHint=False, destructiveHint=False（ToolAnnotations 默认值）；
+    - ADMIN → destructiveHint=True（危险操作标注；P2 预留，无 ADMIN 工具注册）。
+    """
+    if level == "READ":
+        return ToolAnnotations(readOnlyHint=True)
+    if level == "ADMIN":
+        return ToolAnnotations(destructiveHint=True)
+    return ToolAnnotations()
 
 
 @dataclass(frozen=True)
@@ -47,22 +56,52 @@ class ToolSpec:
 
 
 class ToolRegistry:
-    def __init__(self) -> None:
+    """工具注册表：唯一事实源（P1 只读 + P2 写 + ADMIN 显式开启分区）。
+
+    - `add`：常规工具（READ/DRAFT/MUTATE），`install` 时全部安装；
+    - `add_admin`：ADMIN 分区（P2 不注册任何 ADMIN 工具——分区机制先行，
+      未来 phase 上线 = spec 映射表加行 + 本方法加行，审批门零改动）；
+    - `all()` 只含**已安装**工具：ADMIN 行仅在 `REQMESH_ENABLE_ADMIN=1`
+      （build_registry 依此传 `enable_admin`）时进入集合——未开启时 ADMIN
+      工具不出现在 tools/list（协议层不存在，而非调用时才拒绝）。
+    """
+
+    def __init__(self, enable_admin: bool = False) -> None:
         self._specs: dict[str, ToolSpec] = {}
+        self._admin_specs: dict[str, ToolSpec] = {}
+        self._enable_admin = enable_admin
 
     def add(self, spec: ToolSpec) -> None:
-        if spec.name in self._specs:
+        if spec.name in self._specs or spec.name in self._admin_specs:
             raise ValueError(f"重复注册的工具: {spec.name}")
         self._specs[spec.name] = spec
 
+    def add_admin(self, spec: ToolSpec) -> None:
+        if spec.name in self._specs or spec.name in self._admin_specs:
+            raise ValueError(f"重复注册的工具: {spec.name}")
+        if spec.level != "ADMIN":
+            raise ValueError(f"add_admin 仅接受 level=ADMIN 的行: {spec.name}")
+        self._admin_specs[spec.name] = spec
+
     def all(self) -> list[ToolSpec]:
-        return sorted(self._specs.values(), key=lambda s: s.name)
+        specs = dict(self._specs)
+        if self._enable_admin:
+            specs.update(self._admin_specs)
+        return sorted(specs.values(), key=lambda s: s.name)
 
     def get(self, name: str) -> ToolSpec:
-        return self._specs[name]
+        if name in self._specs:
+            return self._specs[name]
+        if name in self._admin_specs and self._enable_admin:
+            return self._admin_specs[name]
+        raise KeyError(f"注册表无工具: {name}")
+
+    @property
+    def enable_admin(self) -> bool:
+        return self._enable_admin
 
     def __len__(self) -> int:
-        return len(self._specs)
+        return len(self.all())
 
     def install(self, mcp: FastMCP) -> None:
         for spec in self.all():

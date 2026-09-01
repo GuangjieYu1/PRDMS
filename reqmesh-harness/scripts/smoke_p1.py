@@ -22,7 +22,7 @@ from reqmesh_harness.errors import HarnessError
 from reqmesh_harness.tools import build_registry
 
 PROJECT_ID = "cessna-172"
-EXPECTED_REQUIREMENTS_TOTAL = 57  # design §7 基线
+EXPECTED_REQUIREMENTS_TOTAL = 57  # design §7 基线（历史快照；P2 冒烟真实写后 total 增长——仅作下限断言）
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent  # PRDMS 仓库根（docs/ 与 spec 同级）
 DEFAULT_OUT = REPO_ROOT / "docs" / "smoke" / "P1-cessna-172.md"
 
@@ -48,7 +48,9 @@ def main() -> int:
 
         requirements = tools.call("list_requirements", project_id=PROJECT_ID)
         total = requirements.get("total")
-        assert total == EXPECTED_REQUIREMENTS_TOTAL, f"需求总数 {total} != {EXPECTED_REQUIREMENTS_TOTAL}"
+        assert total is not None and total >= EXPECTED_REQUIREMENTS_TOTAL, (
+            f"需求总数 {total} < 基线 {EXPECTED_REQUIREMENTS_TOTAL}"
+        )
 
         coverage = tools.call("get_coverage", project_id=PROJECT_ID)
         assert coverage.get("total") is not None
@@ -82,7 +84,7 @@ def main() -> int:
 | 登录 | ok | 用户 {whoami.get('username')} / 角色 {whoami.get('role')} |
 | whoami | ok | username={whoami.get('username')} role={whoami.get('role')} |
 | list_projects | ok | 项目数 {len(projects)}，含 {PROJECT_ID} |
-| list_requirements | ok | total={total}（基线 {EXPECTED_REQUIREMENTS_TOTAL}） |
+| list_requirements | ok | total={total}（基线 ≥{EXPECTED_REQUIREMENTS_TOTAL}；P2 真实写后可能增长——历史快照见 P1 记录，不再作为精确重跑断言） |
 | get_coverage | ok | total={coverage.get('total')} shallow_covered={coverage.get('shallow_covered')} deep_covered={coverage.get('deep_covered')} coverage_pct={coverage.get('coverage_pct')} |
 | get_gap_analysis | ok | 缺口 {gap_count} |
 | get_traces | ok | links={len(traces.get('links'))} |

@@ -10,6 +10,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 DEFAULT_BASE_URL = "http://172.16.100.2:8000"
 
 
+def _default_xdg(kind: str) -> Path:
+    """XDG 基础目录（kind: config/state），遵循 XDG 规范的环境变量覆盖。"""
+    import os
+
+    env = {"config": "XDG_CONFIG_HOME", "state": "XDG_STATE_HOME"}[kind]
+    override = os.environ.get(env)
+    if override:
+        return Path(override)
+    return Path.home() / (".config" if kind == "config" else Path(".local") / "state")
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="REQMESH_",
@@ -31,6 +42,11 @@ class Settings(BaseSettings):
     # 会话持久化文件；默认 XDG state 目录
     session_file: Path | None = None
 
+    # P2 审批门：白名单文件（XDG config）/ 审计日志（XDG state）/ ADMIN 层显式开启
+    approvals_file: Path | None = None
+    audit_file: Path | None = None
+    enable_admin: bool = False
+
     # streamable-HTTP transport
     harness_host: str = "127.0.0.1"
     harness_port: int = 8123
@@ -38,18 +54,23 @@ class Settings(BaseSettings):
     def resolved_session_file(self) -> Path:
         if self.session_file is not None:
             return self.session_file
-        state_home = Path.home() / ".local" / "state"
-        import os
+        return _default_xdg("state") / "reqmesh-harness" / "session.json"
 
-        if os.environ.get("XDG_STATE_HOME"):
-            state_home = Path(os.environ["XDG_STATE_HOME"])
-        return state_home / "reqmesh-harness" / "session.json"
+    def resolved_approvals_file(self) -> Path:
+        if self.approvals_file is not None:
+            return self.approvals_file
+        return _default_xdg("config") / "reqmesh-harness" / "approvals.toml"
+
+    def resolved_audit_file(self) -> Path:
+        if self.audit_file is not None:
+            return self.audit_file
+        return _default_xdg("state") / "reqmesh-harness" / "audit.jsonl"
 
     def has_password_credentials(self) -> bool:
         return bool(self.username and self.password.get_secret_value())
 
     def has_credentials(self) -> bool:
-        return self.has_password_credentials or bool(self.token.get_secret_value())
+        return self.has_password_credentials() or bool(self.token.get_secret_value())
 
 
 def get_settings() -> Settings:

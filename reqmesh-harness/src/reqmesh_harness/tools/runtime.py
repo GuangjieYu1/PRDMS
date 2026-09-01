@@ -12,7 +12,9 @@ import threading
 
 from ..client.reader import ReadOnlyClient
 from ..client.session import AuthSession
+from ..client.writer import WriteClient
 from ..config import Settings
+from ..guardrails.gate import GateToken
 
 _lock = threading.Lock()
 _runtime: "Runtime | None" = None
@@ -26,6 +28,12 @@ class Runtime:
         session = AuthSession(self.settings)
         session.ensure_ready(validate=validate)
         return ReadOnlyClient(session)
+
+    def writer(self, token: GateToken) -> WriteClient:
+        """取写视图：仅接受审批门签发的 GateToken（未批准即结构性无写路径）。"""
+        session = AuthSession(self.settings)
+        session.ensure_ready(validate=False)
+        return WriteClient(session, token)
 
     def validate(self) -> ReadOnlyClient:
         """启动校验：加载持久化会话并以 whoami 检查（失效则重新登录）。"""

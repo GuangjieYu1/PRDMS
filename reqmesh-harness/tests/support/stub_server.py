@@ -2,6 +2,8 @@
 
 供 stdio 子进程级与 streamable-HTTP 级测试使用（全部离线：仅绑定 127.0.0.1 随机端口）。
 认证端点按上游行为打桩：login 返回 token/csrftoken cookie + body csrf_token。
+P2 扩展：写请求（POST/PUT/PATCH/DELETE）按 `write_routes`（键 `"METHOD /path"`）
+返回 fixture，并记录请求体与请求头（CSRF 断言用）。
 """
 
 from __future__ import annotations
@@ -14,10 +16,18 @@ from typing import Iterator
 
 
 class StubServer:
-    def __init__(self, fixtures_dir: Path, routes: dict[str, str] | None = None) -> None:
+    def __init__(
+        self,
+        fixtures_dir: Path,
+        routes: dict[str, str] | None = None,
+        write_routes: dict[str, str] | None = None,
+    ) -> None:
         self.fixtures = fixtures_dir
         self.routes: dict[str, str] = routes or {}
+        self.write_routes: dict[str, str] = write_routes or {}
         self.requests: list[tuple[str, str, dict[str, str]]] = []
+        self.request_bodies: list[bytes] = []
+        self.request_headers: list[dict[str, str]] = []
         self._lock = threading.Lock()
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), self._handler_factory())
         self._thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
@@ -39,6 +49,15 @@ class StubServer:
                 out[method] = out.get(method, 0) + 1
             return out
 
+    def bodies(self) -> list[bytes]:
+        """已记录的全部请求体（与 requests 对齐）。"""
+        with self._lock:
+            return list(self.request_bodies)
+
+    def headers(self) -> list[dict[str, str]]:
+        with self._lock:
+            return [dict(h) for h in self.request_headers]
+
     def _handler_factory(self) -> type[BaseHTTPRequestHandler]:
         server_ref = self
 
@@ -48,9 +67,26 @@ class StubServer:
             def log_message(self, *args) -> None:  # type: ignore[no-untyped-def]
                 pass
 
-            def _record(self, query: dict[str, str]) -> None:
+            def _record(self, query: dict[str, str], body: bytes = b"") -> None:
                 with server_ref._lock:
                     server_ref.requests.append((self.command, self.path.split("?", 1)[0], query))
+                    server_ref.request_bodies.append(body)
+                    server_ref.request_headers.append({k: v for k, v in self.headers.items()})
+
+            def _serve(self, fixture: str) -> None:
+                data = (server_ref.fixtures / fixture).read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def _not_found(self) -> None:
+                self.send_response(404)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", "2")
+                self.end_headers()
+                self.wfile.write(b"{}")
 
             def do_GET(self) -> None:
                 query = {}
@@ -62,24 +98,28 @@ class StubServer:
                 path = self.path.split("?", 1)[0]
                 fixture = server_ref.routes.get(path)
                 if fixture is None:
-                    self.send_response(404)
-                    self.send_header("Content-Type", "application/json")
-                    self.send_header("Content-Length", "2")
-                    self.end_headers()
-                    self.wfile.write(b"{}")
+                    self._not_found()
                     return
-                data = (server_ref.fixtures / fixture).read_bytes()
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
+                self._serve(fixture)
 
             def do_POST(self) -> None:
+                self._write_body()
+
+            def do_PUT(self) -> None:
+                self._write_body()
+
+            def do_PATCH(self) -> None:
+                self._write_body()
+
+            def do_DELETE(self) -> None:
+                self._write_body()
+
+            def _write_body(self) -> None:
                 length = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(length)
-                self._record({})
-                if self.path == "/api/auth/login":
+                self._record({}, body)
+                path = self.path.split("?", 1)[0]
+                if self.command == "POST" and path == "/api/auth/login":
                     payload = json.dumps(
                         {
                             "username": "dev",
@@ -97,7 +137,7 @@ class StubServer:
                     self.send_header("Set-Cookie", "csrftoken=csrf-body-token; Path=/api; SameSite=Lax")
                     self.end_headers()
                     self.wfile.write(payload)
-                elif self.path == "/api/auth/logout":
+                elif self.command == "POST" and path == "/api/auth/logout":
                     payload = b'{"ok": true}'
                     self.send_response(200)
                     self.send_header("Content-Type", "application/json")
@@ -105,9 +145,10 @@ class StubServer:
                     self.end_headers()
                     self.wfile.write(payload)
                 else:
-                    self.send_response(404)
-                    self.send_header("Content-Length", "2")
-                    self.end_headers()
-                    self.wfile.write(b"{}")
+                    fixture = server_ref.write_routes.get(f"{self.command} {path}")
+                    if fixture is None:
+                        self._not_found()
+                        return
+                    self._serve(fixture)
 
         return _Handler

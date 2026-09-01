@@ -101,13 +101,15 @@ class AuthSession:
 
         - Bearer 兜底：未配置凭据且设置 REQMESH_TOKEN 时直接复用（不做 cookie 校验）；
         - 有持久化会话：载入；validate=True 时以 whoami 校验，失效则重新登录；
-        - 无持久化会话：登录。
+        - 无持久化会话且已配置凭据：登录；
+        - 无凭据：保持未认证（匿名只读：后续请求经上游 401/403 以 UpstreamError 透传）。
         """
         if self._use_bearer:
             return
         state = self.store.load()
         if state is None:
-            self.login()
+            if self.settings.has_credentials():
+                self.login()
             return
         self._restore(state)
         if validate:
@@ -116,7 +118,10 @@ class AuthSession:
             except httpx.TransportError as exc:
                 raise TransportError(f"实例不可达: {exc}") from exc
             if resp.status_code == 401:
-                self.login()
+                if self.settings.has_credentials():
+                    self.login()
+                else:
+                    raise UpstreamError(resp.status_code, self._detail_of(resp))
             elif resp.status_code != 200:
                 raise UpstreamError(resp.status_code, self._detail_of(resp))
         self._authenticated = True
@@ -146,13 +151,63 @@ class AuthSession:
                 return self._get_retrying(path, params, True, retried_401)
             raise TransportError(f"实例不可达: {exc}") from exc
         if resp.status_code == 401 and not retried_401:
-            self.login()
-            return self._get_retrying(path, params, retried_connect, True)
+            if self.settings.has_credentials():
+                self.login()
+                return self._get_retrying(path, params, retried_connect, True)
+            # 未配置凭据：无重登可用，上游 401 原样透传（匿名只读验证语义）
+            raise UpstreamError(resp.status_code, self._detail_of(resp))
         if resp.status_code == 401:
             raise SessionExpiredError("会话已失效且自动重登后仍被拒绝（401）。请检查凭据。")
         if resp.status_code != 200:
             raise UpstreamError(resp.status_code, self._detail_of(resp))
         return resp.json()
+
+    # ------------------------------------------------------------------ 写请求（P2）
+    def post(self, path: str, json: dict | None = None) -> tuple[int, Any]:
+        """POST 并返回 (状态码, 解析后的 JSON)。"""
+        return self._write("post", path, json)
+
+    def put(self, path: str, json: dict | None = None) -> tuple[int, Any]:
+        """PUT 并返回 (状态码, 解析后的 JSON)。"""
+        return self._write("put", path, json)
+
+    def patch(self, path: str, json: dict | None = None) -> tuple[int, Any]:
+        """PATCH 并返回 (状态码, 解析后的 JSON)。"""
+        return self._write("patch", path, json)
+
+    def delete(self, path: str) -> tuple[int, Any]:
+        """DELETE 并返回 (状态码, 解析后的 JSON)。"""
+        return self._write("delete", path, None)
+
+    def _write(self, method: str, path: str, json: dict | None, retried_401: bool = False) -> tuple[int, Any]:
+        """写请求统一路径（P2 契约）：
+
+        - 全部写请求挂 `X-CSRF-Token`（Bearer 兜底路径下同 Authorization 头）；
+        - 连接错误**不重试**（写请求非幂等）;
+        - 401 重登一次并重试；仍 401 抛 SessionExpiredError；
+        - 非 2xx 归一化为 UpstreamError(status_code, detail)（两种错误形状）。
+        """
+        self.ensure_ready(validate=False)
+        headers = {**self._auth_headers(), **self._csrf_headers()}
+        kwargs: dict[str, Any] = {"headers": headers}
+        if method != "delete":  # httpx delete() 不接受 json 参数
+            kwargs["json"] = json
+        try:
+            resp = getattr(self._client, method)(path, **kwargs)
+        except httpx.TransportError as exc:
+            raise TransportError(f"实例不可达: {exc}") from exc
+        if resp.status_code == 401 and not retried_401:
+            if self.settings.has_credentials():
+                self.login()
+                return self._write(method, path, json, retried_401=True)
+            raise UpstreamError(resp.status_code, self._detail_of(resp))
+        if resp.status_code == 401:
+            raise SessionExpiredError("会话已失效且自动重登后仍被拒绝（401）。请检查凭据。")
+        if not 200 <= resp.status_code < 300:
+            raise UpstreamError(resp.status_code, self._detail_of(resp))
+        if resp.status_code == 204 or not resp.content:
+            return resp.status_code, {}
+        return resp.status_code, resp.json()
 
     # ------------------------------------------------------------------ 内部
     def _restore(self, state: SessionState) -> None:
@@ -186,10 +241,20 @@ class AuthSession:
 
     @staticmethod
     def _detail_of(resp: httpx.Response) -> str:
+        """上游错误归一化（两种形状 → 单一 detail 字符串）：
+
+        - `{"detail": "<str>"}`（FastAPI 默认）；
+        - `{"error": ..., "message": ..., ...}` envelope（reqmesh 自定义形状）。
+        """
         try:
             data = resp.json()
-            if isinstance(data, dict) and data.get("detail"):
-                return str(data["detail"])
         except ValueError:
-            pass
+            return (resp.text or "")[:500]
+        if isinstance(data, dict):
+            if isinstance(data.get("detail"), str):
+                return data["detail"]
+            if data.get("detail") is not None:
+                return str(data["detail"])
+            if data.get("error") is not None or data.get("message") is not None:
+                return f"{data.get('error', 'upstream_error')}: {data.get('message', '')}".strip(": ")
         return (resp.text or "")[:500]

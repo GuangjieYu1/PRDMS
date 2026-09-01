@@ -49,13 +49,15 @@ async def test_streamable_http_list_tools_and_call(stub, tmp_path, monkeypatch) 
                 await session.initialize()
                 tools = await session.list_tools()
                 names = sorted(t.name for t in tools.tools)
-                assert len(names) == 25
+                assert len(names) == 37
                 # 与 stdio/注册集合对账
                 assert names == sorted(s.name for s in build_registry().all())
                 specs = {s.name: s for s in build_registry().all()}
                 for t in tools.tools:
-                    assert t.description.startswith("READ-ONLY"), t.name
-                    assert t.annotations.readOnlyHint is True, t.name
+                    level = specs[t.name].level
+                    prefix = {"READ": "READ-ONLY", "DRAFT": "DRAFT", "MUTATE": "MUTATE", "ADMIN": "ADMIN"}[level]
+                    assert t.description.startswith(prefix), t.name
+                    assert bool(t.annotations.readOnlyHint) is (level == "READ"), t.name
                     assert t.meta == {"domain": specs[t.name].domain, "permission": specs[t.name].level}, t.name
                 for _ in range(2):
                     result = await session.call_tool("list_requirements", {"project_id": "cessna-172"})

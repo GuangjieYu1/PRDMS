@@ -27,6 +27,9 @@ class Case:
     expect_path: str
     expect_query: dict | None
     fixture: str
+    method: str = "GET"
+    expect_body: dict | None = None
+    dry_run: bool = False
 
 
 @dataclass(frozen=True)
@@ -35,6 +38,7 @@ class ToolMap:
     domain: str
     params: tuple[Param, ...]
     cases: tuple[Case, ...] = field(default_factory=tuple)
+    level: str = "READ"
 
 
 S = ("string",)
@@ -355,9 +359,309 @@ TOOLS: tuple[ToolMap, ...] = (
 )
 
 
+def write_by_name() -> dict[str, ToolMap]:
+    return {t.name: t for t in WRITE_TOOLS}
+
+
+# ------------------------------------------------------------------ P2 写工具（spec 映射表契约；method/body/reason/dry_run）
+A = ("array",)
+O = ("object",)
+E = ("enum",)
+
+WRITE_TOOLS: tuple[ToolMap, ...] = (
+    ToolMap(
+        name="create_requirement",
+        domain="需求",
+        level="DRAFT",
+        params=(
+            Param("project_id", S, required=True),
+            Param("id", S, required=True),
+            Param("name", S),
+            Param("description", S),
+            Param("type", E),
+            Param("priority", E),
+            Param("status", E),
+            Param("parent", S),
+            Param("attributes", A),
+            Param("parameters", A),
+            Param("constraints", A),
+            Param("relations", A),
+            Param("verification_cases", A),
+            Param("cascade_from", S),
+            Param("rationale", S),
+            Param("source", S),
+            Param("allocated_to", S),
+            Param("baselines", A),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("dry_run", {"project_id": "cessna-172", "id": "SMOKE-P2-001", "name": "Fuel", "dry_run": True},
+                 "/api/projects/cessna-172/requirements", None, "requirement_get.json",
+                 method="POST", expect_body={"id": "SMOKE-P2-001", "name": "Fuel"}, dry_run=True),
+            Case("real", {"project_id": "cessna-172", "id": "SMOKE-P2-001", "name": "Fuel"},
+                 "/api/projects/cessna-172/requirements", None, "requirement_get.json",
+                 method="POST", expect_body={"id": "SMOKE-P2-001", "name": "Fuel"}),
+        ),
+    ),
+    ToolMap(
+        name="create_component",
+        domain="组件/基线/变更请求",
+        level="DRAFT",
+        params=(
+            Param("project_id", S, required=True),
+            Param("id", S, required=True),
+            Param("name", S),
+            Param("description", S),
+            Param("type", E),
+            Param("parent", S),
+            Param("part_number", S),
+            Param("supplier", S),
+            Param("quantity", I),
+            Param("satisfies", A),
+            Param("verification_cases", A),
+            Param("relations", A),
+            Param("attributes", A),
+            Param("parameters", A),
+            Param("baselines", A),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "id": "SMOKE-P2-C01", "name": "SMOKE Wing"},
+                 "/api/projects/cessna-172/components", None, "component_get.json",
+                 method="POST", expect_body={"id": "SMOKE-P2-C01", "name": "SMOKE Wing"}),
+        ),
+    ),
+    ToolMap(
+        name="create_verification_case",
+        domain="验证/分析/规格/定义",
+        level="DRAFT",
+        params=(
+            Param("project_id", S, required=True),
+            Param("id", S, required=True),
+            Param("name", S),
+            Param("description", S),
+            Param("method", S),
+            Param("case_type", E),
+            Param("environment", S),
+            Param("decision_gate", S),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "id": "SMOKE-P2-V01", "name": "SMOKE VCase"},
+                 "/api/projects/cessna-172/verification", None, "verification_get.json",
+                 method="POST", expect_body={"id": "SMOKE-P2-V01", "name": "SMOKE VCase"}),
+        ),
+    ),
+    ToolMap(
+        name="create_risk",
+        domain="风险/决策",
+        level="DRAFT",
+        params=(
+            Param("project_id", S, required=True),
+            Param("id", S, required=True),
+            Param("title", S),
+            Param("failure_mode", S),
+            Param("effect", S),
+            Param("cause", S),
+            Param("severity", S),
+            Param("likelihood", S),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "id": "SMOKE-P2-R01", "title": "SMOKE Risk"},
+                 "/api/projects/cessna-172/risks", None, "risk_get.json",
+                 method="POST", expect_body={"id": "SMOKE-P2-R01", "title": "SMOKE Risk"}),
+        ),
+    ),
+    ToolMap(
+        name="create_comment",
+        domain="需求",
+        level="DRAFT",
+        params=(
+            Param("project_id", S, required=True),
+            Param("entity_kind", S, required=True),
+            Param("entity_id", S, required=True),
+            Param("text", S, required=True),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "entity_kind": "requirement", "entity_id": "ACFT0000", "text": "SMOKE comment"},
+                 "/api/projects/cessna-172/comments", None, "comments_list.json",
+                 method="POST", expect_body={"entity_kind": "requirement", "entity_id": "ACFT0000", "text": "SMOKE comment"}),
+        ),
+    ),
+    ToolMap(
+        name="review_item",
+        domain="需求",
+        level="DRAFT",
+        params=(
+            Param("project_id", S, required=True),
+            Param("req_id", S, required=True),
+            Param("comment", S),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "req_id": "ACFT0000", "comment": "LGTM"},
+                 "/api/projects/cessna-172/requirements/ACFT0000/review", None, "requirement_get.json",
+                 method="POST", expect_body={"comment": "LGTM"}),
+        ),
+    ),
+    ToolMap(
+        name="update_requirement",
+        domain="需求",
+        level="MUTATE",
+        params=(
+            Param("project_id", S, required=True),
+            Param("req_id", S, required=True),
+            Param("reason", S, required=True),
+            Param("name", S),
+            Param("description", S),
+            Param("type", E),
+            Param("priority", E),
+            Param("status", E),
+            Param("parent", S),
+            Param("attributes", A),
+            Param("parameters", A),
+            Param("constraints", A),
+            Param("relations", A),
+            Param("verification_cases", A),
+            Param("cascade_from", S),
+            Param("rationale", S),
+            Param("source", S),
+            Param("allocated_to", S),
+            Param("baselines", A),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("partial", {"project_id": "cessna-172", "req_id": "ACFT0000", "reason": "SMOKE 更新", "description": "updated"},
+                 "/api/projects/cessna-172/requirements/ACFT0000", None, "requirement_get.json",
+                 method="PUT", expect_body={"description": "updated"}),
+            Case("null_clears", {"project_id": "cessna-172", "req_id": "ACFT0000", "reason": "SMOKE 清空", "description": None},
+                 "/api/projects/cessna-172/requirements/ACFT0000", None, "requirement_get.json",
+                 method="PUT", expect_body={"description": None}),
+        ),
+    ),
+    ToolMap(
+        name="set_relations",
+        domain="追踪/覆盖",
+        level="MUTATE",
+        params=(
+            Param("project_id", S, required=True),
+            Param("links", A, required=True),
+            Param("reason", S, required=True),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("rewrite", {"project_id": "cessna-172", "reason": "SMOKE 追加", "links": [{"source": "ACFT0000", "target": "AFRM0000", "type": "refines"}]},
+                 "/api/projects/cessna-172/traces", None, "traces.json",
+                 method="PUT", expect_body={"links": [{"source": "ACFT0000", "target": "AFRM0000", "type": "refines"}]}),
+        ),
+    ),
+    ToolMap(
+        name="set_allocation",
+        domain="追踪/覆盖",
+        level="MUTATE",
+        params=(
+            Param("project_id", S, required=True),
+            Param("req_id", S, required=True),
+            Param("reason", S, required=True),
+            Param("row_id", S),
+            Param("row_kind", S),
+            Param("target_id", S),
+            Param("component_id", S),
+            Param("axis", S),
+            Param("allocated", B),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "req_id": "ACFT0000", "reason": "SMOKE 分配", "allocated": True},
+                 "/api/projects/cessna-172/allocation", None, "allocation_matrix.json",
+                 method="POST", expect_body={"req_id": "ACFT0000", "allocated": True}),
+        ),
+    ),
+    ToolMap(
+        name="update_component",
+        domain="组件/基线/变更请求",
+        level="MUTATE",
+        params=(
+            Param("project_id", S, required=True),
+            Param("component_id", S, required=True),
+            Param("reason", S, required=True),
+            Param("name", S),
+            Param("description", S),
+            Param("type", E),
+            Param("parent", S),
+            Param("part_number", S),
+            Param("supplier", S),
+            Param("quantity", I),
+            Param("satisfies", A),
+            Param("verification_cases", A),
+            Param("relations", A),
+            Param("attributes", A),
+            Param("parameters", A),
+            Param("baselines", A),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "component_id": "AILR01", "reason": "SMOKE 更新", "description": "updated"},
+                 "/api/projects/cessna-172/components/AILR01", None, "component_get.json",
+                 method="PUT", expect_body={"description": "updated"}),
+        ),
+    ),
+    ToolMap(
+        name="update_verification_case",
+        domain="验证/分析/规格/定义",
+        level="MUTATE",
+        params=(
+            Param("project_id", S, required=True),
+            Param("vc_id", S, required=True),
+            Param("reason", S, required=True),
+            Param("name", S),
+            Param("description", S),
+            Param("method", S),
+            Param("status", S),
+            Param("result", S),
+            Param("verified_requirements", A),
+            Param("test_procedure", S),
+            Param("steps", A),
+            Param("case_type", E),
+            Param("environment", S),
+            Param("decision_gate", S),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "vc_id": "VCAF0001", "reason": "SMOKE 更新", "status": "passed"},
+                 "/api/projects/cessna-172/verification/VCAF0001", None, "verification_get.json",
+                 method="PUT", expect_body={"status": "passed"}),
+        ),
+    ),
+    ToolMap(
+        name="run_verification",
+        domain="验证/分析/规格/定义",
+        level="MUTATE",
+        params=(
+            Param("project_id", S, required=True),
+            Param("vc_id", S, required=True),
+            Param("status", S, required=True),
+            Param("reason", S, required=True),
+            Param("notes", S),
+            Param("step_results", O),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            Case("real", {"project_id": "cessna-172", "vc_id": "VCAF0001", "status": "passed", "reason": "SMOKE 执行", "notes": "ok"},
+                 "/api/projects/cessna-172/verification/VCAF0001/run", None, "verification_get.json",
+                 method="POST", expect_body={"status": "passed", "notes": "ok"}),
+        ),
+    ),
+)
+
+
 def by_name() -> dict[str, ToolMap]:
     return {t.name: t for t in TOOLS}
 
 
-EXPECTED_TOOL_COUNT = 25
+READ_TOOL_COUNT = 25
+WRITE_TOOL_COUNT = 12
+EXPECTED_TOOL_COUNT = READ_TOOL_COUNT + WRITE_TOOL_COUNT
 REPORT_ENUM = ["quality", "compliance", "metrics", "evaluation", "validation", "workflow"]

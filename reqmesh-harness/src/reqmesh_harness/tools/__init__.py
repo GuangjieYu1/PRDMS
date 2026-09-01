@@ -1,22 +1,44 @@
-"""工具层：注册表（唯一事实源）+ 25 个 READ 工具。
+"""工具层：注册表（唯一事实源）+ 25 个 READ 工具 + 12 个写工具（P2）。
 
-全部工具按 ADR-0002 命名（verb_entity、无权限前缀）；description 以 READ-ONLY
-开头、中文书写（唯一来源 = 处理器 docstring）；权限层级 READ 记录在注册表
-（level 字段）与 MCP annotations.readOnlyHint。
+全部工具按 ADR-0002 命名（verb_entity、无权限前缀）；description 唯一来源 =
+处理器 docstring：READ 层以 READ-ONLY 开头、写层以 DRAFT/MUTATE 开头（中文书写）；
+权限层级记录在注册表（level 字段）并经 `annotations_for` 映射 MCP annotations。
+ADMIN 分区（P2 不注册任何 ADMIN 工具）：`add_admin` + `REQMESH_ENABLE_ADMIN=1`
+显式开启后才安装（未开启时不出现在 tools/list）。审批门（guardrails）从注册表
+映射层级，绝不解析工具名。
 """
 
-from .registry import ToolRegistry, ToolSpec
+from .registry import ToolRegistry, ToolSpec, annotations_for
 from .groups import auth_project, requirements, tracking, risk_decision, components_report
+from .groups import writes
 
-__all__ = ["ToolRegistry", "ToolSpec", "build_registry"]
+__all__ = ["ToolRegistry", "ToolSpec", "annotations_for", "build_registry"]
 
 
 def _spec(name: str, title: str, domain: str, fn) -> ToolSpec:
-    return ToolSpec(name=name, title=title, domain=domain, level="READ", fn=fn)  # P1 全工具层均为 READ
+    return ToolSpec(name=name, title=title, domain=domain, level="READ", fn=fn)
 
 
-def build_registry() -> ToolRegistry:
-    registry = ToolRegistry()
+def _write_spec(name: str, title: str, domain: str, level: str, fn) -> ToolSpec:
+    return ToolSpec(name=name, title=title, domain=domain, level=level, fn=fn)
+
+
+# ADMIN 分区（P2 预留：不注册任何 ADMIN 工具——见 spec「显式开启预留设计」；
+# 未来 phase 上线 = 本元组加行 + spec 映射表加行，审批门零改动）
+ADMIN_TOOL_SPECS: tuple[ToolSpec, ...] = ()
+
+
+def build_registry(enable_admin: bool | None = None) -> ToolRegistry:
+    """构建注册表（唯一事实源）。
+
+    `enable_admin`：None 时按 `REQMESH_ENABLE_ADMIN` 环境变量决定（默认关闭）——
+    关闭时 ADMIN 分区不安装（tools/list 不含 ADMIN 工具，协议层不存在）。
+    """
+    if enable_admin is None:
+        from ..config import get_settings
+
+        enable_admin = get_settings().enable_admin
+    registry = ToolRegistry(enable_admin=enable_admin)
     registry.add(_spec("whoami", "当前用户", "认证/项目", auth_project.whoami))
     registry.add(_spec("list_projects", "列出项目", "认证/项目", auth_project.list_projects))
     registry.add(_spec("list_requirements", "列出需求", "需求", requirements.list_requirements))
@@ -42,4 +64,21 @@ def build_registry() -> ToolRegistry:
     registry.add(_spec("list_baselines", "列出基线", "组件/基线/变更请求", components_report.list_baselines))
     registry.add(_spec("list_change_requests", "列出变更请求", "组件/基线/变更请求", components_report.list_change_requests))
     registry.add(_spec("get_project_report", "项目报告", "报告", components_report.get_project_report))
+
+    # P2 写工具（6 DRAFT + 6 MUTATE，spec 映射表为契约）
+    registry.add(_write_spec("create_requirement", "新建需求", "需求", "DRAFT", writes.create_requirement))
+    registry.add(_write_spec("create_component", "新建组件", "组件/基线/变更请求", "DRAFT", writes.create_component))
+    registry.add(_write_spec("create_verification_case", "新建验证用例", "验证/分析/规格/定义", "DRAFT", writes.create_verification_case))
+    registry.add(_write_spec("create_risk", "新建风险", "风险/决策", "DRAFT", writes.create_risk))
+    registry.add(_write_spec("create_comment", "新建评论", "需求", "DRAFT", writes.create_comment))
+    registry.add(_write_spec("review_item", "提交评审", "需求", "DRAFT", writes.review_item))
+    registry.add(_write_spec("update_requirement", "更新需求", "需求", "MUTATE", writes.update_requirement))
+    registry.add(_write_spec("set_relations", "设置追踪矩阵", "追踪/覆盖", "MUTATE", writes.set_relations))
+    registry.add(_write_spec("set_allocation", "设置分配", "追踪/覆盖", "MUTATE", writes.set_allocation))
+    registry.add(_write_spec("update_component", "更新组件", "组件/基线/变更请求", "MUTATE", writes.update_component))
+    registry.add(_write_spec("update_verification_case", "更新验证用例", "验证/分析/规格/定义", "MUTATE", writes.update_verification_case))
+    registry.add(_write_spec("run_verification", "执行验证", "验证/分析/规格/定义", "MUTATE", writes.run_verification))
+
+    for spec in ADMIN_TOOL_SPECS:
+        registry.add_admin(spec)
     return registry

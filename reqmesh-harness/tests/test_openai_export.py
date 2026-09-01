@@ -1,4 +1,4 @@
-"""#15 OpenAI function JSON 导出：全量、名称合规、schema 合法、1:1 对账、金样例。"""
+"""#15 OpenAI function JSON 导出：全量、名称合规、schema 合法、1:1 对账、金样例（P2：37 工具）。"""
 
 from __future__ import annotations
 
@@ -12,9 +12,10 @@ from mcp.server.fastmcp.tools.base import Tool
 
 from reqmesh_harness.tools import build_registry
 from reqmesh_harness.tools.export import export_openai_functions, to_openai_schema
-from tests.mapping import EXPECTED_TOOL_COUNT, TOOLS, by_name
+from tests.mapping import EXPECTED_TOOL_COUNT, TOOLS, by_name, write_by_name
 
 NAME_RE = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+PREFIX = {"READ": "READ-ONLY", "DRAFT": "DRAFT", "MUTATE": "MUTATE", "ADMIN": "ADMIN"}
 GOLDEN = Path(__file__).resolve().parent / "fixtures" / "openai_export.json"
 
 
@@ -27,9 +28,10 @@ def test_export_all_tools_with_valid_names(exported) -> None:
     assert len(exported) == EXPECTED_TOOL_COUNT
     names = [f["name"] for f in exported]
     assert len(set(names)) == len(names)
+    specs = {s.name: s for s in build_registry().all()}
     for f in exported:
         assert NAME_RE.match(f["name"]), f["name"]
-        assert f["description"].startswith("READ-ONLY")
+        assert f["description"].startswith(PREFIX[specs[f["name"]].level])
 
 
 def test_parameters_are_valid_json_schema(exported) -> None:
@@ -40,10 +42,17 @@ def test_parameters_are_valid_json_schema(exported) -> None:
 
 def test_parameters_validate_known_instances(exported) -> None:
     """已知样例（来自 spec 映射表的 Case 参数）可被导出 schema 校验通过。"""
-    mapping = by_name()
+    mapping = {**by_name(), **write_by_name()}
     for f in exported:
         instance = dict(mapping[f["name"]].cases[0].args)
         Draft202012Validator(f["parameters"]).validate(instance)
+
+
+def test_export_has_no_dangling_refs(exported) -> None:
+    """write 工具的嵌套对象参数（TraceLink/AttributeValue 等）经 $defs 内联——无 $ref 残留。"""
+    for f in exported:
+        assert "$ref" not in json.dumps(f["parameters"]), f["name"]
+        assert "$defs" not in json.dumps(f["parameters"]), f["name"]
 
 
 def test_enum_rejected_by_exported_schema(exported) -> None:

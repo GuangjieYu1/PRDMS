@@ -257,3 +257,16 @@ def test_corrupt_session_file_falls_back_to_login(tmp_path) -> None:
         router.post("/api/auth/login").mock(return_value=Response(200, json=LOGIN_BODY, headers=LOGIN_HEADERS))
         session.ensure_ready(validate=True)
         assert len([c for c in router.calls if c.request.method == "POST"]) == 1
+
+
+def test_anonymous_no_credentials_skips_login_and_passes_401(tmp_path) -> None:
+    """无凭据客户端：不尝试登录；上游 401 以 UpstreamError 原样透传（匿名只读验证语义）。"""
+    session = AuthSession(Settings(base_url=BASE, username="", password="", session_file=tmp_path / "s.json"))
+    with respx.mock(base_url=BASE) as router:
+        router.get("/api/projects").mock(return_value=Response(401, json={"detail": "Not authenticated"}))
+        with pytest.raises(UpstreamError) as exc:
+            session.get("/api/projects")
+        assert exc.value.status_code == 401
+        assert "Not authenticated" in str(exc.value)
+        assert all(c.request.method == "GET" for c in router.calls)  # 未发生登录 POST
+        assert "dev-pass" not in str(exc.value)

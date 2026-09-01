@@ -12,6 +12,9 @@ dependencies = [
   "uvicorn>=0.30.0",
 ]
 
+[project.scripts]
+reqmesh-harness = "reqmesh_harness.cli:main"
+
 [dependency-groups]
 dev = [
   "datamodel-code-generator>=0.25.0",
@@ -34,4 +37,8 @@ addopts = "-m 'not network'"
 pythonpath = ["."]
 markers = [
   "network: requires the live reqmesh instance (run with -m network)",
+]
+filterwarnings = [
+  # UNSET 哨兵默认值刻意不进 JSON schema（区分「未提供」），pydantic 的警示可忽略
+  "ignore:Default value UNSET is not JSON serializable.*:UserWarning",
 ]

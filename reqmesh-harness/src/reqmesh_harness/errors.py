@@ -36,6 +36,21 @@ class TransportError(HarnessError):
     """实例不可达 / 连接失败 / 超时。"""
 
 
+class ApprovalDeniedError(HarnessError):
+    """写工具被审批门拒绝（白名单未命中，fail-closed）。
+
+    错误消息含精确修复建议（`reqmesh-harness approvals add ...` 命令与 TOML 片段）。
+    """
+
+
+class AdminDisabledError(HarnessError):
+    """ADMIN 层工具在 REQMESH_ENABLE_ADMIN=1 未设置时被拒绝（显式开启预留）。"""
+
+
+class ApprovalConfigError(HarnessError):
+    """审批白名单文件损坏/非法（fail-closed：宁可拒绝也不放行）。"""
+
+
 __all__ = [
     "HarnessError",
     "ConfigError",
@@ -44,4 +59,7 @@ __all__ = [
     "SessionExpiredError",
     "UpstreamError",
     "TransportError",
+    "ApprovalDeniedError",
+    "AdminDisabledError",
+    "ApprovalConfigError",
 ]

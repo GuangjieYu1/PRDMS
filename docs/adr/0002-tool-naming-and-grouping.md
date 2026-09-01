@@ -17,3 +17,10 @@ P1 需求会话对开放问题「工具命名前缀与分组方式」做出决�
 ## 实现注记（P1 开发会话核实后回写）
 
 MCP 协议的低层 Tool 类型（mcp 0.5.0 / 1.x）**没有 `tags` 字段**，因此「分组 tags」落地为：实体域作为 `meta.domain`、权限层级作为 `meta.permission` 随 `tools/list` 下发（对客户端可见），注册表仍是分组的唯一来源（OpenAI 导出与测试同源）。P2 审批门按本 ADR 从注册表映射层级。
+
+## 实现注记（P2 开发会话回写：verb 词汇表扩展）
+
+- 按 ADR 预告，「P2 起新增写动词」落地为：`create` / `update` / `set` / `run` / `review`（12 个写工具 = 6 DRAFT + 6 MUTATE）；`delete` 词汇表预留 ADMIN 层（P2 未启用）。
+- description 前缀按层级（ADR 既定约定扩展）：READ 层 `READ-ONLY`（P1 惯例）、DRAFT 层 `DRAFT`、MUTATE 层 `MUTATE`（ADMIN 预留 `ADMIN`）；中文书写不变。
+- 写工具参数字典事实：全部写工具统一 `dry_run: bool = False`；全部 MUTATE 工具统一必填 `reason: str`（只进审计，不进 reqmesh 数据）；create 类 `id` 由调用方给定（reqmesh 契约如此）——与 spec 映射表逐项对账（tests/mapping.py）。
+- 审批门（P2）按本 ADR 从注册表 `level` 映射层级（DRAFT 通配/MUTATE 必匹配 project），**绝不解析工具名推断权限**——写工具名无权限前缀，符合本 ADR。
