@@ -1,13 +1,24 @@
 [
   {
     "name": "create_comment",
-    "description": "DRAFT 给任一实体附加讨论评论（工具层强制校验 entity_kind/entity_id/text 必填——上游 schema 未标 required）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。",
+    "description": "DRAFT 给任一实体附加讨论评论（工具层强制校验 entity_kind/entity_id/text 必填——上游 schema 未标 required；entity_kind 取值来自上游 422 校验词表）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。",
     "parameters": {
       "properties": {
         "project_id": {
           "type": "string"
         },
         "entity_kind": {
+          "enum": [
+            "requirements",
+            "components",
+            "verification_cases",
+            "risks",
+            "decisions",
+            "definitions",
+            "specifications",
+            "analysis_cases",
+            "change_requests"
+          ],
           "type": "string"
         },
         "entity_id": {

@@ -486,15 +486,15 @@ WRITE_TOOLS: tuple[ToolMap, ...] = (
         level="DRAFT",
         params=(
             Param("project_id", S, required=True),
-            Param("entity_kind", S, required=True),
+            Param("entity_kind", E, required=True),
             Param("entity_id", S, required=True),
             Param("text", S, required=True),
             Param("dry_run", B, default=False),
         ),
         cases=(
-            Case("real", {"project_id": "cessna-172", "entity_kind": "requirement", "entity_id": "ACFT0000", "text": "SMOKE comment"},
+            Case("real", {"project_id": "cessna-172", "entity_kind": "requirements", "entity_id": "ACFT0000", "text": "SMOKE comment"},
                  "/api/projects/cessna-172/comments", None, "comments_list.json",
-                 method="POST", expect_body={"entity_kind": "requirement", "entity_id": "ACFT0000", "text": "SMOKE comment"}),
+                 method="POST", expect_body={"entity_kind": "requirements", "entity_id": "ACFT0000", "text": "SMOKE comment"}),
         ),
     ),
     ToolMap(

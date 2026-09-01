@@ -81,6 +81,10 @@ def assert_schema_matches_toolmap(spec: ToolSpec, toolmap: ToolMap) -> Tool:
             vals = schema.get("enum", [])
             if p.name == "report":
                 assert vals == REPORT_ENUM
+            elif p.name == "entity_kind":
+                from reqmesh_harness.tools.groups.writes import COMMENT_ENTITY_KINDS
+
+                assert set(vals) == set(COMMENT_ENTITY_KINDS), f"{spec.name}.{p.name} 枚举与上游词表不一致"
         else:
             assert types == set(p.types), f"{spec.name}.{p.name} 类型 {types} != {p.types}"
         if p.required:

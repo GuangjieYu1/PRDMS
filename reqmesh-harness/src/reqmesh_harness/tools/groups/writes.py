@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from ._common import project_path
 from ._write_common import (
@@ -52,16 +52,17 @@ from ...client.generated.models import (
     Measurement,
 )
 
-# 评论/实体的 entity_kind → 集合路径（dry_run 前置校验用）
-_ENTITY_COLLECTIONS = {
-    "requirement": "requirements",
-    "component": "components",
-    "verification": "verification",
-    "risk": "risks",
-    "decision": "decisions",
-    "analysis": "analysis",
-    "specification": "specifications",
-    "definition": "definitions",
+# 评论 entity_kind 合法值（上游 422 校验词表，实测）→ REST 集合路径（dry_run 前置校验用）
+COMMENT_ENTITY_KINDS = {
+    "requirements": "requirements",
+    "components": "components",
+    "verification_cases": "verification",
+    "risks": "risks",
+    "decisions": "decisions",
+    "definitions": "definitions",
+    "specifications": "specifications",
+    "analysis_cases": "analysis",
+    "change_requests": "change-requests",
 }
 
 
@@ -209,20 +210,23 @@ def create_risk(
 
 def create_comment(
     project_id: str,
-    entity_kind: str,
+    entity_kind: Literal[
+        "requirements", "components", "verification_cases", "risks", "decisions",
+        "definitions", "specifications", "analysis_cases", "change_requests",
+    ],
     entity_id: str,
     text: str,
     dry_run: bool = False,
 ) -> Any:
-    """DRAFT 给任一实体附加讨论评论（工具层强制校验 entity_kind/entity_id/text 必填——上游 schema 未标 required）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。"""
+    """DRAFT 给任一实体附加讨论评论（工具层强制校验 entity_kind/entity_id/text 必填——上游 schema 未标 required；entity_kind 取值来自上游 422 校验词表）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。"""
     params = {k: v for k, v in locals().items() if v is not UNSET}
     body = CommentCreate(entity_kind=entity_kind, entity_id=entity_id, text=text).model_dump(exclude_unset=True)
-    collection = _ENTITY_COLLECTIONS.get(entity_kind)
+    collection = COMMENT_ENTITY_KINDS.get(entity_kind)
 
     def _checks() -> list[dict[str, Any]]:
-        if collection is None:
+        if collection is None:  # Literal 已挡非法值；此处防御性兜底（不阻断）
             return [{"kind": "unknown_entity_kind", "id": entity_kind,
-                     "hint": f"entity_kind={entity_kind} 未在已知集合映射（{sorted(_ENTITY_COLLECTIONS)}）"}]
+                     "hint": f"entity_kind={entity_kind} 未在已知集合映射（{sorted(COMMENT_ENTITY_KINDS)}）"}]
         return entity_checks(project_id, collection, entity_id)
 
     return write_request(

@@ -1,6 +1,6 @@
 # P1 cessna-172 冒烟记录
 
-- 时间：2026-09-01T08:50:37.620615+00:00
+- 时间：2026-09-01T11:29:34.231629+00:00
 - 实例：http://172.16.100.2:8000
 - 项目：cessna-172
 - 结果：**通过**（全链路 200，无副作用）
@@ -12,10 +12,10 @@
 | 登录 | ok | 用户 yugj / 角色 contributor |
 | whoami | ok | username=yugj role=contributor |
 | list_projects | ok | 项目数 1，含 cessna-172 |
-| list_requirements | ok | total=57（基线 57） |
-| get_coverage | ok | total=55 shallow_covered=44 deep_covered=38 coverage_pct=80 |
-| get_gap_analysis | ok | 缺口 36 |
-| get_traces | ok | links=8 |
+| list_requirements | ok | total=58（基线 ≥57；P2 真实写后可能增长——历史快照见 P1 记录，不再作为精确重跑断言） |
+| get_coverage | ok | total=56 shallow_covered=45 deep_covered=39 coverage_pct=80 |
+| get_gap_analysis | ok | 缺口 37 |
+| get_traces | ok | links=9 |
 
 ## 无副作用声明
 

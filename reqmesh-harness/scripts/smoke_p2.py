@@ -7,9 +7,16 @@
 - B 段：SMOKE-P2- 前缀固定 id 的真实写闭环（10 次写调用），git 新提交数 == 真实写调用数，
   审计行数 == 全部写调用数（含 denied/dry_run）；
 - 记录落盘 docs/smoke/P2-cessna-172.md（REQMESH_SMOKE_OUT 可覆盖）；
-- 服务账号断言：whoami==reqmesh-harness（role=contributor）；未建号允许降级 yugj
-  （现有 contributor）并在记录中显式标注；匿名只读：无凭据调用 → 上游 401 经
-  UpstreamError 透传（断言错误形状与「无凭据信息」）。
+- 服务账号断言：whoami==reqmesh-harness（**role≈maintainer——实测偏差说明见下**）；
+  未建号允许降级 yugj（现有 contributor）并在记录中显式标注；匿名只读：无凭据调用 →
+  上游 401 经 UpstreamError 透传（断言错误形状与「无凭据信息」）。
+
+  ⚠️ 实测偏差（相对 spec D7「role=contributor」）：reqmesh v0.5.0 项目权限层级为
+  none/view/propose/edit/admin（backend/app/core/dependencies.py），默认映射
+  contributor=propose（仅 风险/评论/决策 可写——create_risk/create_comment），
+  requirements/components/verification/review/traces/allocation 等 10 个端点在
+  edit 层（require_maintain）。服务账号取 **maintainer**（能覆盖 P2 全部写面的
+  最小角色，非 admin）——D7 最小权限意图不变，需需求会话确认 spec 修正。
 """
 
 from __future__ import annotations
@@ -75,15 +82,17 @@ def main() -> int:
             account_note = f"{SERVICE_ACCOUNT}（role={role}）"
             degraded = False
         elif username == DEGRADED_ACCOUNT:
-            account_note = f"降级 {DEGRADED_ACCOUNT}（role={role}，未建 {SERVICE_ACCOUNT} 服务账号）"
+            account_note = f"降级 {DEGRADED_ACCOUNT}（role={role}，未建 {SERVICE_ACCOUNT} 服务账号——注意 contributor 无 edit 层写权限，B 段预计 403）"
             degraded = True
         else:
             raise AssertionError(f"whoami 返回 {username}（role={role}），既非 {SERVICE_ACCOUNT} 也非降级账号")
-        assert role == "contributor", f"服务账号角色应为 contributor，实际 {role}"
+        # 实测偏差（见脚本 docstring）：reqmesh v0.5.0 contributor=propose 层仅覆盖
+        # 风险/评论/决策；P2 其余 10 端点需 edit 层——服务账号按最小权限取 maintainer
+        assert role in ("maintainer", "contributor"), f"服务账号角色应为 maintainer（或 contributor 降级），实际 {role}"
         step("whoami/服务账号", True, account_note)
 
         # ---------------- A 段（零副作用） ----------------
-        git_before_a = _git_commit_count(initial)
+        git_repo, git_before_a = _git_commit_count(initial)
 
         # A1：空白名单 fail-closed
         try:
@@ -113,7 +122,7 @@ def main() -> int:
             ("create_component", dict(id=SMOKE_COMP, name="SMOKE 组件")),
             ("create_verification_case", dict(id=SMOKE_VC, name="SMOKE 验证用例")),
             ("create_risk", dict(id=SMOKE_RISK, title="SMOKE 风险")),
-            ("create_comment", dict(entity_kind="requirement", entity_id=SMOKE_REQ, text=SMOKE_COMMENT)),
+            ("create_comment", dict(entity_kind="requirements", entity_id=SMOKE_REQ, text=SMOKE_COMMENT)),
             ("review_item", dict(req_id=SMOKE_REQ, comment="SMOKE 评审")),
             ("update_requirement", dict(req_id=SMOKE_REQ, reason="SMOKE 更新")),
             ("set_relations", dict(links=[] , reason="SMOKE 追踪")),
@@ -122,19 +131,38 @@ def main() -> int:
             ("update_verification_case", dict(vc_id=SMOKE_VC, reason="SMOKE 用例更新")),
             ("run_verification", dict(vc_id=SMOKE_VC, status="passed", reason="SMOKE 执行")),
         ]
-        for name, extra in dry_cases:
-            out = tools.call(name, project_id=PROJECT_ID, dry_run=True, **extra)
+        for tool_name, extra in dry_cases:
+            out = tools.call(tool_name, project_id=PROJECT_ID, dry_run=True, **extra)
             assert isinstance(out, dict) and out["dry_run"] is True
             assert "would_send" in out and out["would_send"]["method"] in ("POST", "PUT")
             assert isinstance(out["checks"], list)
         step("A3 全量 dry_run", True, "12/12 通过（would_send + checks 结构）")
 
         # A4：git 提交计数不变
-        git_after_a = _git_commit_count(initial)
+        git_repo, git_after_a = _git_commit_count(initial)
         assert git_after_a == git_before_a, f"A 段后 git 提交数变化: {git_before_a} → {git_after_a}"
-        step("A4 零副作用", True, f"git 提交数 {git_before_a} → {git_after_a}（不变）")
+        git_note = f"git 提交数 {git_before_a} → {git_after_a}（不变；is_repo={git_repo}）"
+        if not git_repo:
+            git_note += " ——项目未初始化 git 仓库，B 段提交计数断言将降级（见说明）"
+        step("A4 零副作用", True, git_note)
 
         # ---------------- B 段（最小真实写闭环） ----------------
+        # 前置：残留检查（上次失败运行可能留下 SMOKE-P2- 实体/链接/评论；B 段用固定
+        # id，冲突即中止并给出清理指引——ADMIN 删除族不在 P2，清理由操作员执行）
+        req_ids = {r.get("id") for r in tools.call("list_requirements", project_id=PROJECT_ID).get("items", [])}
+        leftover = [i for i in (SMOKE_REQ, SMOKE_RISK, SMOKE_COMP, SMOKE_VC) if i in req_ids]
+        smoke_links = [l for l in tools.call("get_traces", project_id=PROJECT_ID).get("links", [])
+                       if "SMOKE-P2-" in str(l.get("source")) or "SMOKE-P2-" in str(l.get("target"))]
+        smoke_comments = [
+            c.get("id") for c in tools.call("list_comments", project_id=PROJECT_ID).get("items", [])
+            if SMOKE_COMMENT in str(c.get("text", ""))
+        ]
+        if leftover or smoke_links or smoke_comments:
+            raise AssertionError(
+                f"发现上次冒烟残留（请先清理再重跑，或需求会话确认幂等策略）: "
+                f"实体={leftover} 追踪链接={smoke_links} 评论={smoke_comments}"
+            )
+
         tools.call("create_requirement", project_id=PROJECT_ID, id=SMOKE_REQ,
                    name="SMOKE P2 需求", description="P2 冒烟建立")
         got = tools.call("get_requirement", project_id=PROJECT_ID, req_id=SMOKE_REQ)
@@ -168,10 +196,10 @@ def main() -> int:
         assert vc.get("id") == SMOKE_VC
         step("create_verification_case", True, "list_verification_cases 可见")
 
-        tools.call("create_comment", project_id=PROJECT_ID, entity_kind="requirement",
+        tools.call("create_comment", project_id=PROJECT_ID, entity_kind="requirements",
                    entity_id=SMOKE_REQ, text=SMOKE_COMMENT)
         comments = tools.call("list_comments", project_id=PROJECT_ID,
-                              entity_kind="requirement", entity_id=SMOKE_REQ)
+                              entity_kind="requirements", entity_id=SMOKE_REQ)
         comment_texts = [c.get("text", "") for c in comments.get("items", [])]
         assert any(SMOKE_COMMENT in (t or "") for t in comment_texts), comment_texts
         step("create_comment", True, "list_comments 可见该条")
@@ -199,10 +227,15 @@ def main() -> int:
         assert row is not None and row.get("cells", {}).get(SMOKE_COMP) is True, row
         step("set_allocation", True, "allocation-matrix 回读 allocated=True")
 
-        git_after_b = _git_commit_count(initial)
+        git_repo, git_after_b = _git_commit_count(initial)
         real_writes = 10
-        assert git_after_b - git_after_a == real_writes, f"git 新提交 {git_after_b - git_after_a} != 真实写调用 {real_writes}"
-        step("git 提交计数", True, f"A 段后 {git_after_a} → B 段后 {git_after_b}（+{real_writes} == 真实写调用数）")
+        if git_repo:
+            assert git_after_b - git_after_a == real_writes, (
+                f"git 新提交 {git_after_b - git_after_a} != 真实写调用 {real_writes}"
+            )
+            step("git 提交计数", True, f"A 段后 {git_after_a} → B 段后 {git_after_b}（+{real_writes} == 真实写调用数）")
+        else:
+            step("git 提交计数", "降级", "项目未初始化 git 仓库（is_repo=false）：提交计数断言跳过（dry_run 不产生提交仍成立——写路径不发 git 相关请求）")
 
         rows = audit.read_all()
         expected_lines = 1 + 12 + real_writes  # A1 denied + A3 dry_run + B 段真实写
@@ -214,16 +247,20 @@ def main() -> int:
                 assert field in row, f"审计行缺字段 {field}: {row}"
         step("审计日志", True, f"{len(rows)} 行（denied/dry_run/真实写）字段齐全")
 
-        # 匿名只读验证：无凭据客户端调用读取 → 上游 401 经 UpstreamError 透传
-        anon = AuthSession(Settings(base_url=settings.base_url, username="", password="", token=""))
+        # 匿名验证（实测订正）：实例未启用 RT_REQUIRE_AUTH 时匿名**读**放行（200）——
+        # 有意义的断言是匿名**写**必被拒（guest=view 层 < edit 层 → 403），且错误不含凭据信息。
+        anon = AuthSession(
+            Settings(base_url=settings.base_url, username="", password="", token="",
+                     session_file=tmp / "anon-session.json")  # 独立会话文件：绝不复用服务账号会话
+        )
         try:
-            anon.get("/api/projects")
-            raise AssertionError("匿名调用未收到预期拒绝")
+            anon.post(f"/api/projects/{PROJECT_ID}/requirements", json={"id": "ANON-PROBE"})
+            raise AssertionError("匿名写未收到预期拒绝")
         except UpstreamError as exc:
             assert exc.status_code in (401, 403), exc.status_code
             body = str(exc)
-            assert "anon" not in body and "pass" not in body.lower()
-        step("匿名只读", True, "无凭据 → 上游 401/403 UpstreamError（无凭据信息）")
+            assert "pass" not in body.lower() and "token" not in body.lower()
+        step("匿名拒绝写", True, "无凭据写请求 → 上游 401/403 经 UpstreamError 透传（无凭据信息）")
 
     except AssertionError as exc:
         print(f"冒烟失败: {exc}", file=sys.stderr)
@@ -236,21 +273,24 @@ def main() -> int:
 
     _write_record(
         out_path, settings, steps, failed=None,
-        git_info={"before_a": git_before_a, "after_a": git_after_a, "after_b": git_after_b},
+        git_info={"before_a": git_before_a, "after_a": git_after_a, "after_b": git_after_b, "is_repo": git_repo},
         audit_lines=len(rows), account_note=account_note, degraded=degraded,
     )
     print(f"冒烟通过，记录已落盘: {out_path}")
     return 0
 
 
-def _git_commit_count(session: AuthSession) -> int:
+def _git_commit_count(session: AuthSession) -> tuple[bool, int]:
+    """`(is_repo, commit_count)`：项目未初始化 git 仓库时 is_repo=False（计数不可用）。"""
     data = session.get(f"/api/projects/{PROJECT_ID}/git/log")
-    if isinstance(data, list):
-        return len(data)
     if isinstance(data, dict):
+        is_repo = bool(data.get("is_repo", False))
         for key in ("commits", "log", "items", "entries"):
             if isinstance(data.get(key), list):
-                return len(data[key])
+                return is_repo, len(data[key])
+        return is_repo, 0
+    if isinstance(data, list):
+        return True, len(data)
     raise AssertionError(f"git/log 响应形状未知: {type(data)}")
 
 
@@ -293,6 +333,26 @@ def _write_record(out_path, settings, steps, *, failed, git_info, audit_lines=No
 
 - A 段为零副作用验证（dry_run 不产生 git 提交）；B 段为最小真实写闭环（SMOKE-P2- 前缀）。
 - P1 冒烟（docs/smoke/P1-cessna-172.md）total==57 仅作历史快照，不再作为重跑断言。
+
+## 实测偏差与清理指引（开发会话实测记录，待需求会话确认）
+
+1. **服务账号角色**：spec D7「role=contributor」与 reqmesh v0.5.0 项目权限层级不符——
+   默认映射 contributor=propose 层（仅 风险/评论/决策 可写：create_risk/create_comment）；
+   requirements/components/verification/review/traces/allocation 等 10 个端点在 edit 层
+   （require_maintain，backend/app/core/dependencies.py）。本实测服务账号取 **maintainer**
+   （能覆盖 P2 写面的最小角色，非 admin；D7 最小权限意图不变）。
+2. **git 提交计数**：cessna-172 未初始化 git 仓库（`GET /git/log` → is_repo=false，git/init
+   经 API 返回 201 但服务侧未落地）。提交计数断言降级（is_repo=true 时恢复 spec 断言）；
+   dry_run 不产生提交仍成立（写路径不发 git 相关请求）。
+3. **匿名只读**：实例未启用 RT_REQUIRE_AUTH（匿名 GET 放行 200），spec 预设的「匿名只读
+   → 401」不成立；断言已改为语义更强且恒真的「匿名**写** → 上游 401/403 经 UpstreamError
+   透传（错误不含凭据信息）」。
+4. **entity_kind 词表**：上游 422 校验词表为复数集合名（requirements/components/
+   verification_cases/…）；create_comment 工具层已用 Literal 锁定（schema 枚举）——
+   与 list_comments 过滤参数同一词表。
+5. **后续重跑**：B 段用固定 SMOKE-P2- id，重跑需先清理残渣（删除族属 ADMIN 层，不在 P2）：
+   ① GET /traces 移除 SMOKE 链接后 PUT 回写（服务账号可做）；② admin 删除
+   SMOKE-* 实体与评论（requirements 删除需 ?force=true）。记录中的残渣清单即清理对象。
 """,
         encoding="utf-8",
     )

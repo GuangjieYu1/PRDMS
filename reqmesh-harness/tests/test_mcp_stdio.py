@@ -119,10 +119,19 @@ async def test_stdio_put_partial_update_via_mcp(stub, tmp_path) -> None:
                  "description": "updated-by-mcp"},
             )
             assert result.isError is False
+            # 显式 null 经 MCP 路径：清空语义保留（发送 null 而非丢弃）
+            result2 = await session.call_tool(
+                "update_requirement",
+                {"project_id": "cessna-172", "req_id": "ACFT0000", "reason": "SMOKE 清空",
+                 "description": None},
+            )
+            assert result2.isError is False
     puts = [b for b in stub.bodies() if b"updated-by-mcp" in b]
     assert puts, [r for r in stub.requests]
     body = json.loads(puts[0])
     assert body == {"description": "updated-by-mcp"}  # 未提供字段不进请求体（exclude_unset 语义）
+    nulls = [json.loads(b) for b in stub.bodies() if b and json.loads(b).get("description") is None]
+    assert nulls and nulls[-1] == {"description": None}  # 显式 null 原样发送
 
 
 @pytest.mark.asyncio

@@ -178,5 +178,5 @@ def test_create_comment_requires_fields_at_tool_layer() -> None:
     model = tool.fn_metadata.arg_model
     with pytest.raises(ValidationError):
         model.model_validate({"project_id": "cessna-172"})
-    model.model_validate({"project_id": "cessna-172", "entity_kind": "requirement",
+    model.model_validate({"project_id": "cessna-172", "entity_kind": "requirements",
                           "entity_id": "ACFT0000", "text": "hi"})

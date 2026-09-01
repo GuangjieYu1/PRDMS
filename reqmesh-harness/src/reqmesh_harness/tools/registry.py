@@ -35,7 +35,7 @@ def annotations_for(level: str) -> ToolAnnotations:
     if level == "READ":
         return ToolAnnotations(readOnlyHint=True)
     if level == "ADMIN":
-        return ToolAnnotations(destructiveHint=True)
+        return ToolAnnotations(readOnlyHint=False, destructiveHint=True)
     return ToolAnnotations(readOnlyHint=False, destructiveHint=False)
 
 
@@ -114,6 +114,9 @@ class ToolRegistry:
                 meta={"domain": spec.domain, "permission": spec.level},
             )
 
-    def call(self, name: str, **kwargs: Any) -> Any:
-        """以注册表为入口调用工具（冒烟等外部方不再穿透到 fn 属性）。"""
-        return self.get(name).fn(**kwargs)
+    def call(self, tool_name: str, **kwargs: Any) -> Any:
+        """以注册表为入口调用工具（冒烟等外部方不再穿透到 fn 属性）。
+
+        参数名 tool_name 而非 name：避免与工具参数 `name`（P2 写工具均有）冲突。
+        """
+        return self.get(tool_name).fn(**kwargs)

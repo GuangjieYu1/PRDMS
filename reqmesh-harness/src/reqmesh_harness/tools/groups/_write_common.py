@@ -128,8 +128,9 @@ def write_request(
         raise
     except HarnessError as exc:
         # 登录/会话失效等认证侧失败（ensure_ready 期间）——环境侧失败路径同样记审计
-        # （结果枚举无认证类目，按「未抵达上游/环境失败」归入 transport_error）
-        _log("approved", decision.entry, None, "transport_error", deny_reason=f"认证/会话失败: {exc}")
+        # （结果枚举无认证类目，按「未抵达上游/环境失败」归入 transport_error；
+        # 裁决已 approved，deny_reason 保持 None）
+        _log("approved", decision.entry, None, "transport_error")
         raise
 
 

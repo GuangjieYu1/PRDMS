@@ -140,10 +140,10 @@ def test_annotations_four_levels() -> None:
     assert annotations_for("READ").readOnlyHint is True
     for level in ("DRAFT", "MUTATE"):
         ann = annotations_for(level)
-        assert ann.readOnlyHint is not True  # 默认 None/False：不是只读
-        assert ann.destructiveHint is not True  # 写常规数据不按危险操作标注
+        assert ann.readOnlyHint is False  # spec L173 字面语义
+        assert ann.destructiveHint is False
     assert annotations_for("ADMIN").destructiveHint is True
-    assert annotations_for("ADMIN").readOnlyHint is not True
+    assert annotations_for("ADMIN").readOnlyHint is False
 
 
 def test_add_admin_rejects_non_admin_level() -> None:

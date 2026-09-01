@@ -162,6 +162,40 @@ def test_dry_run_checks_exception_never_breaks_preview(reqmesh_env, monkeypatch)
     assert _rows(tmp)[0]["result"] == "ok"
 
 
+def test_audit_approval_config_error_path(reqmesh_env, monkeypatch) -> None:
+    """白名单损坏 → ApprovalConfigError：仍记一行审计（denied/blocked），错误透传。"""
+    from reqmesh_harness.errors import ApprovalConfigError
+
+    tmp = reqmesh_env["session_file"].parent
+    (tmp / "approvals.toml").write_text("[[approvals]\ntool = ", encoding="utf-8")  # 非法 TOML
+    with pytest.raises(ApprovalConfigError):
+        writes.create_requirement(project_id="cessna-172", id="SMOKE-P2-001", dry_run=True)
+    rows = _rows(tmp)
+    assert len(rows) == 1
+    assert rows[0]["decision"] == "denied"
+    assert rows[0]["result"] == "blocked"
+    assert rows[0]["upstream"] is None
+    assert rows[0]["http_status"] is None
+
+
+def test_audit_auth_failure_during_write_path(reqmesh_env, monkeypatch) -> None:
+    """写路径认证/会话失败（登录被拒）→ 原错误透传（不吞），且记一行审计（transport_error）。"""
+    from reqmesh_harness.errors import LoginFailedError
+
+    tmp = reqmesh_env["session_file"].parent
+    _approve(monkeypatch, tmp, "create_risk")
+    with respx.mock(base_url="http://reqmesh.test") as router:
+        router.post("/api/projects/cessna-172/risks").mock(return_value=Response(401, json={"detail": "expired"}))
+        router.post("/api/auth/login").mock(return_value=Response(401, json={"detail": "Invalid credentials"}))
+        with pytest.raises(LoginFailedError):
+            writes.create_risk(project_id="cessna-172", id="R1")
+    rows = _rows(tmp)
+    assert len(rows) == 1
+    assert rows[0]["result"] == "transport_error"
+    assert rows[0]["decision"] == "approved"
+    assert rows[0]["deny_reason"] is None
+
+
 def test_audit_write_failure_does_not_block(reqmesh_env, monkeypatch, caplog) -> None:
     """审计写入失败：降级告警，工具调用照常成功。"""
     tmp = reqmesh_env["session_file"].parent
