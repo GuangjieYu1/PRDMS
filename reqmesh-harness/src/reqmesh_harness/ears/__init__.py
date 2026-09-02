@@ -148,13 +148,24 @@ def parse_sentence(
 
     m = re.search(r"\bshall\b", text)
     if m is None:
-        raise InputParseError(
-            "句子缺少义务动词 shall（EARS 句式必须是 '... shall ...'）。受支持形态: " + _EARS_SAMPLE
-        )
+        # spec ②「无 shall → 输入非法」与 ④「should/might/could/would → shall 确定性修正」的衔接：
+        # 无 shall 时接受义务位情态（must/will/should/may/is required to）——渲染模板恒为
+        # "The <system> shall <response>."，义务动词在渲染时归一为 shall（EARS 规范化）；
+        # 仍无义务动词 → InputParseError（spec ②「无 shall」语义，示例含受支持形态）。
+        m = re.search(r"\b(?:is required to|must|will|should|may)\b", text)
+        if m is None:
+            raise InputParseError(
+                "句子缺少义务动词（shall/must/will/should/may/is required to——EARS 句式义务位归一为 shall）。"
+                "受支持形态: " + _EARS_SAMPLE
+            )
     body = text[: m.start()].strip()
     response = text[m.end():].strip().rstrip(".")
     if not response:
-        raise InputParseError("shall 后缺 response 子句 —— EARS 句式要求 '... shall <response>'。")
+        raise InputParseError("义务动词后缺 response 子句 —— EARS 句式要求 '... <obligation> <response>'。")
+    if re.search(r"\bshall\b", response):
+        raise InputParseError(
+            "response 子句含第二个 shall（单条约一个义务动词）——请拆分为多个需求: " + _EARS_SAMPLE
+        )
 
     marker_m = _MARKER_RE.match(body)
     detected = _MARKER_TO_TEMPLATE.get(marker_m.group(1).lower()) if marker_m else None
@@ -174,8 +185,8 @@ def parse_sentence(
         condition = ""
     else:
         rest = body[marker_m.end():].strip() if marker_m else body
-        # unwanted 句型 "..., then the <system> shall ..."：删除 then（系统前）
-        rest = re.sub(r"\bthen\s+the\b", "the", rest, flags=re.IGNORECASE)
+        # unwanted 句型 "..., then the <system> shall ..."：删除 then（系统前；连续多个随即吞掉）
+        rest = re.sub(r"\b(?:then\s+)+the\b", "the", rest, flags=re.IGNORECASE)
         sys_m = _SYSTEM_RE.search(rest)
         if sys_m:
             system_slot = _norm_system(sys_m.group(0))
@@ -208,6 +219,13 @@ def parse_nl(nl_text: str, *, template: str = AUTO, system: str | None = None) -
         raise InputParseError("nl_text 为空。受支持形态: " + _EARS_SAMPLE)
     _validate_length(nl_text)
     _validate_ascii(nl_text)
+    if system is not None:
+        # system 是 EARS 槽位：语言边界与 nl_text 同规（spec ②）；额外长度上限（槽位元数据）
+        if not isinstance(system, str) or len(system) > 200:
+            raise InputParseError("system 参数超长（>200 字符）或类型非法。")
+        if re.search(r"[^\x20-\x7E]", system):
+            raise InputParseError("system 槽位仅接受英文（ASCII 可见字符）——中文翻译是 P5 职责："
+                                  " " + _EARS_SAMPLE)
 
     bullets: dict[str, str] = {}
     sentence_lines: list[str] = []

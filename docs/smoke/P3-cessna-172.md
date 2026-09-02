@@ -51,7 +51,14 @@ git 提交计数：A 段前 0 → A 段后 0（不变） → B 段后 0（+0）
    实测 G5「is unlatched」同为 be+过去分词（-ed 词尾），按 spec 规则表语义在**默认 config**下
    同为 98 分（cessna-172 config 已关 passive_voice → 两者均 100，冒烟不受影响）。单元测试
    tests/test_lint.py 已按此行为断言并注明；若需求会话认为 G5 应豁免，需放宽规则表说明。
-2. **打分取整**：本地分按 round() 取整（G4 默认 98→见上）；上游 /quality 按 int(...*100//max_penalty)
-   取 floor（同情形为 97）。冒烟对账（B 段）仅断言无 finding 的 100 分，不受取整差异影响。
+2. **打分取整（spec 判例修正，待需求会话确认）**：spec ③ 判例「G4 默认 config==98」按 round 计算；
+   上游 /quality 用 int(clamped*100//max_penalty)（floor）→ 同情形为 97。开发会话采纳**上游一致
+   公式**（floor，硬约束「打分公式与上游一致」），本地 G4/G5 默认 config 断言 97（tests/test_lint.py），
+   并把 spec 的 98 判例作为实测偏差记入本清单。冒烟对账（B 段）仅断言无 finding 的 100 分，
+   floor/round 在 100 分处无差异。
 3. **后续重跑**：B 段用固定 SMOKE-P3- id，重跑需先清理残渣（删除族属 ADMIN 层，不在 P3）：
    记录中的残渣清单即清理对象。
+4. **spec ⑥ type 列（回流第 1 轮补充）**：spec ⑥ 金样例表含 type 列（G1=non_functional_performance、
+   G5=safety 等）；首次运行按 spec ②「默认 functional」落库。回流后 smoke_p3.py 已按表传 type
+   并逐断言（A/B 段），运行后重跑即可核对；首次运行实体的 type==functional 属首版行为，
+   待需求会话确认「⑥ 的 type 列是否应作为调用参数」后再定口径（记录不重写历史的既定事实）。

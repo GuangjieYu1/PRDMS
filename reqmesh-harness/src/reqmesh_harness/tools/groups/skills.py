@@ -129,42 +129,60 @@ def draft_requirement(
     # 逐级解析 id：参数 → 要点 → next-uid（spec ②；工具内部直连，不新增公开工具）
     req_id = _pick(id, "id")
     auto_id = req_id is None
+    id_error: HarnessError | None = None
     if req_id is None:
-        req_id = _next_uid(project_id)
+        try:
+            req_id = _next_uid(project_id)
+        except HarnessError as exc:
+            id_error = exc  # lint 未过线时 id 预览失败不阻断报告（仅写路径需要真切 id）
 
     rationale = _RATIONALE_PREFIX + nl_text[:_RATIONALE_MAX]
-    body_fields: dict[str, Any] = {
-        "id": req_id,
-        "name": current_name,
-        "description": sentence,
-        "type": req_type or "functional",
-        "priority": req_priority or "medium",
-        "status": "proposed",  # 新需求不做评审（spec ②）
-        "rationale": rationale,
-        "source": "",
-    }
-    if req_parent is not None:
-        body_fields["parent"] = req_parent
-    if req_subject is not None:
-        body_fields["subject"] = req_subject
-    body = RequirementCreate.model_validate(body_fields).model_dump(exclude_unset=True)
 
-    would_send = {
-        "method": "POST",
-        "path": project_path(project_id, "/requirements"),
-        "body": body,
-    }
+    def _build_body(req_id_value: str) -> dict[str, Any]:
+        body_fields: dict[str, Any] = {
+            "id": req_id_value,
+            "name": current_name,
+            "description": sentence,
+            "type": req_type or "functional",
+            "priority": req_priority or "medium",
+            "status": "proposed",  # 新需求不做评审（spec ②）
+            "rationale": rationale,
+            "source": "",
+        }
+        if req_parent is not None:
+            body_fields["parent"] = req_parent
+        if req_subject is not None:
+            body_fields["subject"] = req_subject
+        return RequirementCreate.model_validate(body_fields).model_dump(exclude_unset=True)
+
+    def _would_send(req_id_value: str) -> dict[str, Any]:
+        return {"method": "POST", "path": project_path(project_id, "/requirements"),
+                "body": _build_body(req_id_value)}
 
     if not passed:
         hint = _build_hint(reasons, converged, rounds, settings.lint_max_rounds,
                            require_measurable, report)
+        if id_error is not None or req_id is None:
+            hint += f"（id 预览不可用：next-uid 获取失败——{id_error}；过线后可重试。）"
+            return {
+                "persisted": False,
+                "ears": ears_out,
+                "lint": lint_out,
+                "would_send": None,
+                "hint": hint,
+            }
         return {
             "persisted": False,
             "ears": ears_out,
             "lint": lint_out,
-            "would_send": would_send,
+            "would_send": _would_send(req_id),
             "hint": hint,
         }
+
+    if id_error is not None or req_id is None:
+        raise id_error or HarnessError("next-uid 获取失败（写路径需要真实 id）")
+    body = _build_body(req_id)
+    would_send = _would_send(req_id)
 
     audit_params: dict[str, Any] = {
         "project_id": project_id,

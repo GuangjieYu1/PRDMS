@@ -229,6 +229,37 @@ def test_empty_nl_rejected() -> None:
         parse_nl("")
 
 
+def test_system_param_language_and_length_boundary() -> None:
+    """system 是 EARS 槽位：非 ASCII / 超长 → InputParseError（spec ② 语言边界）。"""
+    with pytest.raises(InputParseError):
+        parse_nl("If the gear is up, shall warn the pilot.", system="飞机")
+    with pytest.raises(InputParseError):
+        parse_nl("If the gear is up, shall warn the pilot.", system="x" * 201)
+
+
+def test_double_shall_rejected() -> None:
+    """response 内第二个 shall → InputParseError（单条约一个义务动词，请拆分）。"""
+    with pytest.raises(InputParseError):
+        parse_nl("When X shall warn shall alert.")
+
+
+def test_double_then_normalized() -> None:
+    """unwanted 连续 then 吞掉（确定性归一）。"""
+    parsed = parse_nl("If X, then then the aircraft shall warn within 1 s.")
+    assert parsed.sentence == "IF X, THEN the aircraft shall warn within 1 s."
+
+
+def test_must_obligation_accepted_and_normalized() -> None:
+    """义务位情态（must/will/should/may）被接受——渲染归一为 shall（EARS 规范化）。"""
+    parsed = parse_nl("The aircraft must warn within 1 s.")
+    assert parsed.sentence == "The aircraft shall warn within 1 s."
+    parsed = parse_nl("The aircraft should warn within 1 s.")
+    assert parsed.sentence == "The aircraft shall warn within 1 s."
+    parsed = parse_nl("When the engine fails, the aircraft will warn within 1 s.")
+    assert parsed.template == "event"
+    assert parsed.sentence == "WHEN the engine fails, the aircraft shall warn within 1 s."
+
+
 # ------------------------------------------------------------------ 派生与渲染
 def test_derive_name_rules() -> None:
     assert derive_name("display the overspeed warning") == "Display the overspeed warning"

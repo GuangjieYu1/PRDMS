@@ -82,6 +82,9 @@ def config_from_project(raw: dict | None) -> LintConfig:
     max_words = DEFAULT_MAX_WORDS
     try:
         min_words = int(raw.get("min_words", DEFAULT_MIN_WORDS))
+    except (TypeError, ValueError):
+        pass  # 单字段畸形仅丢弃该字段，不连带另一合法字段（回退默认，可重复）
+    try:
         max_words = int(raw.get("max_words", DEFAULT_MAX_WORDS))
     except (TypeError, ValueError):
         pass
@@ -165,7 +168,10 @@ def lint_text(text: str, config: LintConfig = DEFAULT_CONFIG) -> LintReport:
     if max_penalty <= 0:
         score = 100
     else:
-        score = round(100 - min(penalty, max_penalty) / max_penalty * 100)
+        # 与上游 /quality 逐字节一致的整数公式（floor；上游 int(clamped*100 // max_penalty)）：
+        # clamped = max(0, max_penalty - min(penalty, max_penalty))
+        clamped = max(0, max_penalty - min(penalty, max_penalty))
+        score = int(clamped * 100 // max_penalty)
 
     return LintReport(
         score=score,

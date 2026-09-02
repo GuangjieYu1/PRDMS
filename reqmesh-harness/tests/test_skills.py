@@ -174,6 +174,86 @@ def test_draft_requirement_weak_word_fix_loop(reqmesh_env, monkeypatch) -> None:
     assert sent["description"] == "The aircraft shall warn the pilot."
 
 
+def test_draft_requirement_should_obligation_normalized(reqmesh_env, monkeypatch) -> None:
+    """should 作义务位：解析接受（渲染归一为 shall），弱词修正后落库（spec ④ 闭环）。"""
+    _approve(monkeypatch, reqmesh_env["session_file"].parent)
+    sent: dict = {}
+
+    def capture(request) -> Response:
+        sent.update(json.loads(request.content))
+        return Response(201, json={**sent, "id": "SMOKE-P3-X"})
+
+    with respx.mock(base_url="http://reqmesh.test", assert_all_called=False) as router:
+        _mock_common(router)
+        router.post("/api/projects/cessna-172/requirements").mock(side_effect=capture)
+        result = registry().call(
+            "draft_requirement", project_id="cessna-172",
+            nl_text="The aircraft should warn within 1 s.",
+            id="SMOKE-P3-X", require_measurable=False,
+        )
+    assert result["persisted"] is True
+    # 渲染归一 + 弱词修正 → 落库文本为 shall 句式
+    assert sent["description"] == "The aircraft shall warn within 1 s."
+    assert result["ears"]["sentence"] == "The aircraft shall warn within 1 s."
+
+
+def test_draft_requirement_converged_not_passed(reqmesh_env, monkeypatch) -> None:
+    """残余不可确定性修正（形容词类弱词）→ 收敛即终止：persisted=false + 收敛 hint。"""
+    _approve(monkeypatch, reqmesh_env["session_file"].parent)
+    with respx.mock(base_url="http://reqmesh.test", assert_all_called=False) as router:
+        _mock_common(router)
+        result = registry().call(
+            "draft_requirement", project_id="cessna-172",
+            nl_text="The aircraft shall be a fast and robust platform.", id="SMOKE-P3-X",
+            require_measurable=False,
+        )
+    assert result["persisted"] is False
+    assert result["lint"]["passed"] is False
+    assert "收敛" in result["hint"]
+    assert all(c.request.method == "GET" for c in router.calls)  # 无写请求
+
+
+def test_draft_requirement_max_rounds_exhausted(reqmesh_env, monkeypatch) -> None:
+    """N 轮上限（REQMESH_LINT_MAX_ROUNDS=1）→ 未过线 persisted=false（终止语义）。"""
+    _approve(monkeypatch, reqmesh_env["session_file"].parent)
+    monkeypatch.setenv("REQMESH_LINT_MAX_ROUNDS", "1")
+    with respx.mock(base_url="http://reqmesh.test", assert_all_called=False) as router:
+        _mock_common(router)
+        result = registry().call(
+            "draft_requirement", project_id="cessna-172",
+            nl_text="The aircraft shall have the ability to warn the pilot.", id="SMOKE-P3-X",
+            require_measurable=False,
+        )
+    assert result["persisted"] is False
+    assert result["lint"]["rounds"] == 1
+    assert result["lint"]["passed"] is False
+    assert all(c.request.method == "GET" for c in router.calls)
+
+
+def test_draft_requirement_unwanted_negation_residual_persists(reqmesh_env, monkeypatch) -> None:
+    """unwanted 句式残余白名单（negation）：过线并落库（EARS 与 R16 张力不反转语义）。"""
+    _approve(monkeypatch, reqmesh_env["session_file"].parent)
+    sent: dict = {}
+
+    def capture(request) -> Response:
+        sent.update(json.loads(request.content))
+        return Response(201, json={**sent, "id": "SMOKE-P3-X"})
+
+    with respx.mock(base_url="http://reqmesh.test", assert_all_called=False) as router:
+        _mock_common(router)
+        router.post("/api/projects/cessna-172/requirements").mock(side_effect=capture)
+        result = registry().call(
+            "draft_requirement", project_id="cessna-172",
+            nl_text="If the engine fails, then the aircraft shall not start after 2 s.",
+            id="SMOKE-P3-X",
+        )
+    assert result["persisted"] is True
+    rules = {f["rule"] for f in result["lint"]["findings"]}
+    assert "negation" in rules
+    assert result["lint"]["residual_findings"] and result["lint"]["residual_findings"][0]["rule"] == "negation"
+    assert sent["description"] == "IF the engine fails, THEN the aircraft shall not start after 2 s."
+
+
 def test_draft_requirement_409_retries_next_uid(reqmesh_env, monkeypatch) -> None:
     """自动 id 的并发冲突：POST 409 → 重取 next-uid（递增）→ 重试一次（两次 POST）。"""
     _approve(monkeypatch, reqmesh_env["session_file"].parent)
@@ -216,6 +296,23 @@ def test_draft_requirement_explicit_id_conflict_passthrough(reqmesh_env, monkeyp
         with pytest.raises(UpstreamError) as exc:
             registry().call("draft_requirement", project_id="cessna-172", nl_text=G1, id="SMOKE-P3-001")
     assert exc.value.status_code == 409
+
+
+def test_draft_requirement_not_passed_next_uid_failure_graceful(reqmesh_env, monkeypatch) -> None:
+    """未过线 + 自动 id 获取失败：返回未过线报告（would_send=None + hint），不抛上游错误。"""
+    _approve(monkeypatch, reqmesh_env["session_file"].parent)
+    with respx.mock(base_url="http://reqmesh.test", assert_all_called=False) as router:
+        router.get("/api/projects/cessna-172/quality").mock(return_value=Response(200, json=_fixture("report_quality.json")))
+        router.get(re.compile(r".*")).mock(return_value=Response(502, json={"detail": "boom"}))
+        result = registry().call(
+            "draft_requirement", project_id="cessna-172",
+            nl_text="The aircraft shall provide a manual for the operator.",
+        )
+    assert result["persisted"] is False
+    assert result["lint"]["passed"] is False
+    assert result["would_send"] is None
+    assert "id 预览不可用" in result["hint"]
+    assert all(c.request.method == "GET" for c in router.calls)  # 无写请求
 
 
 def test_draft_requirement_parse_failure_no_audit(reqmesh_env, monkeypatch) -> None:

@@ -69,4 +69,5 @@ __all__ = [
     "ApprovalDeniedError",
     "AdminDisabledError",
     "ApprovalConfigError",
+    "InputParseError",
 ]

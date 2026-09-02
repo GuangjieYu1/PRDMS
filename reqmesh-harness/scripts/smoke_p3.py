@@ -32,37 +32,42 @@ PROJECT_ID = "cessna-172"
 SERVICE_ACCOUNT = "reqmesh-harness"
 DEGRADED_ACCOUNT = "yugj"
 
-# spec ⑥ 金样例：(NL 输入, 期望句式, 期望 EARS 输出, B 段固定 id 或 None)
+# spec ⑥ 金样例：(NL 输入, 期望句式, 期望 EARS 输出, B 段固定 id 或 None, type[spec ⑥ 列])
 GOLDEN = [
     (
         "The aircraft shall achieve a range of at least 1185 km at maximum cruise power.",
         "ubiquitous",
         "The aircraft shall achieve a range of at least 1185 km at maximum cruise power.",
         "SMOKE-P3-001",
+        "non_functional_performance",
     ),
     (
         "When the indicated airspeed exceeds 302 km/h, the aircraft shall display the overspeed warning.",
         "event",
         "WHEN the indicated airspeed exceeds 302 km/h, the aircraft shall display the overspeed warning.",
         "SMOKE-P3-002",
+        "functional",
     ),
     (
         "While in the take-off climb, the aircraft shall maintain a climb rate of at least 2.5 m/s at sea level.",
         "state",
         "WHILE in the take-off climb, the aircraft shall maintain a climb rate of at least 2.5 m/s at sea level.",
         None,
+        "functional",
     ),
     (
         "Where the autopilot is engaged, the aircraft shall hold the selected altitude within 15 m.",
         "optional",
         "WHERE the autopilot is engaged, the aircraft shall hold the selected altitude within 15 m.",
         None,
+        "functional",
     ),
     (
         "If the cabin door is unlatched, then the aircraft shall display a door warning within 1 s.",
         "unwanted",
         "IF the cabin door is unlatched, THEN the aircraft shall display a door warning within 1 s.",
         "SMOKE-P3-003",
+        "safety",
     ),
 ]
 
@@ -143,10 +148,11 @@ def main() -> int:
         )
         step("A2 白名单", True, f"draft_requirement+{PROJECT_ID} → {settings.approvals_file}")
 
-        # A3：G1–G5 全量 dry_run
-        for i, (nl, template, sentence, _b_id) in enumerate(GOLDEN, start=1):
+        # A3：G1–G5 全量 dry_run（type 按 spec ⑥ 金样例列）
+        for i, (nl, template, sentence, _b_id, req_type) in enumerate(GOLDEN, start=1):
             out = tools.call(
-                "draft_requirement", project_id=PROJECT_ID, nl_text=nl, id=f"SMOKE-P3-D00{i}", dry_run=True
+                "draft_requirement", project_id=PROJECT_ID, nl_text=nl,
+                id=f"SMOKE-P3-D00{i}", type=req_type, dry_run=True,
             )
             assert out["ears"]["template"] == template
             assert out["ears"]["sentence"] == sentence, out["ears"]["sentence"]
@@ -158,7 +164,7 @@ def main() -> int:
             body = out["would_send"]["body"]
             assert body["description"] == sentence
             assert body["name"] == EXPECTED_NAMES[i - 1], body["name"]
-            assert body["type"] == "functional"
+            assert body["type"] == req_type, body["type"]
             assert body["status"] == "proposed"
             assert body["rationale"].startswith("自然语言建需求（draft_requirement）：" + nl[:200])
             assert body["source"] == ""
@@ -187,8 +193,10 @@ def main() -> int:
             )
 
         for b_id in DERIVED_IDS:
-            nl, template, sentence, _x = next(g for g in GOLDEN if g[3] == b_id)
-            result = tools.call("draft_requirement", project_id=PROJECT_ID, nl_text=nl, id=b_id)
+            nl, template, sentence, _x, req_type = next(g for g in GOLDEN if g[3] == b_id)
+            result = tools.call(
+                "draft_requirement", project_id=PROJECT_ID, nl_text=nl, id=b_id, type=req_type,
+            )
             assert result["persisted"] is True, result
             # ① 201 实体：description 与 EARS 句子文本相等（sanitize 后纯文本原样回读）
             got = result["requirement"]
