@@ -1,0 +1,8 @@
+data: {"id":"chatcmpl-2","object":"chat.completion.chunk","model":"deepseek-chat","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-2","object":"chat.completion.chunk","model":"deepseek-chat","choices":[{"index":0,"delta":{"content":"任务完成。"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-2","object":"chat.completion.chunk","model":"deepseek-chat","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

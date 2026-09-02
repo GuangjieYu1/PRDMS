@@ -1,0 +1,13 @@
+{
+  "type": "server-request",
+  "rpcId": "s-1",
+  "method": "stream/error",
+  "payload": {
+    "type": "stream/error",
+    "error": {
+      "code": "internal",
+      "message": "boom",
+      "details": {}
+    }
+  }
+}

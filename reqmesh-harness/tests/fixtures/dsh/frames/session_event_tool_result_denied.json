@@ -1,0 +1,44 @@
+{
+  "type": "server-request",
+  "rpcId": "host-7",
+  "method": "session/event",
+  "payload": {
+    "type": "session/event",
+    "sessionId": "sess-1",
+    "event": {
+      "type": "tool/result",
+      "seq": 51,
+      "time": 1000,
+      "data": {
+        "turn": 0,
+        "step": 1,
+        "message": {
+          "id": "msg-2",
+          "role": "user",
+          "content": [
+            {
+              "type": "tool-result",
+              "toolCallId": "call-78",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ApprovalDeniedError: 审批门拒绝 draft_requirement: 白名单无该工具的条目\n修复建议（二选一，白名单为唯一裁决源）: reqmesh-harness approvals add draft_requirement"
+                }
+              ],
+              "isError": true
+            }
+          ],
+          "source": {
+            "tool": {
+              "callId": "call-78"
+            }
+          }
+        },
+        "error": {
+          "name": "ApprovalDeniedError",
+          "code": "approval-denied"
+        }
+      }
+    }
+  }
+}

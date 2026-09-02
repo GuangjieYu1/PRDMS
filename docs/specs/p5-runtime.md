@@ -288,4 +288,18 @@ class RunResult:
 
 ## 实测偏差与决策（开发会话核实后回写，待需求会话确认）
 
-（占位：开发会话完成后由需求会话确认并回写。）
+开发会话实测（2026-09-02，本机宿主 v0.1.1-rc.2 / DSH 127.0.0.1:8080 / reqmesh 172.16.100.2:8000）：
+
+| # | 偏差/澄清 | 处理 | 待需求会话确认 |
+|---|---|---|---|
+| 1 | events.mux 实测为**全局多路复用流**：每个连接打开时宿主回放全部 running 会话的 `session/subscribed`（含 lastSeq）与 `session/projection` 帧，随后持续广播各会话 `session/event` | 适配器与冒烟断言均按 sessionId 过滤（本会话帧计数只含被统计会话）；与 spec 事实 4 一致，非偏差 | 确认记录口径（冒烟帧计数=按会话过滤） |
+| 2 | 完成判定时序：turn/end 到达后 `session.list` running 立即转 false（无额外延迟） | 按事实 5 实现（turn/end + running=false 两条件），轮询周期 0.3s | — |
+| 3 | B 段部署前置未满足：`/home/user/.dsh/profiles/web/cordis.patch.yml` 无 mcp-reqmesh 条目（本 phase 硬约束不得修改运行中宿主配置） | A 段通过并落盘；B 段以 `REQMESH_P5_SMOKE_B=1` 待前置后重跑（步骤见「DSH 部署步骤」）；B 段审批/审计改为共享 XDG 文件 + 基线差断言（run CLI 与 DSH 侧 MCP server 进程共享同一文件——spec ④ 注记的落地形态） | 确认 B 段基线差断言口径（共享文件下「恰 2 行」不可行） |
+| 4 | 离线基线：P1–P4 396 passed → P5 后 **533 passed / 3 skipped / 2 deselected**（新增 137 用例；registry/export/server/client/guardrails 裁决路径零 diff——git diff 逐项核验） | — | — |
+| 5 | A 段实测帧计数随回复长度浮动（chunk 数 55–130+，模型回答长度不同）；断言只要求 >0 | — | — |
+| 6 | ③ 契约 L140–141 的 `run_agentic` 以 `def`（同步）书写；实现为 **async**（DSH 路线需 WS 帧循环/轮询，工具层调用同步——Provider 契约只约束调用形状与返回类型，原实现注明） | 全部 provider 实现 async run_agentic；`threading.Event` cancel 语义不变；测试经 pytest-asyncio | 确认 async 偏差写入 ③（type 层面无破坏） |
+| 7 | ①/验收 8：CLI 增 `--max-rounds`（防御上限显式化；默认仍 REQMESH_DSH_MAX_ROUNDS=8）；`--provider fake` 在 CLI 接受但拒绝执行（fake 需脚本化步骤，仅库接口可用）——spec 未明文 | CLI 参数契约保持（`--project/--provider/--resume/--yes` 不变），两处为显式附加；`QuestionOption` 为 DSH `question/requested` 帧 options 字段的契约映射（wire fidelity） | 确认（如不需要 `--max-rounds` 可删） |
+| 9 | ④ 时序与 tool-loop 确认触发点（测试子代理回流发现）：OpenAI 自驱路线无 DSH question/requested 帧，TTY 逐条通道原无触发点（pending 滞留） | `ConfirmedToolExecutor` 在 **denial 即确认**（relay.confirm_now：--yes 已 append 幂等；TTY 立即提示 y/N；错误文本原样回灌，模型自行重试——命中白名单）；与 DSH 委托路线「isError 之后」的确认时序同构；fake 脚本的问题步骤此后走通用回答 | 确认 |
+| 8 | 术语：代码标识符沿用 DSH RPC 契约字段名（sessionId/session.prompt/session.list），与 CONTEXT.md「harness 侧运行时会话称 run」不冲突（DSH session 加限定词仅限文本文档场合）；`on_session`/`session_live_check` 指 DSH 宿主侧会话 | 工作会话内文档（spec/handoff/smoke）均用「DSH session」限定词 | 确认 |
+
+（占位：开发会话完成后由需求会话确认并回写；本节的「处理」列已按 P5 开发会话执行；第 6/7/8 行为 P5 审核子代理回流核验补充。）

@@ -1,0 +1,17 @@
+{
+  "type": "server-request",
+  "rpcId": "q-rpc-1",
+  "method": "question/requested",
+  "payload": {
+    "type": "question/requested",
+    "sessionId": "sess-1",
+    "questions": [
+      {
+        "id": "q-1",
+        "question": "是否批准 draft_requirement 写入？",
+        "header": "审批确认",
+        "detail": "approvals add draft_requirement"
+      }
+    ]
+  }
+}

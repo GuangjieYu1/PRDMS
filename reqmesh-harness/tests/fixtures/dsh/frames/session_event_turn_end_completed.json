@@ -1,0 +1,20 @@
+{
+  "type": "server-request",
+  "rpcId": "host-8",
+  "method": "session/event",
+  "payload": {
+    "type": "session/event",
+    "sessionId": "sess-1",
+    "event": {
+      "type": "turn/end",
+      "seq": 60,
+      "time": 1000,
+      "data": {
+        "turn": 0,
+        "reason": {
+          "kind": "completed"
+        }
+      }
+    }
+  }
+}

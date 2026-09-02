@@ -1,0 +1,12 @@
+{
+  "type": "server-request",
+  "rpcId": "a-rpc-1",
+  "method": "approval/requested",
+  "payload": {
+    "type": "approval/requested",
+    "sessionId": "sess-1",
+    "approvalId": "app-1",
+    "toolName": "bash",
+    "reason": "run git commit"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "server-request",
+  "rpcId": "a-rpc-2",
+  "method": "approval/resolved",
+  "payload": {
+    "type": "approval/resolved",
+    "sessionId": "sess-1",
+    "approvalId": "app-1",
+    "outcome": "rejected"
+  }
+}

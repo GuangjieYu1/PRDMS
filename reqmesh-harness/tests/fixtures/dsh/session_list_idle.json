@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "sessionId": "sess-1",
+      "updatedAt": 1000,
+      "running": false,
+      "blank": false,
+      "cwd": "/home/user/projects/PRDMS",
+      "agentPreset": "standard",
+      "projections": {
+        "session/list-metadata": {
+          "asOfSeq": 60,
+          "values": {
+            "list-metadata": {
+              "blank": false,
+              "lastPromptAt": 900
+            }
+          }
+        }
+      }
+    }
+  ]
+}

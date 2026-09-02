@@ -43,6 +43,10 @@ reqmesh-harness (独立 Python 服务, PRDMS 仓库内 reqmesh-harness/)
 
 - **D7 角色细化**：reqmesh v0.5.0 将账号角色映射到项目权限层（`backend/app/core/dependencies.py`：`contributor→propose`、`maintainer→edit`、`admin→admin`）；propose 层仅可写 风险/评论/决策/变更请求，P2 写面其余 10 个端点要求 edit 层。故 P2 专用服务账号取 **maintainer**（能覆盖 P2 全部写工具的最小角色，非 admin）——D7 表中「contributor」指非 admin 专用账号语义，「admin 动作显式开启」不变；具体角色以 [`docs/specs/p2-write-path.md`](specs/p2-write-path.md) 为准。
 
+### 实现注记（P5 开发会话核实后回写）
+
+- **D10 路线细节修正（宿主版本相关）**：P5 适配器按本地宿主（v0.1.1-rc.2）实测实现——`events.mux` **WebSocket-only**（GET `/api/events.mux` 实测 `426 Upgrade Required` + `upgrade: websocket`；in-process handler 的 SSE 形态不可达）；D10 文中的「events.mux SSE」表述在该宿主版本不成立，已按 P5 spec 事实 4 走 WS 路线（依赖 `websockets`）。其余 D10 不变：loopback HTTP RPC（`/api/session.create|prompt|cancel|list`、`/api/respond`）零凭据 + `authority: trusted-host` 围栏；DSH 是 MCP **client**（dsh-mcp-client 注册 `mcp__reqmesh__*` 工具，工具执行在 harness MCP server 进程内，审批门/审计/dry-run 照常生效）。详见 [`docs/specs/p5-runtime.md`](specs/p5-runtime.md)「事实核实」。
+
 ## 4. 阶段计划（epic 已建）
 
 | Phase | 内容 | Epic |

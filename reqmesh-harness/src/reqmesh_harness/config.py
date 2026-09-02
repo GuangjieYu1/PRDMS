@@ -55,6 +55,24 @@ class Settings(BaseSettings):
     lint_min_score: int = 90
     lint_max_rounds: int = 3
 
+    # P5 内置运行时：provider 选择（dsh 默认 | openai | fake）
+    provider: str = "dsh"
+    show_reasoning: bool = False
+
+    # P5 DSH 适配器（委托式；loopback RPC + WS events.mux；harness 侧零凭据）
+    dsh_url: str = "http://127.0.0.1:8080"
+    dsh_cwd: str | None = None          # None → 当前工作目录
+    dsh_idle_timeout: float = 600.0     # 秒；事件流空闲防御（自最后一帧起计）
+    dsh_max_rounds: int = 8
+
+    # P5 会话内存：run 目录（默认 XDG state reqmesh-harness/runs）
+    runs_dir: Path | None = None
+
+    # P5 OpenAI 兼容 provider（自驱；本环境无 key——D5，仅离线验证）
+    openai_base_url: str = "https://api.deepseek.com"
+    openai_api_key: SecretStr = SecretStr("")
+    openai_model: str = "deepseek-chat"
+
     def resolved_session_file(self) -> Path:
         if self.session_file is not None:
             return self.session_file
@@ -69,6 +87,11 @@ class Settings(BaseSettings):
         if self.audit_file is not None:
             return self.audit_file
         return _default_xdg("state") / "reqmesh-harness" / "audit.jsonl"
+
+    def resolved_runs_dir(self) -> Path:
+        if self.runs_dir is not None:
+            return self.runs_dir
+        return _default_xdg("state") / "reqmesh-harness" / "runs"
 
     def has_password_credentials(self) -> bool:
         return bool(self.username and self.password.get_secret_value())

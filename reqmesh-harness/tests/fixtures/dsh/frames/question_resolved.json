@@ -1,0 +1,11 @@
+{
+  "type": "server-request",
+  "rpcId": "q-rpc-2",
+  "method": "question/resolved",
+  "payload": {
+    "type": "question/resolved",
+    "sessionId": "sess-1",
+    "questionRpcId": "q-rpc-1",
+    "outcome": "answered"
+  }
+}

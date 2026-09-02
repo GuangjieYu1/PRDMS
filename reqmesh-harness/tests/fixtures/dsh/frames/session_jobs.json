@@ -1,0 +1,10 @@
+{
+  "type": "server-request",
+  "rpcId": "host-10",
+  "method": "session/jobs",
+  "payload": {
+    "type": "session/jobs",
+    "sessionId": "sess-1",
+    "jobs": []
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "server-request",
+  "rpcId": "host-5b",
+  "method": "session/event",
+  "payload": {
+    "type": "session/event",
+    "sessionId": "sess-1",
+    "event": {
+      "type": "tool/call",
+      "seq": 39,
+      "time": 1000,
+      "data": {
+        "turn": 0,
+        "step": 0,
+        "callId": "call-78",
+        "name": "draft_requirement",
+        "arguments": "{\"project_id\": \"cessna-172\", \"text\": \"When the landing gear is down and locked, the aircraft shall display a gear-down indication within 1 s.\"}"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "server-request",
+  "rpcId": "host-4",
+  "method": "session/event",
+  "payload": {
+    "type": "session/event",
+    "sessionId": "sess-1",
+    "event": {
+      "type": "assistant/chunk",
+      "seq": 30,
+      "time": 1000,
+      "data": {
+        "turn": 0,
+        "step": 0,
+        "chunk": {
+          "type": "reasoning-delta",
+          "index": 1,
+          "text": "（思考）"
+        }
+      }
+    }
+  }
+}

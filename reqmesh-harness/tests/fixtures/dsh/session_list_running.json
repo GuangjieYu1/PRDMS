@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "sessionId": "sess-1",
+      "updatedAt": 1000,
+      "running": true,
+      "blank": false,
+      "cwd": "/home/user/projects/PRDMS",
+      "agentPreset": "standard"
+    }
+  ]
+}

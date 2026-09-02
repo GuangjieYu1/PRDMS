@@ -1,0 +1,40 @@
+{
+  "type": "server-request",
+  "rpcId": "host-6",
+  "method": "session/event",
+  "payload": {
+    "type": "session/event",
+    "sessionId": "sess-1",
+    "event": {
+      "type": "tool/result",
+      "seq": 41,
+      "time": 1000,
+      "data": {
+        "turn": 0,
+        "step": 0,
+        "message": {
+          "id": "msg-1",
+          "role": "user",
+          "content": [
+            {
+              "type": "tool-result",
+              "toolCallId": "call-77",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "需求 SMOKE-P5-001 已找到"
+                }
+              ],
+              "isError": false
+            }
+          ],
+          "source": {
+            "tool": {
+              "callId": "call-77"
+            }
+          }
+        }
+      }
+    }
+  }
+}

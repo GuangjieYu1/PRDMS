@@ -1,0 +1,10 @@
+{
+  "type": "server-request",
+  "rpcId": "host-1",
+  "method": "session/subscribed",
+  "payload": {
+    "type": "session/subscribed",
+    "sessionId": "sess-1",
+    "lastSeq": 0
+  }
+}

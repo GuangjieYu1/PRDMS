@@ -1,0 +1,28 @@
+{
+  "type": "server-request",
+  "rpcId": "host-9",
+  "method": "session/queue",
+  "payload": {
+    "type": "session/queue",
+    "sessionId": "sess-1",
+    "items": [
+      {
+        "id": "msg-1",
+        "placement": "queued",
+        "message": {
+          "id": "msg-1",
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "hi"
+            }
+          ],
+          "source": {
+            "kind": "user"
+          }
+        }
+      }
+    ]
+  }
+}

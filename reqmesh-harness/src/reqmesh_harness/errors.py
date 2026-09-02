@@ -58,6 +58,21 @@ class InputParseError(HarnessError):
     """
 
 
+class ProviderError(HarnessError):
+    """P5 provider 错误（统一归一，spec ③）：kind/code/message 三元组。
+
+    - kind ∈ {unavailable, timeout, protocol, busy, denied_answer}；
+    - code：DSH rpcError 的 code 原样保留（非 DSH 源错误为 None）；
+    - message：中文语义化消息（不含凭据、不含上游原始内文细节）。
+    """
+
+    def __init__(self, kind: str, message: str, code: str | None = None) -> None:
+        self.kind = kind
+        self.code = code
+        self.message = message
+        super().__init__(message)
+
+
 __all__ = [
     "HarnessError",
     "ConfigError",
@@ -70,4 +85,5 @@ __all__ = [
     "AdminDisabledError",
     "ApprovalConfigError",
     "InputParseError",
+    "ProviderError",
 ]

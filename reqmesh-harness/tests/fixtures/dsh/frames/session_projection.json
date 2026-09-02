@@ -1,0 +1,14 @@
+{
+  "type": "server-request",
+  "rpcId": "host-11",
+  "method": "session/projection",
+  "payload": {
+    "type": "session/projection",
+    "sessionId": "sess-1",
+    "key": "session/list-metadata",
+    "value": {
+      "lastPromptAt": 1
+    },
+    "seq": 5
+  }
+}
