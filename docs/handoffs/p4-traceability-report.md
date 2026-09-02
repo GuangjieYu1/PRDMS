@@ -76,3 +76,19 @@ frontier 首步：#31、#32（可并行）；随后 #33；再后 #34；#35 收�
 - 不动 `reqmesh/` 目录；不动已关闭的 P1/P2/P3 资产（tracking.py/requirements.py/components_report.py/既有注册行/skills.py/guardrails/client 零修改；仅 registry 加 1 行 + 新增 report/ 包与 reporting.py）。
 - 全 READ 承诺：`get_traceability_gap_report` 不得调用任何写端点（P2 工具与 reqmesh 写 API 一律不碰）；冒烟断言零副作用（total 不变、HTTP 方法 ⊆ {GET}、git 条件断言）。
 - 许可证边界：聚合逻辑独立编写（只消费公开 REST 响应形状与实测 fixture），不复制 reqmesh GPL 源码（spec 事实 5）。
+
+## 需求会话回流确认（2026-09-02，开发会话完成报告核实后）
+
+完成报告已实测核验（本会话独立复核，非仅读报告）：
+
+1. **git**：本地 main 领先 origin/main **2 commits**（5800667→18e25c3，未 push）；P1–P3 核心资产零修改（writes.py / _write_common.py / guardrails/ / client/ / server.py / export.py / tracking.py / requirements.py / components_report.py / skills.py 无 diff；registry 仅加 1 行 reporting 注册；tests 改动仅工具数 39→40 计数与新增文件）；reqmesh/ 上游目录未动。
+2. **测试**：离线复跑 **396 passed / 3 skipped / 2 deselected**（P3 基线 329+ 零回退；新增 test_report_kernel 23 / test_report_templates 11 / test_report_tool 10 用例函数 + 既有套件计数更新）。
+3. **冒烟**：docs/smoke/P4-cessna-172.md 完整（基线快照 + G1–G6 + 零副作用声明）；**本会话另做独立 live 复验**（只读探针）：G1 跨源自洽 + 绝对数基线（与 2026-09-02T05:38Z 快照一致未降级）、G2 并集 57==57 无丢失/编造 + SMOKE-P2-001/AFRM0000 点检、G3 全部条目带建议且 hints ⊆ 写工具名、G4 逐对规范比较通过（首版探针检查键方向写反属检查失误，修正后确认实现无偏差）、G6 确定性、G5 total 61→61。
+4. **issues**：#31–#35 全部 CLOSED（回流结论评论齐全）；epic #4 OPEN。
+5. **3 项待确认偏差全部确认接受**并回写 spec「实测偏差与决策」节 + smoke 记录确认节：
+   - ① `coverage.uncovered:<need>` 类型折叠（need 并入类型值 → 12 值 1:1 封闭 Literal，解决初版 12 行模板表/11 唯一值的不自洽）。
+   - ② 离线 golden 用 P1 期 fixture 数字（本会话逐项对账可推导）/ live 冒烟用 2026-09-02 基线——双轨拆分，两轨不互引绝对数（Testing Decisions 已注明）。
+   - ③ 非 design/vc need 防御性回退（design 变体 + evidence.need_type 保留；零触发；专属模板行留后续 phase）。
+6. 全 READ 承诺核验：reporting.py 仅 import report 内核与 tracking/requirements READ 处理器，无任何写动词/写层 import（结构上不存在写路径）；审计 0 行、无 B 段、无残渣确认。
+
+确认摘要记 #31/#32/#34 comment。方向层可执行：推送 origin（5800667..HEAD）→ 关闭 epic #4。

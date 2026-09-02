@@ -85,8 +85,8 @@ design D8 的旗舰用例②要求「追踪/覆盖缺口报告」：调用方指
 
 | # | dimension type | severity | action（中文模板，渲染时嵌入实体 id/need 类型等证据） | tool_hint（仅引用，不执行） | 说明 |
 |---|---|---|---|---|---|
-| 1 | `coverage.uncovered`（need=design） | medium | 为需求分配满足该需求的组件（design 覆盖）：从 list_components 选定组件后 set_allocation(allocated=true)，或让组件 satisfies 该需求 | set_allocation (MUTATE) | 与 allocation.missing 同根；evidence.need_type=design |
-| 2 | `coverage.uncovered`（need=verification_case） | high | 为该需求建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联 | create_verification_case (DRAFT) + set_relations (MUTATE) | evidence.need_type=verification_case |
+| 1 | `coverage.uncovered:design` | medium | 为需求分配满足该需求的组件（design 覆盖）：从 list_components 选定组件后 set_allocation(allocated=true)，或让组件 satisfies 该需求 | set_allocation (MUTATE) | 与 allocation.missing 同根；证据 need_type=design |
+| 2 | `coverage.uncovered:verification_case` | high | 为该需求建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联 | create_verification_case (DRAFT) + set_relations (MUTATE) | 证据 need_type=verification_case |
 | 3 | `coverage.chain_broken` | high | 修复覆盖链：为需求补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型 | update_requirement(relations) / set_relations (MUTATE) | shallow=true 且 deep=false |
 | 4 | `coverage.unwanted` | info | 核查多余覆盖来源并清理：移除不需要类型的链接/分配 | set_relations / set_allocation(allocated=false) (MUTATE) | 非缺口，信息级标注；evidence.unwanted_coverage |
 | 5 | `content.no_description` | low | 补充需求描述文本 | update_requirement(description=…) (MUTATE) | cessna-172 零命中；词表完整性保留（上游 issues 词表 4 值之一） |
@@ -98,7 +98,9 @@ design D8 的旗舰用例②要求「追踪/覆盖缺口报告」：调用方指
 | 11 | `review.stale` | medium | 内容变更后重新评审（刷新指纹） | review_item (DRAFT) | unreviewed 指纹失配 |
 | 12 | `allocation.missing` | medium | 为需求分配组件：选定满足组件后 set_allocation(allocated=true) | set_allocation (MUTATE) | allocation-matrix allocated_to 为空 |
 
-严重度词表固定为 `high`/`medium`/`low`/`info`（四级，不进 reqmesh 数据）；排序见②。
+严重度词表固定为 `high`/`medium`/`low`/`info`（四级，不进 reqmesh 数据）；排序见②。**类型值编码注记（开发会话实现后确认）**：`coverage.uncovered` 在模板表中按 need 分两行（严重度不同），实现把 need **并入类型值**（`coverage.uncovered:design` / `coverage.uncovered:verification_case`），使维度类型唯一值 = 12 = 模板行数 = `dimensions` Literal 枚举值数（1:1 封闭词表）；evidence 仍保留 `need_type` 冗余字段（与 §3 契约一致）。
+
+**防御性回退规则（非 design/vc 的 uncovered need；开发会话实现后确认保留）**：上游 needs 词表共 5 值（design/verification_case/analysis_case/child_requirement/reference），其中 3 值无专属模板行——实现将未知 need 按 `coverage.uncovered:design` 变体处理（severity=medium、action 用设计覆盖模板），**evidence.need_type 保留实际值**供消费者修正判断。理由：零触发（现网与 fixture 均只声明 design/verification_case）、确定性不崩溃、封闭 Literal 不被动态值破坏；3 个无专属模板 need 的专属建议行留待后续 phase 按需扩展（触发条件：项目声明非 design/verification_case 的 needs——写入代码注记）。
 
 ### 开放问题④：与 get_project_report 的边界（已决策）
 
@@ -110,7 +112,7 @@ design D8 的旗舰用例②要求「追踪/覆盖缺口报告」：调用方指
 
 ### 开放问题⑤：过滤维度（已决策）
 
-**决策：默认全量；仅提供 `dimensions: list[str] | None` 白名单过滤（12 类维度类型值，Literal 枚举）；不提供组件/基线/需求组/类型/状态过滤。**
+**决策：默认全量；仅提供 `dimensions: list[Literal[12 类维度]] | None` 白名单过滤（12 类维度类型值——含 `coverage.uncovered:design` / `coverage.uncovered:verification_case` 两个 need 变体，Literal 枚举；见③类型值编码注记）；不提供组件/基线/需求组/类型/状态过滤。**
 
 - 理由：① 六源端点**均无服务端过滤参数**（vendored openapi 核实：coverage/gap-analysis/traces/suspect-links/unreviewed 无 query 参数，allocation-matrix 仅 axis/rows/search/filter_type）——组件/基线/需求组/类型/状态过滤只能是客户端后过滤，模型拿到全量 JSON 自行 slice 是零成本操作，工具重复实现违背「工具做语义、模型做呈现」的分工；② 基线维度的缺口数据六源均不存在（baselines 端点只返回里程碑清单，与缺口无关联），强行过滤是伪功能；③ `dimensions` 白名单有真实用例（「只看追踪类缺口」「只看未评审」）且实现/测试便宜：过滤作用于 chapters（带缺口条目）与 gaps 主清单，**summary 保持全量**（计数口径稳定，报告间可比）。
 - 分页：不提供 offset/limit——聚合报告受项目规模约束（cessna-172 = 61 条需求），单文档完整返回优于分页语义；P1 分页透传是针对列表端点的机制，不适用于聚合产物。
@@ -184,7 +186,7 @@ design D8 的旗舰用例②要求「追踪/覆盖缺口报告」：调用方指
 }
 ```
 
-- 主清单 key = 实体 id（六源缺口均为需求中心：coverage/gap/unreviewed/allocation 的条目即需求；suspect-links 按 target 并入该需求的条目——target 为被指向实体，实测即需求）。去重合并 = 同 id 多源维度并集，evidence 保留源数据字段（如 trace.stale 的 link_type/from/reason、review.stale 的 reviewed/current_fingerprint、coverage.uncovered 的 need_type）。
+- 主清单 key = 实体 id（六源缺口均为需求中心：coverage/gap/unreviewed/allocation 的条目即需求；suspect-links 按 target 并入该需求的条目——target 为被指向实体，实测即需求）。去重合并 = 同 id 多源维度并集，evidence 保留源数据字段（如 trace.stale 的 link_type/from/reason、review.stale 的 reviewed/current_fingerprint、coverage.uncovered:* 的 need_type）。
 - `requirements_total` 取自 gap-analysis.total（61，与 list_requirements.total 同源）——**六源之外零请求**，契约明示不额外调用 list_requirements。
 - 错误：任一源 4xx/5xx → UpstreamError 透传（MCP tool error，整体失败无部分报告）；形状未知 → HarnessError（P3 get_requirement_quality 同款防御）。全 READ：不产生任何审计行、不涉审批门。
 
@@ -251,3 +253,12 @@ design D8 的旗舰用例②要求「追踪/覆盖缺口报告」：调用方指
 - 许可证边界：聚合逻辑独立编写，仅消费公开 REST 响应形状与实测 fixture；不复制 reqmesh GPL 源码（事实 5）。
 - 开发会话按 design §5：实施后自动启动审核子代理与测试子代理；每轮循环结论记对应 ticket comment；超 5 轮仍失败回到需求会话（入口即交接文本）。
 - 实测偏差回写惯例：开发会话对真实实例实测的偏差（如基线漂移、suspect/unreviewed 边界样本）记入 docs/smoke/P4-cessna-172.md「实测偏差」节，需求会话确认后回写本 spec 的「实测偏差与决策」节（P1/P2/P3 同款流程）。
+
+## 实测偏差与决策（开发会话核实后回写，需求会话确认，2026-09-02）
+
+开发会话实现共 3 项与初版 spec 表述的偏差，需求会话（本会话）独立复核后全部确认；证据：本会话离线复跑 396 passed / 3 skipped / 2 deselected（P3 基线 329+ 零回退）、git 差异复核（P1–P3 核心资产零修改、main 领先 origin/main 2 commits 未推送）、live 独立复验（见 docs/smoke/P4-cessna-172.md 需求会话确认节）。
+
+1. **`coverage.uncovered:<need>` 类型折叠（确认）**：初版模板表类型列为 `coverage.uncovered` 加 need 单元格注记（表格 12 行但类型唯一值仅 11 个，与「12 类缺口维度」/Literal 12 值表述不自洽）。实现把 need 并入类型值（`coverage.uncovered:design` / `coverage.uncovered:verification_case`），维度类型唯一值 = 12 = 模板行数 = dimensions 白名单 Literal 枚举值数（1:1 封闭词表）。本会话确认接受：类型值 ⟷ 严重度 ⟷ 建议模板成为纯映射，过滤语义精确到 need；已回写本 spec ③ 类型列、⑤ Literal 说明、工具契约 evidence 注记；ADR-0002 P4 实现注记的对应表述成立。
+2. **离线 golden 的 fixture/live 双轨（确认）**：离线黄金样本 tests/fixtures/http/report_golden.json 的数字 = P1 期 fixture 快照（57 / 55-44-38-80-69 / gap 36 / traces 8 / suspect 0 / unreviewed 37 / allocation 57 行 4 未分配——本会话逐项对账与 fixture 可推导性一致），live 冒烟断言 2026-09-02 实测基线（61 / 59-48-42-81-71 / 40 / 9 / 2 / 41 / 61 行 7）。这正是初版 spec「事实核实 3 双轨基线」的落地：离线测试验证内核在 fixture 输入下的聚合正确性与回归稳定性，live 冒烟验证现网数字；两轨**不得互相引用绝对数**（离线以自洽断言 + golden 为准）。已回写本 spec「Testing Decisions」注明双轨拆分。
+3. **非 design/vc 的 uncovered need 防御性回退（确认保留）**：上游 needs 词表 5 值中 analysis_case/child_requirement/reference 无专属模板行 → 实现按 `coverage.uncovered:design` 变体（medium、design 模板），evidence.need_type 保留实际值；现网零触发（cessna-172 仅声明 design/verification_case）。本会话确认：保持封闭 Literal 12 值不被动态值破坏 + 确定性不崩溃 + 证据可辨，是三选一中的正确取舍（回退语义缺陷——对 reference 类 need 给「分配组件」建议——属**为触发**的已知局限而非错误，已写入 ③ 防御性回退规则与代码注记；若未来项目启用这些 need，再按需扩专属模板行，属后续 phase）。
+4. **（本会话检查注记，非实现偏差）**：回流复验首版 G4 探针检查键方向写反（升序断言了低严重度在前），修正为逐对规范比较后通过（severity 降序 → 维度数降序 → id 升序，n=57 全对）——实现无偏差，冒烟记录 G4 结论成立。
