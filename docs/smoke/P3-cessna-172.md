@@ -47,9 +47,9 @@ git 提交计数：A 段前 0 → A 段后 0（不变） → B 段后 0（+0）
 
 ## 实测偏差与开发会话注记（待需求会话确认）
 
-1. **G5 默认 config == 98（与 G4 同）**：spec ⑥ 仅列举 G4「is engaged」触发 passive_voice；
+1. **G5 默认 config == 97（与 G4 同，floor）**：spec ⑥ 仅列举 G4「is engaged」触发 passive_voice；
    实测 G5「is unlatched」同为 be+过去分词（-ed 词尾），按 spec 规则表语义在**默认 config**下
-   同为 98 分（cessna-172 config 已关 passive_voice → 两者均 100，冒烟不受影响）。单元测试
+   同为 97 分（floor；cessna-172 config 已关 passive_voice → 两者均 100，冒烟不受影响）。单元测试
    tests/test_lint.py 已按此行为断言并注明；若需求会话认为 G5 应豁免，需放宽规则表说明。
 2. **打分取整（spec 判例修正，待需求会话确认）**：spec ③ 判例「G4 默认 config==98」按 round 计算；
    上游 /quality 用 int(clamped*100//max_penalty)（floor）→ 同情形为 97。开发会话采纳**上游一致
@@ -62,3 +62,8 @@ git 提交计数：A 段前 0 → A 段后 0（不变） → B 段后 0（+0）
    G5=safety 等）；首次运行按 spec ②「默认 functional」落库。回流后 smoke_p3.py 已按表传 type
    并逐断言（A/B 段），运行后重跑即可核对；首次运行实体的 type==functional 属首版行为，
    待需求会话确认「⑥ 的 type 列是否应作为调用参数」后再定口径（记录不重写历史的既定事实）。
+
+> **需求会话确认（2026-09-02）**：上述 4 项偏差全部确认接受并回写 spec（「实测偏差与决策」节）：
+> ① floor 判例 97 成立（98 为 round 心算误差）；② G5 同触发 passive_voice（默认 config 97）；
+> ③ ⑥ type 列口径 = 冒烟调用参数（工具默认 functional），首轮残渣 type=functional 为历史事实，接受记录；
+> ④ 服务账号 maintainer 沿用 P2 结论。A 段已由需求会话按最终脚本语义 live 复验（G1–G5 零副作用、name/type 逐断言、61→61、审计 6 行）。

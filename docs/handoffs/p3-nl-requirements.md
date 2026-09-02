@@ -70,3 +70,20 @@ frontier 首步：#25、#26、#28（可并行）；随后 #27；再后 #29；#30
 - 术语遵循 `CONTEXT.md`（审批门/权限层级/dry-run/审计/工作会话等）；与 ADR 冲突须显式指出（本会话：ADR-0002 verb 词汇表扩展 + draft/DRAFT 同形歧义，见 spec ①，非冲突）。
 - 不动 `reqmesh/` 目录（上游部署克隆，只读参考）；不动已关闭的 P1/P2 资产（`writes.py`/`_write_common.py`/审批门/审计零修改，仅 import 复用；注册表仅加行）。
 - 许可证边界：本地 lint 独立重写规则（不复制 reqmesh GPL 源码），等价性靠冒烟「本地分 == 服务端分」对账。
+
+## 需求会话回流确认（2026-09-02，开发会话完成报告核实后）
+
+完成报告已实测核验（本会话复核，非仅读报告）：
+
+1. **git**：本地 main 领先 origin/main **5 commits**（b612909→4a593c9→020056e→a776f3f→f99932d，未 push）；P1/P2 核心资产零修改（writes.py / _write_common.py / guardrails/ / client/ / server.py / export.py / registry.py 无 diff）；reqmesh/ 上游目录未动。
+2. **测试**：离线复跑 **329 passed / 2 skipped / 2 deselected**（13.4s）；MCP stdio/http 测试断言 39 工具；OpenAI 导出 golden 同步。
+3. **冒烟**：docs/smoke/P3-cessna-172.md 完整（A 段零副作用 + B 段 SMOKE-P3-001..003 + 审计 9 行）；**A 段已由本会话按最终脚本语义 live 复验**（G1–G5 dry_run：ears 逐字符/name 派生/type 按表/score=100/rounds=1/config_source=project，total 61→61，审计 6 行——零副作用再确认）；**B 段残渣已回读核验**（description/name/status=proposed/unreviewed 可见/服务端分=100）。
+4. **issues**：#25–#30 全部 CLOSED（回流结论评论齐全）；epic #3 OPEN（含开发会话收口摘要）。
+5. **4 项实测偏差全部确认接受**并回写 spec「实测偏差与决策」节（P2 同款流程）：
+   - ① 打分取整 **98→97（floor）**：上游 int(clamped*100//max_penalty)，实现取上游一致（本地分==服务端分对全部分数成立）；spec 判例已改。
+   - ② G5「is unlatched」同触发 passive_voice（默认 config 97，与 G4 同）——spec ⑥ G5 说明已补。
+   - ③ ⑥ type 列口径 = **冒烟调用参数**（工具默认 functional）；首轮残渣 type=functional 为历史事实，接受记录（P2 残渣同款；重跑需 ADMIN 清理后按表落库）。
+   - ④ 服务账号 maintainer：P2 已确认，README 已同步，无新增动作。
+6. 许可证边界已核实：lint/rules.py 独立重写有推导依据注记 + 结构差异声明（15/17 与上游不同形；oblique/non_atomic 为 spec 自身描述的最小形式）——审核子代理 P0 项已闭环。
+
+确认摘要记 #29/#30 comment。方向层可执行：推送 origin（aa6b76f..HEAD）→ 关闭 epic #3。

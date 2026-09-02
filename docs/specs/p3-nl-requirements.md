@@ -160,17 +160,17 @@ P2 交付了 12 个写工具与四级审批门，但「自然语言建需求」�
 
 ### 开放问题⑥：验收金样例（已决策）
 
-**决策：5 条金样例覆盖五句式（英文、cessna-172、预期本地分 == 服务端分 == 100；passive_voice 在 cessna-172 config 为 false，金样例 4 在默认 config 下为 98——两者都写入断言）**，冒烟 A 段全量 dry_run（零副作用）+ B 段 3 条真实写闭环。
+**决策：5 条金样例覆盖五句式（英文、cessna-172；cessna-172 config 下本地分 == 服务端分 == 100；默认 config 下 G4/G5 因 passive_voice（info，权重 2）按上游 floor 公式为 97——两态都写入断言，见文末实测偏差）**，冒烟 A 段全量 dry_run（零副作用）+ B 段 3 条真实写闭环。
 
 | # | 句式 | NL 输入（一句话） | 断言 EARS 输出 | type | 说明 |
 |---|---|---|---|---|---|
 | G1 | ubiquitous | The aircraft shall achieve a range of at least 1185 km at maximum cruise power. | 同输入（首字母大写规范化） | non_functional_performance | 可度量（1185 km）；无弱词 |
 | G2 | event | When the indicated airspeed exceeds 302 km/h, the aircraft shall display the overspeed warning. | WHEN the indicated airspeed exceeds 302 km/h, the aircraft shall display the overspeed warning. | functional | 触发标记检测；302 km/h 可度量 |
 | G3 | state | While in the take-off climb, the aircraft shall maintain a climb rate of at least 2.5 m/s at sea level. | WHILE in the take-off climb, the aircraft shall maintain a climb rate of at least 2.5 m/s at sea level. | functional | 状态标记检测；2.5 m/s 可度量 |
-| G4 | optional | Where the autopilot is engaged, the aircraft shall hold the selected altitude within 15 m. | WHERE the autopilot is engaged, the aircraft shall hold the selected altitude within 15 m. | functional | 特性标记检测；"is engaged" 在默认 config 触发 passive_voice（info，98 分），cessna-172 config（off）为 100 |
-| G5 | unwanted | If the cabin door is unlatched, then the aircraft shall display a door warning within 1 s. | IF the cabin door is unlatched, THEN the aircraft shall display a door warning within 1 s. | safety | 正向缓解表述（无 negation 罚分）；1 s 可度量 |
+| G4 | optional | Where the autopilot is engaged, the aircraft shall hold the selected altitude within 15 m. | WHERE the autopilot is engaged, the aircraft shall hold the selected altitude within 15 m. | functional | 特性标记检测；"is engaged" 在默认 config 触发 passive_voice（info，-2 分，floor 后 97），cessna-172 config（off）为 100 |
+| G5 | unwanted | If the cabin door is unlatched, then the aircraft shall display a door warning within 1 s. | IF the cabin door is unlatched, THEN the aircraft shall display a door warning within 1 s. | safety | 正向缓解表述（无 negation 罚分）；1 s 可度量；"is unlatched" 与 G4 同为 be+过去分词——默认 config 97（passive_voice），cessna-172 config（off）为 100 |
 
-- 金样例逐一核对过 lint 规则表：无 weak_words/escape/open_ended/abbreviation/oblique（km/h、m/s 为 1-2 字母边，不触发 3+ 字母斜杠规则）/pronoun/absolute/combinator（单 and）/parentheses/placeholder；均有 shall（no_obligation 过）与可度量单位（untestable 过）；词数在 min_words/max_words 内。**单元测试断言：本地 lint 对 G1–G5 打分 == 100**（G4 在默认 config 下 == 98 的用例单独覆盖）。
+- 金样例逐一核对过 lint 规则表：无 weak_words/escape/open_ended/abbreviation/oblique（km/h、m/s 为 1-2 字母边，不触发 3+ 字母斜杠规则）/pronoun/absolute/combinator（单 and）/parentheses/placeholder；均有 shall（no_obligation 过）与可度量单位（untestable 过）；词数在 min_words/max_words 内。**单元测试断言：cessna-172 config 下本地 lint 对 G1–G5 打分 == 100；默认 config 下 G1–G3 == 100、G4/G5 == 97（passive_voice info 权重 2，上游 floor 公式）——两态均有用例**。
 - **冒烟 A 段（零副作用，cessna-172）**：临时空白名单下 draft_requirement 被阻断（断言 ApprovalDeniedError 形状 + 审计 denied 行）→ 添加白名单后 G1–G5 全部 dry_run=true：断言 ① ears.sentence 与上表逐字符一致（G1 规范化后一致）、ears.template 正确；② lint.passed=true、score==100、findings 为空、rounds==1；③ would_send.body.description/name/type/rationale 与映射模板一致、checks 形状正确（id 冲突/引用检查）；④ **全程 list_requirements.total 不变（58）**、写路径零 HTTP 写请求、is_repo 时 git 提交数不变（cessna-172 实测 is_repo=false，条件化降级并注明，P2 同款处理）；⑤ 审计行数 == dry_run 调用数。
 - **冒烟 B 段（真实写闭环，SMOKE-P3-001..003 固定 id）**：对 G1/G2/G5 dry_run=false 落库：断言 ① 201 返回实体 description 与 EARS 句子**文本相等**（sanitize 后纯文本原样回读）；② get_requirement 回读一致、status=="proposed"、rationale 含 NL 原文溯源；③ 新需求出现在 get_unreviewed_requirements；④ get_requirement_quality(req_id) 返回 score==100（**本地分 == 服务端分对账**）；⑤ 审计行数 == 全部写调用数（A+B 段）、lint_score/lint_rounds 字段在列；⑥ list_requirements.total == 61；残渣清单落盘（3 条 SMOKE-P3 需求 id）。B 段冒烟**不调用** review_item（新需求保持未评审是设计语义，②）。
 - 负例（离线单测覆盖，不进冒烟）：弱词自动修正（should→shall）、placeholder 立即拒绝、require_measurable=true 拒绝无单位文本、N 轮后仍未过线返回 persisted=false、中文输入 InputParseError。
@@ -227,7 +227,7 @@ P2 交付了 12 个写工具与四级审批门，但「自然语言建需求」�
 
 1. draft_requirement 经 MCP 双 transport 列出并可调用，schema 与契约表一致（#27）。
 2. 五句式渲染：G1–G5 输入 → EARS 输出与金样例表逐字符一致（#26、#29）。
-3. 本地 lint：G1–G5 打分 == 100（默认与 cessna-172 config 下；G4 默认 config == 98 单独用例）；弱词修正、占位符硬拒绝、measurable 门、N 轮上限、残余白名单（unwanted→negation）各有用例（#25、#29）。
+3. 本地 lint：cessna-172 config 下 G1–G5 == 100；默认 config 下 G1–G3 == 100、G4/G5 == 97（floor，passive_voice 权重 2）；弱词修正、占位符硬拒绝、measurable 门、N 轮上限、残余白名单（unwanted→negation）各有用例（#25、#29）。
 4. lint 打分对账：B 段落库后 get_requirement_quality 服务端分 == 本地分（100）（#30）。
 5. 落库复用写路径：draft_requirement 未批准被阻断（fail-closed）、dry_run 不发写请求且返回 would_send、审计每调用一行含 lint_score/lint_rounds（#27、#29）。
 6. dry_run 与 lint 失败路径不产生任何 reqmesh 写副作用（A 段 list_requirements.total 不变 + 审计 denied 行计数）（#30）。
@@ -264,3 +264,14 @@ P2 交付了 12 个写工具与四级审批门，但「自然语言建需求」�
 - 与 ADR 的关系：ADR-0001 无冲突（MCP 为核 + OpenAI 导出不变）；ADR-0002 为 verb 词汇表扩展（draft），同形歧义已显式声明（①）；开发会话完成后回写实现注记。
 - 许可证边界：本地 lint 独立重写（不复制 reqmesh GPL 源码），等价性靠「本地分 == 服务端分」冒烟对账（事实 3、验收 4）。
 - 开发会话按 design §5：实施后自动启动审核子代理与测试子代理；每轮循环结论记对应 ticket comment；超 5 轮仍失败回到需求会话（入口即交接文本）。
+
+## 实测偏差与决策（开发会话核实后回写，需求会话确认，2026-09-02）
+
+开发会话对真实实例实测发现 4 处与初版 spec 的偏差，需求会话全部确认接受（证据：docs/smoke/P3-cessna-172.md 实测偏差节 + 本会话实测复核：329 passed 复跑、A 段 live 复验零副作用、B 段残渣回读核验）：
+
+1. **打分取整 98 → 97（floor）**：初版判例「G4 默认 config==98」按 round 心算；上游 /quality 公式为 int(clamped*100//max_penalty)（floor）——passive_voice 罚 2 分时 88*100//90 = 97。实现取上游一致 floor（本地 lint 与上游逐字节一致，保「本地分==服务端分」对全部分数成立）；spec ⑥ 判例与验收标准 3 已改为 97。
+2. **G5 同触发 passive_voice**：G5「is unlatched」与 G4「is engaged」同为 be+过去分词——初版只列 G4；默认 config 下 G5 同为 97（cessna-172 config 已关 passive_voice → 冒烟两态均 100 不受影响）。spec ⑥ 金样例表 G5 说明已补。
+3. **⑥ type 列口径**：金样例表的 type 列 = **冒烟调用参数**（工具本身按 ② 默认 functional，调用方可覆盖）——smoke_p3.py 已按表传参并在 A 段逐断言（本会话 live 复验通过）。首轮 live 落库的 3 条残渣（SMOKE-P3-001..003）type=functional 为首版行为的历史事实，接受并记录（P2 残渣同款处理，不重写历史；重跑需先经 ADMIN 清理残渣后按表落库）。
+4. **服务账号角色 maintainer**：沿用 P2 已确认结论（contributor→propose 层不覆盖 requirements 写面，maintainer 为最小角色）；README 已同步，无新增动作。
+
+以上已回写本 spec 对应小节（⑥、验收标准 3）；确认摘要记 #29/#30 comment；方向层可执行：推送 origin（aa6b76f..HEAD）→ 关闭 epic #3。
