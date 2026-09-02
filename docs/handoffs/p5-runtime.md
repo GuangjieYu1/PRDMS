@@ -107,3 +107,40 @@ B 段冒烟与「DSH 会话内驱动 40 工具」的前置（硬约束：不得�
 - 不动 `reqmesh/` 目录；**不修改 DSH checkout 与运行中 DSH 宿主配置**（部署步骤只记录）；不破坏 P1–P4 资产（registry/groups/export/server/client/guardrails 裁决路径零 diff，396 基线不回退）。
 - 审批门 fail-closed 语义不变：agent 触达未白名单写工具 → 既有拒绝语义（denied 审计行 + fix_hint），确认通道只维护白名单文件（唯一裁决源），无临时放行通道。
 - 凭据边界：harness 侧对 DSH 零凭据；REQMESH_OPENAI_API_KEY 为 SecretStr 且仅离线测试使用；凭据不进日志/审计/run 日志。
+
+## 开发会话开场（可直接作为新工作会话的首条消息）
+
+你是 P5 的「开发会话」——PRDMS 工程流程模型（docs/reqmesh-harness-design.md §5）中 P5 phase 的实施工作会话。只做实现与验证，不做需求决策；需求已由需求会话定案，规格即契约。
+
+### 入口（先读，按顺序）
+1. `docs/handoffs/p5-runtime.md` —— 本会话唯一交接索引：epic #5、tickets #36–#44 阻塞边与 frontier、需求会话决策摘要①–⑥、核实事实 9 条、P1–P4 复用点、DSH 部署步骤、硬约束。
+2. `docs/specs/p5-runtime.md` —— 实施契约：事实核实 12 条、Implementation Decisions①–⑥、14 条验收标准（逐条挂 ticket）、Testing Decisions、Out of Scope。
+3. `docs/reqmesh-harness-design.md`（§3 D5/D10/D11、§4 P5 行、§5 流程）、`CONTEXT.md`（术语，用词必须遵循）、`docs/adr/0001-mcp-core-tool-protocol.md`（Consequences：工具层与 provider 解耦——P5 即其兑现）、`docs/adr/0002-tool-naming-and-grouping.md`。
+4. P1–P4 specs/handoffs 与 `reqmesh-harness/` 现有代码（复用，不要重做）；DSH checkout（只读调查，禁止修改）：`/home/user/.npm-global/lib/node_modules/@deepseek-ai/dsh`（v0.1.1-rc.2）；运行中宿主 `http://127.0.0.1:8080`。
+
+### Tickets（frontier 顺序，阻塞边见上文表）
+#36、#37 可并行 → #38、#39（#39 待 #37）→ #40 → #41（待 #39/#40）；#42 可随 #39 之后并行推进 → #43 收束全部代码 → #44 网络冒烟（A 段立即可跑，B 段按部署前置状态执行并注明）。
+
+### 必须遵守的需求会话决策与事实（不要重议，spec 为准）
+- provider 契约：`execution ∈ delegated|tool-loop` 执行所有权（DSH=delegated，openai/fake=tool-loop）；错误统一归一 `ProviderError(kind/code/message)`。
+- DSH 集成：委托式（路线 A）是唯一形态——DSH 无裸推理/工具往返端点（UNARY_ROUTES 已核实）；events.mux 走 WebSocket（GET 实测 426 Upgrade Required，不是 design D10 写的 SSE）；完成判定 = turn/end + running=false。
+- 工具层零改动：registry/groups/export/server/client 零 diff；guardrails 三模块（gate/whitelist/audit）零 diff（只 import）；errors.py 仅新增 ProviderError；40 工具注册表/导出对账不动。
+- 审批门不变式：fail-closed、白名单唯一裁决源、每次调用重读、denied 审计行 + fix_hint 照旧；确认通道只维护白名单文件（`WhitelistStore.append`），无「本次放行」临时通道；denied→确认→重试 → 审计双行。
+- 不修改 DSH checkout 与运行中宿主配置（cordis.patch.yml 注册步骤只记录——spec「DSH 部署步骤」，属 P6 输入）；冒烟 #44 的 B 段按前置状态执行并注明，A 段必须跑。
+- 术语 CONTEXT.md：harness 侧称 run（运行时会话），DSH 宿主侧一律「DSH session」；审批门、权限层级、dry-run、审计、工作会话照词表。
+
+### 流程（design §5）
+- 用 tdd 技能实施（red-green-refactor，先测试后实现）；单元测试全部离线（FakeProvider + respx + DSH 帧 fixture，`tests/fixtures/dsh/` 新样本）。
+- 实施完成后自动启动审核子代理与测试子代理；每轮循环结论摘要记入对应 ticket comment；超过 5 轮仍失败 → 回到需求会话（入口 = 本交接文本）。
+- 测试通过后：关 tickets #36–#44 → 产出完成报告（git 历史、测试结果、冒烟记录路径、issue 状态、待需求会话确认的实测偏差清单）→ 实测偏差按惯例回写 spec「实测偏差与决策」节 → 本地提交，禁止 git push。
+
+### 硬约束
+- 本地提交，禁止 git push（推送是方向层唯一职责，design §5）。
+- 不动 `reqmesh/` 目录；不破坏 P1–P4 资产（离线基线 396 passed / 3 skipped 不回退，P5 提交对 P1–P4 核心资产零 diff）。
+- 凭据不进日志/审计/run 日志；`.env` 不落盘；harness 对 DSH 零凭据（宿主自持 provider）。
+- 冒烟记录落盘 `docs/smoke/P5-cessna-172.md`（时间戳、实例、DSH URL、帧计数、审计行、残渣清单、部署前置状态）。
+
+### 完成标准（epic #5 底线）
+- 内置 loop 能驱动 P1–P4 工具完成一个真实任务：离线 FakeProvider 任务用例（追踪缺口→评审建议 denied→确认→approved，断言工具序列/审计双行/流式顺序）全绿 + live 冒烟 A 段零副作用必过；B 段（SMOKE-P5-001 落库回读、total 61→62）在部署前置满足后通过。
+- provider 切换（DSH ↔ Fake/OpenAI）不改工具层：同一注册表、同一审批门，P1–P4 资产零 diff。
+- spec 验收标准 1–14 全部满足、无未决项；P1–P4 既有 396 passed 不回退。
