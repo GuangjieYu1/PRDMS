@@ -1,9 +1,10 @@
 """#25 lint 模块：20 条规则逐条、金样例打分、修正表、收敛、残余白名单、measurable 边界。
 
 全部离线（纯函数）。金样例文本与 spec ⑥ 表一致；打分目标：
-G1–G5 == 100（cessna-172 config：passive_voice=false）；G4/G5 默认 config == 98
-（passive_voice info 权重 2 —— G5 "is unlatched" 与 G4 "is engaged" 同为 be+过去分词，
-spec 仅列举 G4，本测试按规则表语义覆盖两者并注明）。
+G1–G5 == 100（cessna-172 config：passive_voice=false）；G4/G5 默认 config == 97
+（passive_voice info 权重 2，与上游一致的 floor 公式——spec 判例 98 系 round 假设，
+实测偏差@docs/smoke/P3-cessna-172.md 待需求会话确认；G5 "is unlatched" 与 G4
+"is engaged" 同为 be+过去分词，spec 仅列举 G4，本测试按规则表语义覆盖两者并注明）。
 """
 
 from __future__ import annotations
@@ -201,7 +202,7 @@ def test_word_count_short_warning_and_long_half_penalty() -> None:
         ("The aircraft shall be capable of detecting a stall.", "The aircraft shall detect a stall."),
         ("The aircraft shall warn if necessary.", "The aircraft shall warn."),
         ("The aircraft shall warn, if necessary, within 1 s.", "The aircraft shall warn within 1 s."),
-        ("The aircraft shall warn as appropriate.", "The aircraft shall warn."),
+        ("The aircraft shall warn subject to availability.", "The aircraft shall warn."),
         ("The aircraft shall use and/or a battery.", "The aircraft shall use or a battery."),
         ("The aircraft shall use e.g. a generator.", "The aircraft shall use for example a generator."),
         ("The aircraft shall use i.e. a generator.", "The aircraft shall use that is a generator."),

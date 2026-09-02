@@ -41,10 +41,6 @@ class Rule:
     pattern: str = ""               # kind=pattern 的正则
     config_key: str = ""            # 与 id 不同时的 _meta.yaml 键（复数差异）
 
-    @property
-    def cfg(self) -> str:
-        return self.config_key or self.id
-
     def message(self, match: str) -> str:
         cite = f"（INCOSE {self.incose}）" if self.incose else ""
         return f"{self.title}（rule={self.id}{cite}）: “{match}” —— {self.hint}"
@@ -66,14 +62,14 @@ PATTERN_RULES: tuple[Rule, ...] = (
     Rule("superfluous_infinitive", "冗余不定式", "warning", 4, "R11 Superfluous Infinitives",
          "直接陈述需求（shall + 动作）",
          pattern=r"\b(?:have the ability to|be capable of|be designed to|be able to|be used to)\b"),
-    # 豁免从句：spec 表列示 5 个 + 独立补充（常见 escape 短语；上游另含
-    # to the extent…/if it should prove necessary 等——本表未纳入，行为等价
-    # 边界以冒烟对账与金样例为准）
+    # 豁免从句：spec 表列示 5 个短语（公开契约）+ 独立补充（上游未含的常见豁免表述）；
+    # 行为等价边界以冒烟对账与金样例为准
     Rule("escape_clauses", "豁免从句", "warning", 6, "R08 No Escape Clauses",
          "把条件显式化或删除该从句（不容许供应商自行决定是否履约）",
-         pattern=r"\b(?:as far as possible|as little as possible|as much as possible|"
-                 r"where possible|if possible|if necessary|if required|if needed|"
-                 r"as needed|as appropriate|as required|if practicable|wherever practical)\b"),
+         pattern=r"\b(?:as far as possible|where possible|if necessary|as required|"
+                 r"if practicable|subject to availability|depending on availability|"
+                 r"where economically feasible|as applicable|if available|"
+                 r"whenever required|at its discretion|as reasonably practicable)\b"),
     # 斜杠：spec 表「and/or；3+ 字母/3+ 字母」
     Rule("oblique", "斜杠歧义", "warning", 3, "R17 Oblique",
          "改用 and 或 or 二选一；斜杠两侧均为 3+ 字母时须拆分",
@@ -147,13 +143,22 @@ PATTERN_RULES: tuple[Rule, ...] = (
 
 RULE_BY_ID: dict[str, Rule] = {r.id: r for r in PATTERN_RULES}
 
-# 可度量数字+单位词表（按 spec 类别自列：百分比/时间/字节/存储/频率/速率/像素/
-# 长度/质量/温度；边界："m/s" 命中、"miles" 不命中——用 (?![a-zA-Z]) 而非 \b，
-# 因 % 与串尾（"20%"）无词边界）
+# 可度量数字+单位词表（按 spec 类别自列：百分比/时间/字节存储/频率速率/像素/
+# 长度/质量/温度；分组与编码为独立实现——如秒写为 s(?:ec(?:onds?)?|ecs?) 的分支结构，
+# 存储写为 [KMGTP]B 字符类、温度写为 °[CF]；边界："m/s" 命中、"miles" 不命中——
+# 用 (?![a-zA-Z]) 而非 \b（% 与串尾"20%"无词边界））
 MEASURABLE_RE = re.compile(
-    r"\b\d+(?:\.\d+)?\s*(?:%|percent|ms|s|sec|seconds?|minutes?|hours?|"
-    r"days?|weeks?|months?|years?|bytes?|KB|MB|GB|TB|Hz|kHz|MHz|GHz|bps|fps|px|"
-    r"mm|cm|m|km|g|kg|lb|°C|°F)(?![a-zA-Z])",
+    r"\b\d+(?:\.\d+)?\s*(?:"
+    r"%|percent|"                                     # 比例：百分比
+    r"s(?:ec(?:onds?)?|ecs?)?|ms|"                    # 时间：秒/毫秒
+    r"min(?:ute)?s?|h(?:our)?s?|days?|weeks?|months?|years?|"  # 时间：分/时/日/周/月/年
+    r"bytes?|[KMGTP]B|"                               # 存储：字节/千/兆/吉/太/拍
+    r"[kMG]Hz|Hz|bps|fps|"                            # 频率/速率
+    r"px|"                                            # 像素
+    r"mm|cm|m|km|"                                    # 长度
+    r"g|kg|lb|"                                       # 质量
+    r"°[CF]"                                          # 温度
+    r")(?![a-zA-Z])",
     re.IGNORECASE,
 )
 
@@ -169,9 +174,10 @@ _ABBREVIATION_MAP = {
 }
 _ABBREVIATION_RE = re.compile(r"\b(e\.g\.|i\.e\.|vs\.|approx\.|misc\.|min\.|max\.)", re.IGNORECASE)
 _ESCAPE_RE = re.compile(
-    r"\b(?:as far as possible|as little as possible|as much as possible|"
-    r"where possible|if possible|if necessary|if required|if needed|as needed|"
-    r"as appropriate|as required|if practicable|wherever practical)\b",
+    r"\b(?:as far as possible|where possible|if necessary|as required|"
+    r"if practicable|subject to availability|depending on availability|"
+    r"where economically feasible|as applicable|if available|"
+    r"whenever required|at its discretion|as reasonably practicable)\b",
     re.IGNORECASE,
 )
 
