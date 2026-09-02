@@ -1,4 +1,4 @@
-"""#15 OpenAI function JSON 导出：全量、名称合规、schema 合法、1:1 对账、金样例（P2：37 工具）。"""
+"""#15 OpenAI function JSON 导出：全量、名称合规、schema 合法、1:1 对账、金样例（P3：39 工具）。"""
 
 from __future__ import annotations
 

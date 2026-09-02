@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     harness_host: str = "127.0.0.1"
     harness_port: int = 8123
 
+    # P3 复合技能：本地 quality lint 过线标准与确定性修正轮数上限
+    lint_min_score: int = 90
+    lint_max_rounds: int = 3
+
     def resolved_session_file(self) -> Path:
         if self.session_file is not None:
             return self.session_file

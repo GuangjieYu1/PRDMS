@@ -10,7 +10,7 @@ ADMIN 分区（P2 不注册任何 ADMIN 工具）：`add_admin` + `REQMESH_ENABL
 
 from .registry import ToolRegistry, ToolSpec, annotations_for
 from .groups import auth_project, requirements, tracking, risk_decision, components_report
-from .groups import writes
+from .groups import writes, skills
 
 __all__ = ["ToolRegistry", "ToolSpec", "annotations_for", "build_registry"]
 
@@ -78,6 +78,10 @@ def build_registry(enable_admin: bool | None = None) -> ToolRegistry:
     registry.add(_write_spec("update_component", "更新组件", "组件/基线/变更请求", "MUTATE", writes.update_component))
     registry.add(_write_spec("update_verification_case", "更新验证用例", "验证/分析/规格/定义", "MUTATE", writes.update_verification_case))
     registry.add(_write_spec("run_verification", "执行验证", "验证/分析/规格/定义", "MUTATE", writes.run_verification))
+
+    # P3 复合技能①：自然语言建需求（DRAFT 层；domain=复合技能，P4 复合技能②并入）
+    registry.add(_write_spec("draft_requirement", "自然语言建需求", "复合技能", "DRAFT", skills.draft_requirement))
+    registry.add(_spec("get_requirement_quality", "需求品质反馈", "需求", skills.get_requirement_quality))
 
     for spec in ADMIN_TOOL_SPECS:
         registry.add_admin(spec)

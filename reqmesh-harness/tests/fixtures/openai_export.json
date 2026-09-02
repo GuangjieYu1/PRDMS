@@ -1072,6 +1072,146 @@
     }
   },
   {
+    "name": "draft_requirement",
+    "description": "DRAFT 从自然语言（一句话或要点）生成符合 EARS 句式的需求并落库：模板渲染 → 本地 quality lint 迭代修正（≤REQMESH_LINT_MAX_ROUNDS 轮，确定性修正表 6 类）→ 过线（零 error + score ≥ REQMESH_LINT_MIN_SCORE（默认 90）+ 残余白名单）后经审批门 POST /requirements。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。仅接受英文槽位（中文输入报 InputParseError——翻译是 P5 agent loop 的职责）；不编造内容（占位符/不可度量数字一律拒绝）。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "nl_text": {
+          "type": "string"
+        },
+        "template": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "ubiquitous",
+            "event",
+            "unwanted",
+            "state",
+            "optional"
+          ],
+          "type": "string"
+        },
+        "system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "functional",
+                "non_functional_performance",
+                "non_functional_security",
+                "non_functional_usability",
+                "non_functional_maintainability",
+                "non_functional_reliability",
+                "non_functional_scalability",
+                "non_functional_portability",
+                "interface",
+                "user",
+                "system",
+                "business",
+                "regulatory_compliance",
+                "safety",
+                "environmental",
+                "verification"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "subject": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "require_measurable": {
+          "default": true,
+          "type": "boolean"
+        },
+        "dry_run": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "project_id",
+        "nl_text"
+      ],
+      "type": "object"
+    }
+  },
+  {
     "name": "get_allocation_matrix",
     "description": "READ-ONLY 返回分配矩阵（axis/rows/search/filter_type 过滤）。",
     "parameters": {
@@ -1209,6 +1349,25 @@
   {
     "name": "get_requirement",
     "description": "READ-ONLY 按 id 返回单个需求完整内容。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "req_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "req_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_requirement_quality",
+    "description": "READ-ONLY 返回单个需求的品质反馈：score/findings + 项目 average/total 上下文。服务端无需求级端点（一次 GET /api/projects/{project_id}/quality 后按 id 过滤；rate limit 20 次/60 秒——description 注明）；目标需求无记录时相关字段为 null。",
     "parameters": {
       "properties": {
         "project_id": {

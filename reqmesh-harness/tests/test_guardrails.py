@@ -124,7 +124,7 @@ def test_registry_admin_partition_absent_by_default(monkeypatch) -> None:
     monkeypatch.delenv("REQMESH_ENABLE_ADMIN", raising=False)
     registry = build_registry()
     assert registry.enable_admin is False
-    assert len(registry) == 37
+    assert len(registry) == 39
     assert all(s.level != "ADMIN" for s in registry.all())  # tools/list 不含 ADMIN（协议层不存在）
     assert registry._admin_specs == {}
 

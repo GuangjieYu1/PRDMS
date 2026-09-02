@@ -97,12 +97,12 @@ def assert_schema_matches_toolmap(spec: ToolSpec, toolmap: ToolMap) -> Tool:
 
 
 # ------------------------------------------------------------------ 注册表
-def test_registry_has_exactly_37_tools() -> None:
-    """P2：25 READ + 12 写 = 37（写入 spec 映射表契约）。"""
+def test_registry_has_exactly_39_tools() -> None:
+    """P3：26 READ + 13 写 = 39（25 READ + 12 写 + draft_requirement + get_requirement_quality）。"""
     specs = registry().all()
     assert len(specs) == EXPECTED_TOOL_COUNT
     assert sum(1 for s in specs if s.level == "READ") == READ_TOOL_COUNT
-    assert sum(1 for s in specs if s.level == "DRAFT") == 6
+    assert sum(1 for s in specs if s.level == "DRAFT") == 7
     assert sum(1 for s in specs if s.level == "MUTATE") == 6
 
 
@@ -150,6 +150,8 @@ def _load_fixture(name: str) -> dict:
     ids=lambda tc: f"{tc[0].name}.{tc[1].name}" if isinstance(tc, tuple) else tc.name,
 )
 def test_case_passthrough_readonly(reqmesh_env, toolmap: ToolMap, case) -> None:
+    if not toolmap.passthrough:
+        pytest.skip("工具返回为加工投影（非逐字透传）——由专用测试覆盖")
     spec = registry().get(toolmap.name)
     fixture = _load_fixture(case.fixture)
     with respx.mock(base_url="http://reqmesh.test") as router:

@@ -51,6 +51,13 @@ class ApprovalConfigError(HarnessError):
     """审批白名单文件损坏/非法（fail-closed：宁可拒绝也不放行）。"""
 
 
+class InputParseError(HarnessError):
+    """复合工具（P3 draft_requirement）的自然语言输入解析失败。
+
+    消息含受支持形态示例；按 spec ⑤ 边界：不发起写请求、不记审计。
+    """
+
+
 __all__ = [
     "HarnessError",
     "ConfigError",

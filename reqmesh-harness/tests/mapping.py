@@ -30,6 +30,8 @@ class Case:
     method: str = "GET"
     expect_body: dict | None = None
     dry_run: bool = False
+    # 额外上游路由（method, path, fixture）——写工具调用前的只读探访（P3 config/next-uid）
+    routes: tuple[tuple[str, str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -39,6 +41,8 @@ class ToolMap:
     params: tuple[Param, ...]
     cases: tuple[Case, ...] = field(default_factory=tuple)
     level: str = "READ"
+    # 返回内容经工具加工（如按 id 过滤）时 False——通用「envelope 透传」断言跳过（专用测试覆盖）
+    passthrough: bool = True
 
 
 S = ("string",)
@@ -356,6 +360,19 @@ TOOLS: tuple[ToolMap, ...] = (
             Case("workflow", {"project_id": "cessna-172", "report": "workflow"}, "/api/projects/cessna-172/workflow", None, "report_workflow.json"),
         ),
     ),
+    ToolMap(
+        name="get_requirement_quality",
+        domain="需求",
+        params=(Param("project_id", S, required=True), Param("req_id", S, required=True)),
+        cases=(
+            Case("found", {"project_id": "cessna-172", "req_id": "SAFE0004"},
+                 "/api/projects/cessna-172/quality", None, "report_quality.json"),
+            Case("missing", {"project_id": "cessna-172", "req_id": "NO-SUCH"},
+                 "/api/projects/cessna-172/quality", None, "report_quality.json"),
+        ),
+        # 返回为按 id 过滤后的投影（非逐字透传）——通用透传断言跳过，专用测试覆盖两态
+        passthrough=False,
+    ),
 )
 
 
@@ -669,6 +686,59 @@ WRITE_TOOLS: tuple[ToolMap, ...] = (
                  method="POST", expect_body={"status": "passed", "notes": "ok"}),
         ),
     ),
+    ToolMap(
+        name="draft_requirement",
+        domain="复合技能",
+        level="DRAFT",
+        # 结果 = 闭环包装（persisted/ears/lint/requirement），非上游响应逐字透传
+        passthrough=False,
+        params=(
+            Param("project_id", S, required=True),
+            Param("nl_text", S, required=True),
+            Param("template", E, default="auto"),
+            Param("system", S, default=None),
+            Param("name", S, default=None),
+            Param("type", E, default=None),
+            Param("priority", E, default=None),
+            Param("parent", S, default=None),
+            Param("subject", S, default=None),
+            Param("id", S, default=None),
+            Param("require_measurable", B, default=True),
+            Param("dry_run", B, default=False),
+        ),
+        cases=(
+            # 金样例 G1（ubiquitous）；id 显式给定（next-uid 集成由专用测试覆盖）
+            Case(
+                "dry_run",
+                {"project_id": "cessna-172", "nl_text": "The aircraft shall achieve a range of at least 1185 km at maximum cruise power.", "id": "SMOKE-P3-001"},
+                "/api/projects/cessna-172/requirements", None, "requirement_get.json",
+                method="POST", dry_run=True,
+                expect_body={
+                    "id": "SMOKE-P3-001", "type": "functional",
+                    "name": "Achieve a range of at least 1185 km at maximum cruise power",
+                    "description": "The aircraft shall achieve a range of at least 1185 km at maximum cruise power.",
+                    "priority": "medium", "status": "proposed",
+                    "rationale": "自然语言建需求（draft_requirement）：The aircraft shall achieve a range of at least 1185 km at maximum cruise power.",
+                    "source": "",
+                },
+            ),
+            Case(
+                "real",
+                {"project_id": "cessna-172", "nl_text": "The aircraft shall achieve a range of at least 1185 km at maximum cruise power.", "id": "SMOKE-P3-001"},
+                "/api/projects/cessna-172/requirements", None, "requirement_get.json",
+                method="POST",
+                expect_body={
+                    "id": "SMOKE-P3-001", "type": "functional",
+                    "name": "Achieve a range of at least 1185 km at maximum cruise power",
+                    "description": "The aircraft shall achieve a range of at least 1185 km at maximum cruise power.",
+                    "priority": "medium", "status": "proposed",
+                    "rationale": "自然语言建需求（draft_requirement）：The aircraft shall achieve a range of at least 1185 km at maximum cruise power.",
+                    "source": "",
+                },
+                routes=(("GET", "/api/projects/cessna-172/quality", "report_quality.json"),),
+            ),
+        ),
+    ),
 )
 
 
@@ -676,7 +746,7 @@ def by_name() -> dict[str, ToolMap]:
     return {t.name: t for t in TOOLS}
 
 
-READ_TOOL_COUNT = 25
-WRITE_TOOL_COUNT = 12
+READ_TOOL_COUNT = 26
+WRITE_TOOL_COUNT = 13
 EXPECTED_TOOL_COUNT = READ_TOOL_COUNT + WRITE_TOOL_COUNT
 REPORT_ENUM = ["quality", "compliance", "metrics", "evaluation", "validation", "workflow"]

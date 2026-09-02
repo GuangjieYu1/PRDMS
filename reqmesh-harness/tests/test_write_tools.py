@@ -41,9 +41,15 @@ def test_write_case_method_path_body(toolmap: ToolMap, reqmesh_env, monkeypatch)
     fixture = _fixture(case.fixture)
     _approve(monkeypatch, reqmesh_env["session_file"].parent, toolmap.name)
     with respx.mock(base_url="http://reqmesh.test") as router:
+        # 写前只读探访（P3：项目 quality config / next-uid 等）
+        for method, path, fixture_name in case.routes:
+            router.route(method=method, path=path).mock(return_value=Response(200, json=_fixture(fixture_name)))
         router.route(method=case.method, path=case.expect_path).mock(return_value=Response(200, json=fixture))
         result = spec.fn(**case.args)
-        assert result == fixture
+        if toolmap.passthrough:
+            assert result == fixture
+        else:
+            assert result["persisted"] is True and result["requirement"] == fixture
         calls = [c for c in router.calls if c.request.url.path == case.expect_path]
         assert len(calls) == 1
         assert calls[0].request.method == case.method

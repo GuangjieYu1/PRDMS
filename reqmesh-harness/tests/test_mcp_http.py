@@ -49,7 +49,7 @@ async def test_streamable_http_list_tools_and_call(stub, tmp_path, monkeypatch) 
                 await session.initialize()
                 tools = await session.list_tools()
                 names = sorted(t.name for t in tools.tools)
-                assert len(names) == 37
+                assert len(names) == 39
                 # 与 stdio/注册集合对账
                 assert names == sorted(s.name for s in build_registry().all())
                 specs = {s.name: s for s in build_registry().all()}

@@ -24,3 +24,20 @@ MCP 协议的低层 Tool 类型（mcp 0.5.0 / 1.x）**没有 `tags` 字段**，�
 - description 前缀按层级（ADR 既定约定扩展）：READ 层 `READ-ONLY`（P1 惯例）、DRAFT 层 `DRAFT`、MUTATE 层 `MUTATE`（ADMIN 预留 `ADMIN`）；中文书写不变。
 - 写工具参数字典事实：全部写工具统一 `dry_run: bool = False`；全部 MUTATE 工具统一必填 `reason: str`（只进审计，不进 reqmesh 数据）；create 类 `id` 由调用方给定（reqmesh 契约如此）——与 spec 映射表逐项对账（tests/mapping.py）。
 - 审批门（P2）按本 ADR 从注册表 `level` 映射层级（DRAFT 通配/MUTATE 必匹配 project），**绝不解析工具名推断权限**——写工具名无权限前缀，符合本 ADR。
+
+## 实现注记（P3 开发会话回写：verb 词汇表扩展 `draft`）
+
+- 按 ADR 预告的「按层级扩展动词」机制，P3 新增白名单外动词 **`draft`（起草）**：
+  `draft_requirement` = 复合技能①（NL→EARS 句式→本地 quality lint 闭环保→落库），
+  注册表 level=DRAFT、domain=复合技能（P4 复合技能②并入）；`delete` 仍预留 ADMIN 层（P3 未启用）。
+- **`draft_` 前缀与 DRAFT 权限层级的同形歧义（显式声明，非冲突）——开发会话核实后的消解依据**：
+  ① `draft` 是动词（起草草稿），不是权限层级前缀——本 ADR 禁止的是「以权限层级作为
+  命名前缀」（read_/mutate_ 类），动词在词汇表内扩展属既定机制（P2 的 create/update/set/run/review
+  同款）；② 审批门从注册表 `level` 映射层级、**绝不解析工具名**（本 ADR 硬规则），
+  同形前缀在护栏语义上零影响；③ 词义一致：DRAFT 层=「草拟但未生效」，draft=起草草稿。
+  本消解规则对后续所有「层级词形 == 动词」的候选命名生效。
+- P3 新增工具参数事实：`draft_requirement` 提供 `nl_text`（受控自然语言）与 `template`
+  （EARS 句式显式覆盖，默认 auto 自动检测）；`require_measurable=false` 为显式豁免
+  untestable 的开关（默认 true）；`dry_run` 语义与 P2 完全一致（照跑审批门）。
+- description 前缀惯例不变：DRAFT 层工具以 `DRAFT` 开头（中文书写；READ 层
+  `READ-ONLY` 不变——`get_requirement_quality` 属 READ 层）。
