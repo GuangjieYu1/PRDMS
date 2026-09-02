@@ -1,0 +1,6450 @@
+{
+ "project_id": "cessna-172",
+ "generated_at": "2026-09-02T05:38:00+00:00",
+ "summary": {
+  "requirements_total": 57,
+  "coverage": {
+   "total": 55,
+   "shallow_covered": 44,
+   "deep_covered": 38,
+   "coverage_pct": 80,
+   "deep_pct": 69,
+   "broken_chain": 6,
+   "uncovered_items": 11,
+   "unwanted_items": 30
+  },
+  "gap_analysis": {
+   "total": 57,
+   "gaps": 36
+  },
+  "traces": {
+   "links": 8,
+   "types": {
+    "refines": 8
+   }
+  },
+  "suspect_links": {
+   "count": 0
+  },
+  "unreviewed": {
+   "count": 37,
+   "never": 37,
+   "stale": 0
+  },
+  "allocation": {
+   "rows": 57,
+   "unallocated": 4
+  },
+  "gap_entities": 53,
+  "dimension_breakdown": {
+   "high": 32,
+   "medium": 43,
+   "low": 39,
+   "info": 30
+  }
+ },
+ "chapters": {
+  "coverage": {
+   "total_analyzed": 55,
+   "count": 33,
+   "items": [
+    {
+     "id": "ACFT0000",
+     "name": "Aircraft System",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "analysis_case",
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": false,
+     "broken_chain": true,
+     "dimensions": [
+      {
+       "type": "coverage.chain_broken",
+       "severity": "high",
+       "evidence": {
+        "shallow": true,
+        "deep": false,
+        "needs": [
+         "design"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case",
+         "child_requirement"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AD2024001",
+     "name": "Airworthiness Directive — CO Detector Retrofit",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "verification_case"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0000",
+     "name": "Airframe",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "design"
+     ],
+     "unwanted_coverage": [
+      "analysis_case",
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:design",
+       "severity": "medium",
+       "evidence": {
+        "need_type": "design",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "child_requirement",
+         "verification_case"
+        ],
+        "uncovered_types": [
+         "design"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case",
+         "child_requirement"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "child_requirement",
+         "verification_case"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0001",
+     "name": "Fuselage Structure",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0004",
+     "name": "Wing Assembly",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0005",
+     "name": "Main Spar Ultimate Load",
+     "needs": [
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "design"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "design"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0007",
+     "name": "Empennage",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": false,
+     "broken_chain": true,
+     "dimensions": [
+      {
+       "type": "coverage.chain_broken",
+       "severity": "high",
+       "evidence": {
+        "shallow": true,
+        "deep": false,
+        "needs": [
+         "design"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0008",
+     "name": "Horizontal Stabilizer & Elevator",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0000",
+     "name": "Avionics Suite — Garmin G1000 NXi",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "analysis_case",
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": false,
+     "broken_chain": true,
+     "dimensions": [
+      {
+       "type": "coverage.chain_broken",
+       "severity": "high",
+       "evidence": {
+        "shallow": true,
+        "deep": false,
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case",
+         "child_requirement"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "child_requirement",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0003",
+     "name": "Navigation Systems",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0006",
+     "name": "Communication Systems",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "design",
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement"
+        ],
+        "uncovered_types": [
+         "design",
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.uncovered:design",
+       "severity": "medium",
+       "evidence": {
+        "need_type": "design",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement"
+        ],
+        "uncovered_types": [
+         "design",
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0007",
+     "name": "VHF COM Transceivers",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "verification_case"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0000",
+     "name": "Electrical Power System",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0001",
+     "name": "Alternator & Regulation",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "analysis_case",
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case",
+         "verification_case"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0002",
+     "name": "Battery — Emergency Power",
+     "needs": [
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "design"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "design"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0003",
+     "name": "Power Distribution & Bus Architecture",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "verification_case"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0000",
+     "name": "Environmental Control System",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": false,
+     "broken_chain": true,
+     "dimensions": [
+      {
+       "type": "coverage.chain_broken",
+       "severity": "high",
+       "evidence": {
+        "shallow": true,
+        "deep": false,
+        "needs": [
+         "design"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0001",
+     "name": "Cabin Heat — Exhaust Heat Exchanger",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "analysis_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0003",
+     "name": "Windshield Defrost",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0000",
+     "name": "Flight Control System",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": false,
+     "broken_chain": true,
+     "dimensions": [
+      {
+       "type": "coverage.chain_broken",
+       "severity": "high",
+       "evidence": {
+        "shallow": true,
+        "deep": false,
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0001",
+     "name": "Primary Flight Controls",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement",
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": false,
+     "broken_chain": true,
+     "dimensions": [
+      {
+       "type": "coverage.chain_broken",
+       "severity": "high",
+       "evidence": {
+        "shallow": true,
+        "deep": false,
+        "needs": [
+         "design"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0005",
+     "name": "Secondary Flight Controls — Flaps",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0007",
+     "name": "Pitch Trim System",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "verification_case"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0000",
+     "name": "Landing Gear System",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0001",
+     "name": "Main Gear Legs & Wheels",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0002",
+     "name": "Steerable Nose Gear",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "verification_case"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0000",
+     "name": "Propulsion System",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0001",
+     "name": "Engine — Lycoming IO-360-L2A",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "analysis_case",
+      "child_requirement"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case",
+         "child_requirement"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "child_requirement",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0002",
+     "name": "Precision Fuel Injection",
+     "needs": [
+      "design"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "verification_case"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "verification_case"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "design"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0005",
+     "name": "Propeller — McCauley 1A170/E",
+     "needs": [
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "analysis_case",
+      "design"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "analysis_case",
+         "design"
+        ],
+        "covered_types": [
+         "analysis_case",
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0000",
+     "name": "Safety Systems",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [
+      "child_requirement"
+     ],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      },
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "child_requirement"
+        ],
+        "covered_types": [
+         "child_requirement",
+         "design"
+        ],
+        "needs": [
+         "design",
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0002",
+     "name": "Engine Fire Detection",
+     "needs": [
+      "design",
+      "verification_case"
+     ],
+     "uncovered_types": [
+      "verification_case"
+     ],
+     "unwanted_coverage": [],
+     "shallow": false,
+     "deep": false,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.uncovered:verification_case",
+       "severity": "high",
+       "evidence": {
+        "need_type": "verification_case",
+        "needs": [
+         "design",
+         "verification_case"
+        ],
+        "covered_types": [
+         "design"
+        ],
+        "uncovered_types": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0003",
+     "name": "Emergency Locator Transmitter (ELT)",
+     "needs": [
+      "verification_case"
+     ],
+     "uncovered_types": [],
+     "unwanted_coverage": [
+      "design"
+     ],
+     "shallow": true,
+     "deep": true,
+     "broken_chain": false,
+     "dimensions": [
+      {
+       "type": "coverage.unwanted",
+       "severity": "info",
+       "evidence": {
+        "unwanted_coverage": [
+         "design"
+        ],
+        "covered_types": [
+         "design",
+         "verification_case"
+        ],
+        "needs": [
+         "verification_case"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "gap_analysis": {
+   "total": 57,
+   "gaps": 36,
+   "count": 36,
+   "items": [
+    {
+     "id": "ACFT0000",
+     "name": "Aircraft System",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0000",
+     "name": "Airframe",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0001",
+     "name": "Fuselage Structure",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0002",
+     "name": "Cabin Interior & Restraints",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0003",
+     "name": "Cockpit Ergonomic Layout",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0004",
+     "name": "Wing Assembly",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0007",
+     "name": "Empennage",
+     "issues": [
+      "no_rationale",
+      "no_source",
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0008",
+     "name": "Horizontal Stabilizer & Elevator",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0009",
+     "name": "Vertical Fin & Rudder",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0006",
+     "name": "Communication Systems",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0007",
+     "name": "VHF COM Transceivers",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0009",
+     "name": "Audio Panel — GMA 1360",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0010",
+     "name": "Avionics Architecture Decision",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0000",
+     "name": "Electrical Power System",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0001",
+     "name": "Alternator & Regulation",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0002",
+     "name": "Battery — Emergency Power",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0003",
+     "name": "Power Distribution & Bus Architecture",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0004",
+     "name": "External Power Receptacle",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0000",
+     "name": "Environmental Control System",
+     "issues": [
+      "no_rationale",
+      "no_source",
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0002",
+     "name": "Fresh Air Ventilation",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0003",
+     "name": "Windshield Defrost",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0000",
+     "name": "Flight Control System",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0001",
+     "name": "Primary Flight Controls",
+     "issues": [
+      "no_rationale",
+      "no_source",
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0002",
+     "name": "Aileron Control",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0003",
+     "name": "Elevator Control",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0004",
+     "name": "Rudder Control",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0005",
+     "name": "Secondary Flight Controls — Flaps",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0006",
+     "name": "Flap Actuation & Indication",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0007",
+     "name": "Pitch Trim System",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0000",
+     "name": "Landing Gear System",
+     "issues": [
+      "no_source",
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source",
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0001",
+     "name": "Main Gear Legs & Wheels",
+     "issues": [
+      "no_rationale",
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0002",
+     "name": "Steerable Nose Gear",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0003",
+     "name": "Hydraulic Braking System",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "OVERVIEW01",
+     "name": "— System Architecture Overview —",
+     "issues": [
+      "no_rationale",
+      "no_source",
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_rationale",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      },
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_rationale",
+         "no_source",
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0000",
+     "name": "Propulsion System",
+     "issues": [
+      "unlinked"
+     ],
+     "dimensions": [
+      {
+       "type": "trace.unlinked",
+       "severity": "high",
+       "evidence": {
+        "issues": [
+         "unlinked"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0002",
+     "name": "Engine Fire Detection",
+     "issues": [
+      "no_source"
+     ],
+     "dimensions": [
+      {
+       "type": "content.no_source",
+       "severity": "low",
+       "evidence": {
+        "issues": [
+         "no_source"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "traces": {
+   "links": 8,
+   "types": {
+    "refines": 8
+   },
+   "items": [
+    {
+     "source": "ACFT0000",
+     "target": "AFRM0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "AVNC0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "ELEC0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "ENVR0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "FLTC0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "LNDG0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "PROP0000",
+     "type": "refines"
+    },
+    {
+     "source": "ACFT0000",
+     "target": "SAFE0000",
+     "type": "refines"
+    }
+   ]
+  },
+  "suspect_links": {
+   "count": 0,
+   "items": []
+  },
+  "unreviewed": {
+   "count": 37,
+   "never": 37,
+   "stale": 0,
+   "items": [
+    {
+     "id": "AD2024001",
+     "name": "Airworthiness Directive — CO Detector Retrofit",
+     "reviewed": null,
+     "current_fingerprint": "9peysputw8XvRHyajtkEkLbDS2t8K0SkOCG63qa-wMs",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "9peysputw8XvRHyajtkEkLbDS2t8K0SkOCG63qa-wMs"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0002",
+     "name": "Cabin Interior & Restraints",
+     "reviewed": null,
+     "current_fingerprint": "1m7vg9Z5DMeEVfQUtmErM_tpzuavDX0efk6pbT4Mu1o",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "1m7vg9Z5DMeEVfQUtmErM_tpzuavDX0efk6pbT4Mu1o"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0006",
+     "name": "Integral Wing Fuel Tanks",
+     "reviewed": null,
+     "current_fingerprint": "55d2IO-UDnQmrGNOAUDD5sBTvuQGNfRsAjUPvlhPdsc",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "55d2IO-UDnQmrGNOAUDD5sBTvuQGNfRsAjUPvlhPdsc"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0008",
+     "name": "Horizontal Stabilizer & Elevator",
+     "reviewed": null,
+     "current_fingerprint": "EN2OWqps-z_kRIo8H5Iaw9PSZ43s0yJARQkSWOMfuC8",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "EN2OWqps-z_kRIo8H5Iaw9PSZ43s0yJARQkSWOMfuC8"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AFRM0009",
+     "name": "Vertical Fin & Rudder",
+     "reviewed": null,
+     "current_fingerprint": "uUy1h2fUfmZuY3-qFkeMxGFrMsKbdxCqh16dgA2Mnyc",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "uUy1h2fUfmZuY3-qFkeMxGFrMsKbdxCqh16dgA2Mnyc"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0002",
+     "name": "Multi-Function Display (MFD)",
+     "reviewed": null,
+     "current_fingerprint": "YtG4GJwd1TxyJ33sPHdEcm7WBJLmYKgX3OCzxVN15g4",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "YtG4GJwd1TxyJ33sPHdEcm7WBJLmYKgX3OCzxVN15g4"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0003",
+     "name": "Navigation Systems",
+     "reviewed": null,
+     "current_fingerprint": "qxoOeH9NFoYuhZG2IoNmiOSKbMAEl-yVMWnDHhdIFBU",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "qxoOeH9NFoYuhZG2IoNmiOSKbMAEl-yVMWnDHhdIFBU"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0004",
+     "name": "GPS/WAAS Receiver",
+     "reviewed": null,
+     "current_fingerprint": "6FL0KRFuzv5S96Q286rGckFKV0sKVu477lQ83i6maf4",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "6FL0KRFuzv5S96Q286rGckFKV0sKVu477lQ83i6maf4"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0006",
+     "name": "Communication Systems",
+     "reviewed": null,
+     "current_fingerprint": "6OeJh_MjStq2rjMScrEnf8rkyl7mt5DcPlzHWre2y90",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "6OeJh_MjStq2rjMScrEnf8rkyl7mt5DcPlzHWre2y90"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0007",
+     "name": "VHF COM Transceivers",
+     "reviewed": null,
+     "current_fingerprint": "b8bf8JjIv1x4tHvfPjQPvgjj98Qv3605oyNYqYjnngg",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "b8bf8JjIv1x4tHvfPjQPvgjj98Qv3605oyNYqYjnngg"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0008",
+     "name": "Mode S Transponder with ADS-B Out",
+     "reviewed": null,
+     "current_fingerprint": "1AP2PJ-fTc_b-wp7bQl9P9WwrkyS8xCfYR9pwiUYVvc",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "1AP2PJ-fTc_b-wp7bQl9P9WwrkyS8xCfYR9pwiUYVvc"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0009",
+     "name": "Audio Panel — GMA 1360",
+     "reviewed": null,
+     "current_fingerprint": "D9VI5F9z_Q8DCkxml510Zs5bVEV6VzTqyW2j3-RMAnw",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "D9VI5F9z_Q8DCkxml510Zs5bVEV6VzTqyW2j3-RMAnw"
+       }
+      }
+     ]
+    },
+    {
+     "id": "AVNC0010",
+     "name": "Avionics Architecture Decision",
+     "reviewed": null,
+     "current_fingerprint": "JebuZeiTQNGVfZTFK3-eaCLR-gvozQpTSBIL0h9W1No",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "JebuZeiTQNGVfZTFK3-eaCLR-gvozQpTSBIL0h9W1No"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0000",
+     "name": "Electrical Power System",
+     "reviewed": null,
+     "current_fingerprint": "0jO7vQnVtuz28tUrK2LiAYKtzDYWqLRGVKS_UARP4qY",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "0jO7vQnVtuz28tUrK2LiAYKtzDYWqLRGVKS_UARP4qY"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0001",
+     "name": "Alternator & Regulation",
+     "reviewed": null,
+     "current_fingerprint": "4yk1NK-WcxIRXwKVOF3nvF0XQooJbxuLWD3ArM_ygl4",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "4yk1NK-WcxIRXwKVOF3nvF0XQooJbxuLWD3ArM_ygl4"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0002",
+     "name": "Battery — Emergency Power",
+     "reviewed": null,
+     "current_fingerprint": "pVyDDDrLUyK98JSrrnsmWBd62WTUYWBCxDp-kNBQhjE",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "pVyDDDrLUyK98JSrrnsmWBd62WTUYWBCxDp-kNBQhjE"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0003",
+     "name": "Power Distribution & Bus Architecture",
+     "reviewed": null,
+     "current_fingerprint": "6CLOd-gNEcHG7B28Mdg8fP-iEdgQKLauqjq7aQ6BSn8",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "6CLOd-gNEcHG7B28Mdg8fP-iEdgQKLauqjq7aQ6BSn8"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ELEC0004",
+     "name": "External Power Receptacle",
+     "reviewed": null,
+     "current_fingerprint": "jLd3R8RT0RfUcfTas4bC0mRYsMGwtr7qnDu3jUT99qw",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "jLd3R8RT0RfUcfTas4bC0mRYsMGwtr7qnDu3jUT99qw"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0000",
+     "name": "Environmental Control System",
+     "reviewed": null,
+     "current_fingerprint": "zI9QSTSPmcJqUuoecclFDn_hy-SGI1mDYmVBewLnsms",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "zI9QSTSPmcJqUuoecclFDn_hy-SGI1mDYmVBewLnsms"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0001",
+     "name": "Cabin Heat — Exhaust Heat Exchanger",
+     "reviewed": null,
+     "current_fingerprint": "p6PMW_y0jobGvxx4yXlpxZlKXwIyOCKhOXD6jWR-Y6I",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "p6PMW_y0jobGvxx4yXlpxZlKXwIyOCKhOXD6jWR-Y6I"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0002",
+     "name": "Fresh Air Ventilation",
+     "reviewed": null,
+     "current_fingerprint": "Y_cv5cQjO6WxlRCtPofCdsYTMyOh6MKh-xCwYPs59IU",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "Y_cv5cQjO6WxlRCtPofCdsYTMyOh6MKh-xCwYPs59IU"
+       }
+      }
+     ]
+    },
+    {
+     "id": "ENVR0003",
+     "name": "Windshield Defrost",
+     "reviewed": null,
+     "current_fingerprint": "U259o53wE4GTjQvJPLLkBiDFMLns6rCV0yL1HUaGLCs",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "U259o53wE4GTjQvJPLLkBiDFMLns6rCV0yL1HUaGLCs"
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0004",
+     "name": "Rudder Control",
+     "reviewed": null,
+     "current_fingerprint": "r8l6J_wUKSd150rsxdEao2gQftq9_p3fg6UEQ6tUh6A",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "r8l6J_wUKSd150rsxdEao2gQftq9_p3fg6UEQ6tUh6A"
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0005",
+     "name": "Secondary Flight Controls — Flaps",
+     "reviewed": null,
+     "current_fingerprint": "p34WtTROuOHUVmAOFVNS-ey6ACP9wZrrS3mRt3pgNdk",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "p34WtTROuOHUVmAOFVNS-ey6ACP9wZrrS3mRt3pgNdk"
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0006",
+     "name": "Flap Actuation & Indication",
+     "reviewed": null,
+     "current_fingerprint": "KD-QEgmQg5tP_G3Kx76E2kH1vuKhpLpfVfjaBlxv2iI",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "KD-QEgmQg5tP_G3Kx76E2kH1vuKhpLpfVfjaBlxv2iI"
+       }
+      }
+     ]
+    },
+    {
+     "id": "FLTC0007",
+     "name": "Pitch Trim System",
+     "reviewed": null,
+     "current_fingerprint": "Z_MTXvA96vwW7dsYwIEeibgfMXgUB1c5sL91Wtzrh_o",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "Z_MTXvA96vwW7dsYwIEeibgfMXgUB1c5sL91Wtzrh_o"
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0000",
+     "name": "Landing Gear System",
+     "reviewed": null,
+     "current_fingerprint": "p6GFi8DQXbKms-2hipisCjo3KJRsllLdwmN4HCb_HlU",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "p6GFi8DQXbKms-2hipisCjo3KJRsllLdwmN4HCb_HlU"
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0001",
+     "name": "Main Gear Legs & Wheels",
+     "reviewed": null,
+     "current_fingerprint": "WOtk7wGkX3vEzPZQA2_u5xKHym4mWJgRoH745E32F1g",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "WOtk7wGkX3vEzPZQA2_u5xKHym4mWJgRoH745E32F1g"
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0002",
+     "name": "Steerable Nose Gear",
+     "reviewed": null,
+     "current_fingerprint": "hC1ZhuJ-5c-qnTbxMMUT2RUV2ziyjEfCPDHSCPHh_ts",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "hC1ZhuJ-5c-qnTbxMMUT2RUV2ziyjEfCPDHSCPHh_ts"
+       }
+      }
+     ]
+    },
+    {
+     "id": "LNDG0003",
+     "name": "Hydraulic Braking System",
+     "reviewed": null,
+     "current_fingerprint": "za3v9eB3a-OiUicw9ow4aWkz3nclP6q5nZQqN3UmGAs",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "za3v9eB3a-OiUicw9ow4aWkz3nclP6q5nZQqN3UmGAs"
+       }
+      }
+     ]
+    },
+    {
+     "id": "OVERVIEW01",
+     "name": "— System Architecture Overview —",
+     "reviewed": null,
+     "current_fingerprint": "i_MgOx-M8Afod0A0BPe5ABDnCfQdhgNdiPXSz1aGupc",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "i_MgOx-M8Afod0A0BPe5ABDnCfQdhgNdiPXSz1aGupc"
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0004",
+     "name": "Engine Instrumentation",
+     "reviewed": null,
+     "current_fingerprint": "esn4FwZtUSkPMCTcU-mffNYcVUSr_FKFr24o6Dn4gfc",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "esn4FwZtUSkPMCTcU-mffNYcVUSr_FKFr24o6Dn4gfc"
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0005",
+     "name": "Propeller — McCauley 1A170/E",
+     "reviewed": null,
+     "current_fingerprint": "gW9dbrXcn93ODFBfAsjUlQsh1cIe3dsiXRh9F5qgTmg",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "gW9dbrXcn93ODFBfAsjUlQsh1cIe3dsiXRh9F5qgTmg"
+       }
+      }
+     ]
+    },
+    {
+     "id": "PROP0006",
+     "name": "Fuel Delivery System",
+     "reviewed": null,
+     "current_fingerprint": "6ocY7-ev_0ZBLsicydvA4ACEEUnZQDLTxOUhBDEDMMI",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "6ocY7-ev_0ZBLsicydvA4ACEEUnZQDLTxOUhBDEDMMI"
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0002",
+     "name": "Engine Fire Detection",
+     "reviewed": null,
+     "current_fingerprint": "TfnNBP4AriVRO5Pva3NIUdkNlLIuaFOX8wBDAG5nWWg",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "TfnNBP4AriVRO5Pva3NIUdkNlLIuaFOX8wBDAG5nWWg"
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0003",
+     "name": "Emergency Locator Transmitter (ELT)",
+     "reviewed": null,
+     "current_fingerprint": "0MtAgee0vmrkYsy3cnc9VFMp4F3EU-cgXdLgE3d4-yo",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "0MtAgee0vmrkYsy3cnc9VFMp4F3EU-cgXdLgE3d4-yo"
+       }
+      }
+     ]
+    },
+    {
+     "id": "SAFE0004",
+     "name": "Exterior Lighting",
+     "reviewed": null,
+     "current_fingerprint": "mxClnufefVftZfPKWVASLny-DXdkIcquCeloy8kFuyk",
+     "dimensions": [
+      {
+       "type": "review.never",
+       "severity": "medium",
+       "evidence": {
+        "reviewed": null,
+        "current_fingerprint": "mxClnufefVftZfPKWVASLny-DXdkIcquCeloy8kFuyk"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "allocation": {
+   "rows": 57,
+   "unallocated": 4,
+   "items": [
+    {
+     "req_id": "AFRM0000",
+     "req_name": "Airframe",
+     "req_type": "system",
+     "row_id": "AFRM0000",
+     "row_name": "Airframe",
+     "allocated_to": "",
+     "dimensions": [
+      {
+       "type": "allocation.missing",
+       "severity": "medium",
+       "evidence": {
+        "row_id": "AFRM0000",
+        "row_name": "Airframe",
+        "allocated_to": "",
+        "req_type": "system"
+       }
+      }
+     ]
+    },
+    {
+     "req_id": "AVNC0006",
+     "req_name": "Communication Systems",
+     "req_type": "interface",
+     "row_id": "AVNC0006",
+     "row_name": "Communication Systems",
+     "allocated_to": "",
+     "dimensions": [
+      {
+       "type": "allocation.missing",
+       "severity": "medium",
+       "evidence": {
+        "row_id": "AVNC0006",
+        "row_name": "Communication Systems",
+        "allocated_to": "",
+        "req_type": "interface"
+       }
+      }
+     ]
+    },
+    {
+     "req_id": "AVNC0010",
+     "req_name": "Avionics Architecture Decision",
+     "req_type": "system",
+     "row_id": "AVNC0010",
+     "row_name": "Avionics Architecture Decision",
+     "allocated_to": "",
+     "dimensions": [
+      {
+       "type": "allocation.missing",
+       "severity": "medium",
+       "evidence": {
+        "row_id": "AVNC0010",
+        "row_name": "Avionics Architecture Decision",
+        "allocated_to": "",
+        "req_type": "system"
+       }
+      }
+     ]
+    },
+    {
+     "req_id": "OVERVIEW01",
+     "req_name": "— System Architecture Overview —",
+     "req_type": "system",
+     "row_id": "OVERVIEW01",
+     "row_name": "— System Architecture Overview —",
+     "allocated_to": "",
+     "dimensions": [
+      {
+       "type": "allocation.missing",
+       "severity": "medium",
+       "evidence": {
+        "row_id": "OVERVIEW01",
+        "row_name": "— System Architecture Overview —",
+        "allocated_to": "",
+        "req_type": "system"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "gaps": [
+  {
+   "id": "AVNC0006",
+   "collection": "requirements",
+   "name": "Communication Systems",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement"
+      ],
+      "uncovered_types": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "allocation.missing",
+     "severity": "medium",
+     "evidence": {
+      "row_id": "AVNC0006",
+      "row_name": "Communication Systems",
+      "allocated_to": "",
+      "req_type": "interface"
+     },
+     "source": "allocation"
+    },
+    {
+     "type": "coverage.uncovered:design",
+     "severity": "medium",
+     "evidence": {
+      "need_type": "design",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement"
+      ],
+      "uncovered_types": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "6OeJh_MjStq2rjMScrEnf8rkyl7mt5DcPlzHWre2y90"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 AVNC0006 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AVNC0006 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "为需求 AVNC0006 分配满足该需求的组件（design 覆盖）：从 list_components 选定组件后 set_allocation(allocated=true)，或让组件 satisfies 该需求；该缺口与 allocation.missing 同根。",
+     "tool_hint": [
+      "set_allocation"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "为需求 AVNC0006 分配组件：选定满足组件后 set_allocation(allocated=true)。",
+     "tool_hint": [
+      "set_allocation"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "提交评审：对需求 AVNC0006 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 AVNC0006 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "ENVR0000",
+   "collection": "requirements",
+   "name": "Environmental Control System",
+   "dimensions": [
+    {
+     "type": "coverage.chain_broken",
+     "severity": "high",
+     "evidence": {
+      "shallow": true,
+      "deep": false,
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "zI9QSTSPmcJqUuoecclFDn_hy-SGI1mDYmVBewLnsms"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "修复覆盖链：为需求 ENVR0000 补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型。",
+     "tool_hint": [
+      "update_requirement",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 ENVR0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 ENVR0000 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ENVR0000 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 ENVR0000 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 ENVR0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0007",
+   "collection": "requirements",
+   "name": "Empennage",
+   "dimensions": [
+    {
+     "type": "coverage.chain_broken",
+     "severity": "high",
+     "evidence": {
+      "shallow": true,
+      "deep": false,
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "修复覆盖链：为需求 AFRM0007 补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型。",
+     "tool_hint": [
+      "update_requirement",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AFRM0007 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "补充需求 AFRM0007 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 AFRM0007 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 AFRM0007 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "FLTC0001",
+   "collection": "requirements",
+   "name": "Primary Flight Controls",
+   "dimensions": [
+    {
+     "type": "coverage.chain_broken",
+     "severity": "high",
+     "evidence": {
+      "shallow": true,
+      "deep": false,
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "修复覆盖链：为需求 FLTC0001 补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型。",
+     "tool_hint": [
+      "update_requirement",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 FLTC0001 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "补充需求 FLTC0001 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 FLTC0001 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 FLTC0001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "LNDG0000",
+   "collection": "requirements",
+   "name": "Landing Gear System",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "p6GFi8DQXbKms-2hipisCjo3KJRsllLdwmN4HCb_HlU"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 LNDG0000 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 LNDG0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 LNDG0000 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 LNDG0000 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 LNDG0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "OVERVIEW01",
+   "collection": "requirements",
+   "name": "— System Architecture Overview —",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "allocation.missing",
+     "severity": "medium",
+     "evidence": {
+      "row_id": "OVERVIEW01",
+      "row_name": "— System Architecture Overview —",
+      "allocated_to": "",
+      "req_type": "system"
+     },
+     "source": "allocation"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "i_MgOx-M8Afod0A0BPe5ABDnCfQdhgNdiPXSz1aGupc"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source",
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 OVERVIEW01 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "为需求 OVERVIEW01 分配组件：选定满足组件后 set_allocation(allocated=true)。",
+     "tool_hint": [
+      "set_allocation"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "提交评审：对需求 OVERVIEW01 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 OVERVIEW01 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 OVERVIEW01 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0000",
+   "collection": "requirements",
+   "name": "Airframe",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "allocation.missing",
+     "severity": "medium",
+     "evidence": {
+      "row_id": "AFRM0000",
+      "row_name": "Airframe",
+      "allocated_to": "",
+      "req_type": "system"
+     },
+     "source": "allocation"
+    },
+    {
+     "type": "coverage.uncovered:design",
+     "severity": "medium",
+     "evidence": {
+      "need_type": "design",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "child_requirement",
+       "verification_case"
+      ],
+      "uncovered_types": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case",
+       "child_requirement"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "child_requirement",
+       "verification_case"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AFRM0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "为需求 AFRM0000 分配满足该需求的组件（design 覆盖）：从 list_components 选定组件后 set_allocation(allocated=true)，或让组件 satisfies 该需求；该缺口与 allocation.missing 同根。",
+     "tool_hint": [
+      "set_allocation"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "为需求 AFRM0000 分配组件：选定满足组件后 set_allocation(allocated=true)。",
+     "tool_hint": [
+      "set_allocation"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 AFRM0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0008",
+   "collection": "requirements",
+   "name": "Horizontal Stabilizer & Elevator",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "EN2OWqps-z_kRIo8H5Iaw9PSZ43s0yJARQkSWOMfuC8"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 AFRM0008 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 AFRM0008 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 AFRM0008 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 AFRM0008 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "FLTC0005",
+   "collection": "requirements",
+   "name": "Secondary Flight Controls — Flaps",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "p34WtTROuOHUVmAOFVNS-ey6ACP9wZrrS3mRt3pgNdk"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 FLTC0005 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 FLTC0005 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 FLTC0005 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 FLTC0005 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "ACFT0000",
+   "collection": "requirements",
+   "name": "Aircraft System",
+   "dimensions": [
+    {
+     "type": "coverage.chain_broken",
+     "severity": "high",
+     "evidence": {
+      "shallow": true,
+      "deep": false,
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case",
+       "child_requirement"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "修复覆盖链：为需求 ACFT0000 补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型。",
+     "tool_hint": [
+      "update_requirement",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 ACFT0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 ACFT0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0004",
+   "collection": "requirements",
+   "name": "Wing Assembly",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 AFRM0004 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AFRM0004 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 AFRM0004 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AVNC0003",
+   "collection": "requirements",
+   "name": "Navigation Systems",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "qxoOeH9NFoYuhZG2IoNmiOSKbMAEl-yVMWnDHhdIFBU"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 AVNC0003 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 AVNC0003 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 AVNC0003 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AVNC0010",
+   "collection": "requirements",
+   "name": "Avionics Architecture Decision",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "allocation.missing",
+     "severity": "medium",
+     "evidence": {
+      "row_id": "AVNC0010",
+      "row_name": "Avionics Architecture Decision",
+      "allocated_to": "",
+      "req_type": "system"
+     },
+     "source": "allocation"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "JebuZeiTQNGVfZTFK3-eaCLR-gvozQpTSBIL0h9W1No"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AVNC0010 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "为需求 AVNC0010 分配组件：选定满足组件后 set_allocation(allocated=true)。",
+     "tool_hint": [
+      "set_allocation"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "提交评审：对需求 AVNC0010 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "ELEC0000",
+   "collection": "requirements",
+   "name": "Electrical Power System",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "0jO7vQnVtuz28tUrK2LiAYKtzDYWqLRGVKS_UARP4qY"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 ELEC0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 ELEC0000 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 ELEC0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "ENVR0003",
+   "collection": "requirements",
+   "name": "Windshield Defrost",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "U259o53wE4GTjQvJPLLkBiDFMLns6rCV0yL1HUaGLCs"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 ENVR0003 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 ENVR0003 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ENVR0003 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "FLTC0000",
+   "collection": "requirements",
+   "name": "Flight Control System",
+   "dimensions": [
+    {
+     "type": "coverage.chain_broken",
+     "severity": "high",
+     "evidence": {
+      "shallow": true,
+      "deep": false,
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "修复覆盖链：为需求 FLTC0000 补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型。",
+     "tool_hint": [
+      "update_requirement",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 FLTC0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 FLTC0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "PROP0000",
+   "collection": "requirements",
+   "name": "Propulsion System",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 PROP0000 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 PROP0000 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 PROP0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "SAFE0002",
+   "collection": "requirements",
+   "name": "Engine Fire Detection",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "TfnNBP4AriVRO5Pva3NIUdkNlLIuaFOX8wBDAG5nWWg"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 SAFE0002 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 SAFE0002 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 SAFE0002 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0001",
+   "collection": "requirements",
+   "name": "Fuselage Structure",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AFRM0001 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 AFRM0001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0002",
+   "collection": "requirements",
+   "name": "Cabin Interior & Restraints",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "1m7vg9Z5DMeEVfQUtmErM_tpzuavDX0efk6pbT4Mu1o"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AFRM0002 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "提交评审：对需求 AFRM0002 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AVNC0000",
+   "collection": "requirements",
+   "name": "Avionics Suite — Garmin G1000 NXi",
+   "dimensions": [
+    {
+     "type": "coverage.chain_broken",
+     "severity": "high",
+     "evidence": {
+      "shallow": true,
+      "deep": false,
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case",
+       "child_requirement"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "child_requirement",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "修复覆盖链：为需求 AVNC0000 补充子需求分解（refines/derives）并确保子需求自身 deep 覆盖；或直接补齐顶层缺失的覆盖类型。",
+     "tool_hint": [
+      "update_requirement",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 AVNC0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "SAFE0000",
+   "collection": "requirements",
+   "name": "Safety Systems",
+   "dimensions": [
+    {
+     "type": "coverage.uncovered:verification_case",
+     "severity": "high",
+     "evidence": {
+      "need_type": "verification_case",
+      "needs": [
+       "design",
+       "verification_case"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "uncovered_types": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "为需求 SAFE0000 建立验证覆盖：create_verification_case 新建或复用既有验证用例，再经 set_relations / update_requirement(verification_cases) 关联。",
+     "tool_hint": [
+      "create_verification_case",
+      "set_relations"
+     ],
+     "severity": "high"
+    },
+    {
+     "action": "核查需求 SAFE0000 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AFRM0003",
+   "collection": "requirements",
+   "name": "Cockpit Ergonomic Layout",
+   "dimensions": [
+    {
+     "type": "trace.unlinked",
+     "severity": "high",
+     "evidence": {
+      "issues": [
+       "unlinked"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "建立追踪链接：get_traces 读-改-写回放，经 set_relations 为需求 AFRM0003 追加 refines/derives/verifies 链接。",
+     "tool_hint": [
+      "set_relations"
+     ],
+     "severity": "high"
+    }
+   ],
+   "max_severity": "high"
+  },
+  {
+   "id": "AVNC0007",
+   "collection": "requirements",
+   "name": "VHF COM Transceivers",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "b8bf8JjIv1x4tHvfPjQPvgjj98Qv3605oyNYqYjnngg"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "verification_case"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AVNC0007 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 AVNC0007 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 AVNC0007 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 AVNC0007 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "ELEC0001",
+   "collection": "requirements",
+   "name": "Alternator & Regulation",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "4yk1NK-WcxIRXwKVOF3nvF0XQooJbxuLWD3ArM_ygl4"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case",
+       "verification_case"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 ELEC0001 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ELEC0001 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 ELEC0001 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 ELEC0001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "ELEC0003",
+   "collection": "requirements",
+   "name": "Power Distribution & Bus Architecture",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "6CLOd-gNEcHG7B28Mdg8fP-iEdgQKLauqjq7aQ6BSn8"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "verification_case"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 ELEC0003 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ELEC0003 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 ELEC0003 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 ELEC0003 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "LNDG0001",
+   "collection": "requirements",
+   "name": "Main Gear Legs & Wheels",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "WOtk7wGkX3vEzPZQA2_u5xKHym4mWJgRoH745E32F1g"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "child_requirement"
+      ],
+      "covered_types": [
+       "child_requirement",
+       "design"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 LNDG0001 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 LNDG0001 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 LNDG0001 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 LNDG0001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AFRM0009",
+   "collection": "requirements",
+   "name": "Vertical Fin & Rudder",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "uUy1h2fUfmZuY3-qFkeMxGFrMsKbdxCqh16dgA2Mnyc"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AFRM0009 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 AFRM0009 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 AFRM0009 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AVNC0009",
+   "collection": "requirements",
+   "name": "Audio Panel — GMA 1360",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "D9VI5F9z_Q8DCkxml510Zs5bVEV6VzTqyW2j3-RMAnw"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AVNC0009 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 AVNC0009 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 AVNC0009 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "ELEC0002",
+   "collection": "requirements",
+   "name": "Battery — Emergency Power",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "pVyDDDrLUyK98JSrrnsmWBd62WTUYWBCxDp-kNBQhjE"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "design"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 ELEC0002 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ELEC0002 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 ELEC0002 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "ELEC0004",
+   "collection": "requirements",
+   "name": "External Power Receptacle",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "jLd3R8RT0RfUcfTas4bC0mRYsMGwtr7qnDu3jUT99qw"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 ELEC0004 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ELEC0004 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 ELEC0004 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "ENVR0002",
+   "collection": "requirements",
+   "name": "Fresh Air Ventilation",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "Y_cv5cQjO6WxlRCtPofCdsYTMyOh6MKh-xCwYPs59IU"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 ENVR0002 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 ENVR0002 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 ENVR0002 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "FLTC0004",
+   "collection": "requirements",
+   "name": "Rudder Control",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "r8l6J_wUKSd150rsxdEao2gQftq9_p3fg6UEQ6tUh6A"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_rationale",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_rationale",
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 FLTC0004 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 FLTC0004 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "补充需求 FLTC0004 的理由（rationale，why）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "FLTC0007",
+   "collection": "requirements",
+   "name": "Pitch Trim System",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "Z_MTXvA96vwW7dsYwIEeibgfMXgUB1c5sL91Wtzrh_o"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "verification_case"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 FLTC0007 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 FLTC0007 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 FLTC0007 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "LNDG0002",
+   "collection": "requirements",
+   "name": "Steerable Nose Gear",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "hC1ZhuJ-5c-qnTbxMMUT2RUV2ziyjEfCPDHSCPHh_ts"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "verification_case"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 LNDG0002 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 LNDG0002 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    },
+    {
+     "action": "核查需求 LNDG0002 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AD2024001",
+   "collection": "requirements",
+   "name": "Airworthiness Directive — CO Detector Retrofit",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "9peysputw8XvRHyajtkEkLbDS2t8K0SkOCG63qa-wMs"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "verification_case"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AD2024001 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 AD2024001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "ENVR0001",
+   "collection": "requirements",
+   "name": "Cabin Heat — Exhaust Heat Exchanger",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "p6PMW_y0jobGvxx4yXlpxZlKXwIyOCKhOXD6jWR-Y6I"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 ENVR0001 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 ENVR0001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "FLTC0006",
+   "collection": "requirements",
+   "name": "Flap Actuation & Indication",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "KD-QEgmQg5tP_G3Kx76E2kH1vuKhpLpfVfjaBlxv2iI"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 FLTC0006 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 FLTC0006 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "LNDG0003",
+   "collection": "requirements",
+   "name": "Hydraulic Braking System",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "za3v9eB3a-OiUicw9ow4aWkz3nclP6q5nZQqN3UmGAs"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 LNDG0003 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "补充需求 LNDG0003 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "PROP0005",
+   "collection": "requirements",
+   "name": "Propeller — McCauley 1A170/E",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "gW9dbrXcn93ODFBfAsjUlQsh1cIe3dsiXRh9F5qgTmg"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case",
+       "design"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 PROP0005 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 PROP0005 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "SAFE0003",
+   "collection": "requirements",
+   "name": "Emergency Locator Transmitter (ELT)",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "0MtAgee0vmrkYsy3cnc9VFMp4F3EU-cgXdLgE3d4-yo"
+     },
+     "source": "unreviewed"
+    },
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "design"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 SAFE0003 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    },
+    {
+     "action": "核查需求 SAFE0003 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AFRM0006",
+   "collection": "requirements",
+   "name": "Integral Wing Fuel Tanks",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "55d2IO-UDnQmrGNOAUDD5sBTvuQGNfRsAjUPvlhPdsc"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AFRM0006 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AVNC0002",
+   "collection": "requirements",
+   "name": "Multi-Function Display (MFD)",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "YtG4GJwd1TxyJ33sPHdEcm7WBJLmYKgX3OCzxVN15g4"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AVNC0002 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AVNC0004",
+   "collection": "requirements",
+   "name": "GPS/WAAS Receiver",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "6FL0KRFuzv5S96Q286rGckFKV0sKVu477lQ83i6maf4"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AVNC0004 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "AVNC0008",
+   "collection": "requirements",
+   "name": "Mode S Transponder with ADS-B Out",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "1AP2PJ-fTc_b-wp7bQl9P9WwrkyS8xCfYR9pwiUYVvc"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 AVNC0008 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "PROP0004",
+   "collection": "requirements",
+   "name": "Engine Instrumentation",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "esn4FwZtUSkPMCTcU-mffNYcVUSr_FKFr24o6Dn4gfc"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 PROP0004 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "PROP0006",
+   "collection": "requirements",
+   "name": "Fuel Delivery System",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "6ocY7-ev_0ZBLsicydvA4ACEEUnZQDLTxOUhBDEDMMI"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 PROP0006 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "SAFE0004",
+   "collection": "requirements",
+   "name": "Exterior Lighting",
+   "dimensions": [
+    {
+     "type": "review.never",
+     "severity": "medium",
+     "evidence": {
+      "reviewed": null,
+      "current_fingerprint": "mxClnufefVftZfPKWVASLny-DXdkIcquCeloy8kFuyk"
+     },
+     "source": "unreviewed"
+    }
+   ],
+   "actions": [
+    {
+     "action": "提交评审：对需求 SAFE0004 执行 review_item（从未评审）。",
+     "tool_hint": [
+      "review_item"
+     ],
+     "severity": "medium"
+    }
+   ],
+   "max_severity": "medium"
+  },
+  {
+   "id": "FLTC0002",
+   "collection": "requirements",
+   "name": "Aileron Control",
+   "dimensions": [
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "补充需求 FLTC0002 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "low"
+  },
+  {
+   "id": "FLTC0003",
+   "collection": "requirements",
+   "name": "Elevator Control",
+   "dimensions": [
+    {
+     "type": "content.no_source",
+     "severity": "low",
+     "evidence": {
+      "issues": [
+       "no_source"
+      ]
+     },
+     "source": "gap_analysis"
+    }
+   ],
+   "actions": [
+    {
+     "action": "补充需求 FLTC0003 的来源（source，出处）。",
+     "tool_hint": [
+      "update_requirement"
+     ],
+     "severity": "low"
+    }
+   ],
+   "max_severity": "low"
+  },
+  {
+   "id": "AFRM0005",
+   "collection": "requirements",
+   "name": "Main Spar Ultimate Load",
+   "dimensions": [
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "design"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "核查需求 AFRM0005 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "info"
+  },
+  {
+   "id": "PROP0001",
+   "collection": "requirements",
+   "name": "Engine — Lycoming IO-360-L2A",
+   "dimensions": [
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "analysis_case",
+       "child_requirement"
+      ],
+      "covered_types": [
+       "analysis_case",
+       "child_requirement",
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design",
+       "verification_case"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "核查需求 PROP0001 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "info"
+  },
+  {
+   "id": "PROP0002",
+   "collection": "requirements",
+   "name": "Precision Fuel Injection",
+   "dimensions": [
+    {
+     "type": "coverage.unwanted",
+     "severity": "info",
+     "evidence": {
+      "unwanted_coverage": [
+       "verification_case"
+      ],
+      "covered_types": [
+       "design",
+       "verification_case"
+      ],
+      "needs": [
+       "design"
+      ]
+     },
+     "source": "coverage"
+    }
+   ],
+   "actions": [
+    {
+     "action": "核查需求 PROP0002 的多余覆盖来源并清理：移除不需要类型的链接/分配。",
+     "tool_hint": [
+      "set_relations",
+      "set_allocation"
+     ],
+     "severity": "info"
+    }
+   ],
+   "max_severity": "info"
+  }
+ ],
+ "meta": {
+  "tool": "get_traceability_gap_report",
+  "version": 1,
+  "filters": {
+   "dimensions": null
+  }
+ }
+}

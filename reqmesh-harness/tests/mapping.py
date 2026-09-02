@@ -373,6 +373,33 @@ TOOLS: tuple[ToolMap, ...] = (
         # 返回为按 id 过滤后的投影（非逐字透传）——通用透传断言跳过，专用测试覆盖两态
         passthrough=False,
     ),
+    ToolMap(
+        name="get_traceability_gap_report",
+        domain="复合技能",
+        # 结果 = 客户端多源聚合报告（六源 fixture 路由见 cases.routes），非上游响应逐字透传——
+        # 通用透传断言跳过，聚合/排序/过滤/只读由 test_report_tool.py 专用测试覆盖
+        passthrough=False,
+        params=(
+            Param("project_id", S, required=True),
+            # 粗类型 = array（元素为 12 类维度 Literal 枚举；枚举词表由 test_report_tool 专测）
+            Param("dimensions", ("array",), required=False, default=None),
+        ),
+        cases=(
+            Case(
+                "full",
+                {"project_id": "cessna-172"},
+                "/api/projects/cessna-172/coverage", None, "coverage.json",
+                routes=(
+                    ("GET", "/api/projects/cessna-172/coverage", "coverage.json"),
+                    ("GET", "/api/projects/cessna-172/gap-analysis", "gap_analysis.json"),
+                    ("GET", "/api/projects/cessna-172/traces", "traces.json"),
+                    ("GET", "/api/projects/cessna-172/suspect-links", "suspect_links.json"),
+                    ("GET", "/api/projects/cessna-172/unreviewed", "unreviewed.json"),
+                    ("GET", "/api/projects/cessna-172/allocation-matrix", "allocation_matrix.json"),
+                ),
+            ),
+        ),
+    ),
 )
 
 
@@ -746,7 +773,7 @@ def by_name() -> dict[str, ToolMap]:
     return {t.name: t for t in TOOLS}
 
 
-READ_TOOL_COUNT = 26
+READ_TOOL_COUNT = 27
 WRITE_TOOL_COUNT = 13
 EXPECTED_TOOL_COUNT = READ_TOOL_COUNT + WRITE_TOOL_COUNT
 REPORT_ENUM = ["quality", "compliance", "metrics", "evaluation", "validation", "workflow"]

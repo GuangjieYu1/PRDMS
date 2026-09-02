@@ -1,7 +1,7 @@
 # reqmesh-harness
 
-reqmesh 需求管理工具的 Agentic 编排运行时（见 `docs/reqmesh-harness-design.md`；P1 范围见 `docs/specs/p1-tool-layer-mvp.md`，P2 范围见 `docs/specs/p2-write-path.md`，P3 范围见 `docs/specs/p3-nl-requirements.md`）。
-本目录实现：P1 工具层 MVP（认证客户端 + 25 个 READ 工具 + MCP 双 transport + OpenAI 导出）+ P2 受控写路径（12 个 DRAFT/MUTATE 工具 + 白名单审批门 + dry-run 预览 + 工具调用级审计日志 + 四级权限元数据 + 服务账号约定）+ P3 复合技能①（`draft_requirement` 自然语言建需求：EARS 五句式 + 本地 quality lint 闭环 + 落库（DRAFT 审批门复用）+ `get_requirement_quality` 需求级品质反馈）。
+reqmesh 需求管理工具的 Agentic 编排运行时（见 `docs/reqmesh-harness-design.md`；P1 范围见 `docs/specs/p1-tool-layer-mvp.md`，P2 范围见 `docs/specs/p2-write-path.md`，P3 范围见 `docs/specs/p3-nl-requirements.md`，P4 范围见 `docs/specs/p4-traceability-report.md`）。
+本目录实现：P1 工具层 MVP（认证客户端 + 25 个 READ 工具 + MCP 双 transport + OpenAI 导出）+ P2 受控写路径（12 个 DRAFT/MUTATE 工具 + 白名单审批门 + dry-run 预览 + 工具调用级审计日志 + 四级权限元数据 + 服务账号约定）+ P3 复合技能①（`draft_requirement` 自然语言建需求：EARS 五句式 + 本地 quality lint 闭环 + 落库（DRAFT 审批门复用）+ `get_requirement_quality` 需求级品质反馈）+ P4 复合技能②（`get_traceability_gap_report` 追踪/覆盖缺口报告：六源客户端聚合 + 12 类缺口维度 + 规则驱动建议，全 READ 零写）。
 
 ## 目录与管线职责
 
@@ -12,11 +12,12 @@ reqmesh 需求管理工具的 Agentic 编排运行时（见 `docs/reqmesh-harnes
 | `src/reqmesh_harness/client/` | 薄 HTTP 客户端：认证会话（cookie/CSRF）、只读视图（仅 `get()`）、写视图（仅 post/put/patch/delete，构造需 GateToken） |
 | `src/reqmesh_harness/client/generated/` | 生成产物（提交入库，**禁止手改**） |
 | `src/reqmesh_harness/guardrails/` | 审批门（白名单 fail-closed 裁决 + GateToken 签发）+ JSONL 审计日志 + `approvals` CLI |
-| `src/reqmesh_harness/tools/` | 工具注册表（唯一事实源）+ 26 个 READ 工具 + 13 个写工具（7 DRAFT + 6 MUTATE；含 P3 复合技能） |
+| `src/reqmesh_harness/tools/` | 工具注册表（唯一事实源）+ 27 个 READ 工具 + 13 个写工具（7 DRAFT + 6 MUTATE；含 P3/P4 复合技能） |
 | `src/reqmesh_harness/ears/` | EARS 五句式解析/渲染（P3；纯确定性，无 LLM，英文槽位） |
 | `src/reqmesh_harness/lint/` | 本地 quality lint（20 条规则镜像 + 6 类确定性修正表；独立重写，不复制上游 GPL 源码） |
+| `src/reqmesh_harness/report/` | 追踪/覆盖缺口报告聚合内核（P4；纯函数零网络，12 类缺口维度 + 建议模板表独立编写） |
 | `src/reqmesh_harness/server.py` | FastMCP server（stdio + streamable-HTTP） |
-| `scripts/smoke_p1.py` / `smoke_p2.py` / `smoke_p3.py` | cessna-172 冒烟（network-tagged，不进默认 pytest 集合） |
+| `scripts/smoke_p1.py` / `smoke_p2.py` / `smoke_p3.py` / `smoke_p4.py` | cessna-172 冒烟（network-tagged，不进默认 pytest 集合） |
 | `tests/` | 离线单测（respx 打桩 + fixture），见 spec「Testing Decisions」 |
 
 ## 常用命令

@@ -196,7 +196,7 @@ async def test_stdio_list_tools_and_call_requirement(stub, tmp_path) -> None:
             await session.initialize()
             tools = await session.list_tools()
             names = sorted(t.name for t in tools.tools)
-            assert len(names) == 39
+            assert len(names) == 40
             assert names == sorted(s.name for s in build_registry().all())
             specs = {s.name: s for s in build_registry().all()}
             for t in tools.tools:

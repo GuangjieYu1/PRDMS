@@ -1,4 +1,4 @@
-"""工具层：注册表（唯一事实源）+ 25 个 READ 工具 + 12 个写工具（P2）。
+"""工具层：注册表（唯一事实源）+ 27 个 READ 工具 + 13 个写工具（含 P3/P4 复合技能）。
 
 全部工具按 ADR-0002 命名（verb_entity、无权限前缀）；description 唯一来源 =
 处理器 docstring：READ 层以 READ-ONLY 开头、写层以 DRAFT/MUTATE 开头（中文书写）；
@@ -10,7 +10,7 @@ ADMIN 分区（P2 不注册任何 ADMIN 工具）：`add_admin` + `REQMESH_ENABL
 
 from .registry import ToolRegistry, ToolSpec, annotations_for
 from .groups import auth_project, requirements, tracking, risk_decision, components_report
-from .groups import writes, skills
+from .groups import writes, skills, reporting
 
 __all__ = ["ToolRegistry", "ToolSpec", "annotations_for", "build_registry"]
 
@@ -79,9 +79,13 @@ def build_registry(enable_admin: bool | None = None) -> ToolRegistry:
     registry.add(_write_spec("update_verification_case", "更新验证用例", "验证/分析/规格/定义", "MUTATE", writes.update_verification_case))
     registry.add(_write_spec("run_verification", "执行验证", "验证/分析/规格/定义", "MUTATE", writes.run_verification))
 
-    # P3 复合技能①：自然语言建需求（DRAFT 层；domain=复合技能，P4 复合技能②并入）
+    # P3 复合技能①：自然语言建需求（DRAFT 层；domain=复合技能，P2/P3 预告 P4 复合技能②并入）
     registry.add(_write_spec("draft_requirement", "自然语言建需求", "复合技能", "DRAFT", skills.draft_requirement))
     registry.add(_spec("get_requirement_quality", "需求品质反馈", "需求", skills.get_requirement_quality))
+
+    # P4 复合技能②：追踪/覆盖缺口报告（READ 层；客户端六源聚合，独立工具——
+    # 不扩展 get_project_report 的 report 枚举，见 ADR-0002 P4 实现注记与 spec ④）
+    registry.add(_spec("get_traceability_gap_report", "追踪/覆盖缺口报告", "复合技能", reporting.get_traceability_gap_report))
 
     for spec in ADMIN_TOOL_SPECS:
         registry.add_admin(spec)

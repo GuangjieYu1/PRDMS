@@ -97,8 +97,8 @@ def assert_schema_matches_toolmap(spec: ToolSpec, toolmap: ToolMap) -> Tool:
 
 
 # ------------------------------------------------------------------ 注册表
-def test_registry_has_exactly_39_tools() -> None:
-    """P3：26 READ + 13 写 = 39（25 READ + 12 写 + draft_requirement + get_requirement_quality）。"""
+def test_registry_has_exactly_40_tools() -> None:
+    """P4：27 READ + 13 写 = 40（25 READ + 12 写 + draft_requirement + get_requirement_quality + get_traceability_gap_report）。"""
     specs = registry().all()
     assert len(specs) == EXPECTED_TOOL_COUNT
     assert sum(1 for s in specs if s.level == "READ") == READ_TOOL_COUNT

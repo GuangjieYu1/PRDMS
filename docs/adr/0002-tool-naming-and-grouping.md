@@ -41,3 +41,23 @@ MCP 协议的低层 Tool 类型（mcp 0.5.0 / 1.x）**没有 `tags` 字段**，�
   untestable 的开关（默认 true）；`dry_run` 语义与 P2 完全一致（照跑审批门）。
 - description 前缀惯例不变：DRAFT 层工具以 `DRAFT` 开头（中文书写；READ 层
   `READ-ONLY` 不变——`get_requirement_quality` 属 READ 层）。
+
+## 实现注记（P4 开发会话回写：复合技能②并入 + 不扩展 report 枚举）
+
+- **新工具并入 domain=复合技能（兑现 P3 预告）**：`get_traceability_gap_report`
+  （P4 复合技能②：追踪/覆盖缺口报告）注册表 domain=复合技能、level=READ——P3 注记
+  「domain=复合技能（P4 复合技能②并入）」落定。verb=`get`（READ 词汇表内，
+  **零动词扩展**），实体对齐 `get_project_report` 的「报告作实体后缀」惯例。
+- **不扩展 get_project_report 的 report 枚举（对 P1 资产的零改动边界，非破坏）**：
+  `get_project_report` = reqmesh **服务端计算型报告端点**的 1:1 路由（
+  `_REPORT_ROUTES`）+ envelope 透传（P1 契约）；P4 报告 = harness **客户端多源聚合**
+  （coverage/gap-analysis/traces/suspect-links/unreviewed/allocation-matrix 六源，无任何
+  单一上游端点可路由）——两种计算模型。若并入枚举：① 破坏「枚举成员 1:1 对应一个路由」
+  契约（映射表测试不可执行）；② 破坏 envelope 透传契约（聚合产物不是任何端点的响应）。
+  因此独立工具；P1 预告的《reference freshness/conflicts/backlog/pugh/risk-bingo》
+  五个**服务端**端点仍在 0.5.0 快照中，属未来 phase 的合法枚举扩展对象（P4 不消费）。
+- 实现细节补记：`dimensions` 白名单参数 = `list[Literal[12 类维度]]`（可选，默认
+  None）；12 类维度类型值与建议模板表（spec ③）逐行 1:1，其中 `coverage.uncovered`
+  按 need 分两型（`coverage.uncovered:design` / `coverage.uncovered:verification_case`，
+  严重度不同）——spec 表类型列背引号部分为 `coverage.uncovered`，need 注记在单元格内；
+  本实现把 need 并入类型值以保证 Literal 枚举 12 值逐值对应（开发会话解释，待需求会话确认）。

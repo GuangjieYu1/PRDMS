@@ -1430,6 +1430,49 @@
     }
   },
   {
+    "name": "get_traceability_gap_report",
+    "description": "READ-ONLY 返回项目级追踪/覆盖缺口报告：一次调用聚合 coverage/gap-analysis/traces/suspect-links/unreviewed/allocation-matrix 六源（仅 GET），输出 summary/chapters/gaps/meta 结构化报告；每条缺口带规则驱动的建议修复动作（仅建议，绝不执行——tool_hint 只引用既有写工具名，caller 自行决定是否经审批门执行）。任一源失败整体报错（fail-fast，无部分报告）；dimensions 白名单（12 类维度类型）过滤 chapters/gaps，summary 保持全量。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "dimensions": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "coverage.uncovered:design",
+                  "coverage.uncovered:verification_case",
+                  "coverage.chain_broken",
+                  "coverage.unwanted",
+                  "content.no_description",
+                  "content.no_rationale",
+                  "content.no_source",
+                  "trace.unlinked",
+                  "trace.stale",
+                  "review.never",
+                  "review.stale",
+                  "allocation.missing"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
     "name": "get_traces",
     "description": "READ-ONLY 返回追踪矩阵；给出 entity_id 时返回该实体的回链（backlinks）。",
     "parameters": {
