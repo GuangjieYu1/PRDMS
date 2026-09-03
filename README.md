@@ -24,7 +24,7 @@ PRDMS 是需求管理工具链的主工作区：本地部署 **reqmesh** 作为�
 | P3 | 复合技能①（自然语言建需求：EARS + lint 闭环） | [#3](https://github.com/GuangjieYu1/PRDMS/issues/3) | ✅ 完成 |
 | P4 | 复合技能②（追踪/覆盖缺口报告） | [#4](https://github.com/GuangjieYu1/PRDMS/issues/4) | ✅ 完成 |
 | P5 | 内置运行时（agent loop + DSH/OpenAI/Fake provider） | [#5](https://github.com/GuangjieYu1/PRDMS/issues/5) | ✅ 完成 |
-| P6 | 交付（evals + 部署 + 文档/版本 0.2.0） | [#6](https://github.com/GuangjieYu1/PRDMS/issues/6) | 🔄 开发会话实施中 |
+| P6 | 交付（evals + 部署 + 文档/版本 0.2.0） | [#6](https://github.com/GuangjieYu1/PRDMS/issues/6) | ✅ 实现完成（待方向层推送收口） |
 
 ## 快速开始
 
