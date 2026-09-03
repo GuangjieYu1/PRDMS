@@ -73,8 +73,8 @@ design §6 的 P6 预置开放问题（部署端口与是否独立 systemd 单�
 | G1 NL 建需求 | P3 旗舰① | `draft_requirement` → `get_requirement_quality` → `get_requirement` | 落库实体 description 与 EARS 文本相等、status=proposed、quality score≥lint 线；审计 1 行 approved | respx | ✓（id `SMOKE-EVAL-P6-G1`，残渣） |
 | G2 追踪/覆盖缺口报告 | P4 旗舰② | `get_traceability_gap_report`（单步） | 报告结构：summary/gaps 非空、已知基线缺口点检（SMOKE-P2-001 / AFRM0000 口径沿用 P4 golden） | respx + report_golden.json 复用 | ✓（全 READ，零副作用零残渣） |
 | G3 追踪维护 | P2 追踪域 | `get_traces` → `set_relations`（MUTATE，经审批）→ `get_traces` | 新链接回读可见、旧链接保留；审计 approved 1 行 | respx | ✓（link id 前缀 `SMOKE-EVAL-P6-G3`，残渣） |
-| G4 审批拒绝路径 | P2 审批门 | `create_requirement`（空白名单）→ 断言拒绝 | 工具错误文本含 `ApprovalDeniedError` + `fix_hint`（`approvals add` 命令）；审计 denied 1 行；**库状态零变化**（回读 total 不变）；白名单文件未被修改 | respx + 临时白名单文件 | ✓（denied 落库零行，无残渣；审计行数用基线差口径） |
-| G5 P5 run 任务 | P5 内置运行时 | run（tool-loop）：`get_traceability_gap_report` → `review_item`（denied→确认中继→approved 重试） | 工具调用序列与 FakeProvider 脚本一致；审计 denied+approved 双行；run 事件日志 kind 顺序（task→tool_call→tool_result→question→…→done） | respx + FakeProvider | ✗（P5 live 已由 smoke_p5 B 段覆盖，不重复） |
+| G4 审批拒绝路径 | P2 审批门 | `create_requirement`（空白名单）→ 断言拒绝 | 工具错误文本含 `ApprovalDeniedError` + `fix_hint`（`approvals add` 命令；DRAFT 层无 `--project`——gate.py DRAFT 通配语义，见实测偏差 2）；审计 denied 1 行；**库状态零变化**（回读 total 不变）；白名单文件未被修改 | respx + 临时白名单文件 | ✓（denied 落库零行，无残渣；审计行数用基线差口径） |
+| G5 P5 run 任务 | P5 内置运行时 | run（tool-loop）：`get_traceability_gap_report` → `review_item`（denied→确认中继→approved 重试） | 工具调用序列与 FakeProvider 脚本一致；审计 denied+approved 双行；run 事件日志 kind 顺序按实际落盘形态断言（task→text→tool_call→tool_result×3→turn_end→done；question 事件在 sink 层断言——P5 LoggingSink 不落盘 question，见实测偏差 1） | respx + FakeProvider | ✗（P5 live 已由 smoke_p5 B 段覆盖，不重复） |
 
 - **与既有 533 测试的关系**：evals 复用同一 registry/gate/audit/FakeProvider/run_task 机制，**零复制裁决逻辑**；evals 目录不进 pytest testpaths；533 基线、P1–P5 冒烟记录均不回退。evals 自身新增的离线用例落在 evals/ 内（runner 退出码即全绿判定），不改变 pytest 计数。
 - **live 前置**：G1–G4 live 与 smoke_p5 B 段同前置（DSH web profile 已注册 mcp__reqmesh__*，决策 ③）；前置未满足时 live runner 与 B 段同口径记录「待前置后执行」。
@@ -198,3 +198,16 @@ design §6 的 P6 预置开放问题（部署端口与是否独立 systemd 单�
 - 硬约束遵守：不动 reqmesh/ 目录与 DSH checkout；**不修改运行中 DSH 宿主配置**（注册应用由操作员按决策 ③ 执行，开发会话不执行）；不破坏 P1–P5 资产（验收 12 零 diff 断言）；本地提交、禁止 git push（推送/发布/tag 是方向层唯一职责，design §5）。
 - 开发会话按 design §5：实施后自动启动审核子代理与测试子代理；每轮循环结论记对应 ticket comment；超 5 轮仍失败回到需求会话（入口 = 交接文本）。
 - 实测偏差回写惯例：开发会话对部署/live evals/DSH 注册的实测偏差记入 `docs/smoke/P6-cessna-172.md`「实测偏差」节，需求会话确认后回写本 spec「实测偏差与决策」节（P1–P5 同款流程）。
+
+## 实测偏差与决策（开发会话核实后回写，需求会话确认，2026-09-03）
+
+开发会话实测共 2 项偏差（见 `docs/smoke/P6-cessna-172.md`「实测偏差」），需求会话独立复核（git 逐项核验 + 离线复跑 533 passed / 3 skipped / 2 deselected + evals 离线 5/5 与 selftest + run_server.sh 生命周期实测 + systemd-analyze verify + uv lock/build + dsh_register.sh 真实 patch 文件零改动核对 + issue 状态核对）后**全部确认接受**：
+
+| # | 偏差/澄清 | 需求会话确认结论 |
+|---|---|---|
+| 1 | G5 run.jsonl 无 question 事件：P5 实现的 `LoggingSink.on_question`（`runtime/memory.py:296`）只转发不落盘，run.jsonl 实际 kind 序列 task→text→tool_call→tool_result×3→turn_end→done | **确认接受**。spec 验收 2 的「run 日志 kind 顺序」措辞与 G5 行已按实际形态回写（question 事件在 sink 层断言，位于两次 review_item 之间）。本偏差同时揭示 P5 spec ⑤ 与 P5 实现的既有差距（P5 spec ⑤ kind 列表含 question，实现未落盘）——**不属 P6 范围**（P1–P5 资产零 diff 硬约束），以记录口径接受；如未来 phase 需要 run 日志完整性，另行立项回写 P5 |
+| 2 | G4 fix_hint 形态：DRAFT 层 create_requirement 的修复建议为 `reqmesh-harness approvals add create_requirement`（无 `--project`；gate.py `_deny` 按 DRAFT project 可省略=通配） | **确认接受**。spec G4 行已补注「DRAFT 层无 --project（gate.py DRAFT 通配语义）」；spec 验收 2 的「fix_hint（approvals add 命令）」原文为泛指，与实际形态一致，无措辞冲突 |
+
+另：完成报告 §3 的「20 文件」计数经本会话核对为 **19 文件（12 新增 + 7 授权修改）**（`git diff 36bbf63 HEAD --name-status`），差 1 属报告计数误差，无实质影响。
+
+以上已回写本 spec 对应小节（G4/G5 行）；确认摘要记 #45/#46 comment。方向层可执行：推送 origin（36bbf63..HEAD）→ 打 tag v0.2.0 + 挂 dist/ 双产物（按 RELEASING.md）→ 关闭 epic #6；操作员按 docs/deployment.md 执行 DSH 注册后补跑 B 段冒烟与 evals live（残渣约定见冒烟记录）。

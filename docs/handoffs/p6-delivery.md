@@ -121,3 +121,19 @@ frontier 首步：#45、#47、#49、#50、#51（可并行）；随后 #46（待 
 - evals 离线 5/5 全绿 + live（按部署前置状态）记录落盘；部署文档可复现（免 root 路径本机实测）；0.2.0 打包齐备（uv build 双产物 + CHANGELOG/RELEASING）；README 可让新会话独立跑通三步。
 - DSH 注册后（操作员执行）：B 段冒烟通过（SMOKE-P5-001、total 61→62、审计基线差 Δ2 行）——P5 遗留闭环。
 - spec 验收标准 1–12 全部满足、无未决项；P1–P5 基线 533 不回退。
+
+## 需求会话回流确认（2026-09-03，开发会话完成报告核实后）
+
+完成报告已实测核验（本会话独立复核，非仅读报告；入口 `docs/handoffs/p6-completion.md`）：
+
+1. **git**：本地 main 领先 origin/main **5 commits**（a29a042→36bbf63→a1030a6→6dcb421→fbb2854，未 push）；工作树干净；`git diff 36bbf63 HEAD` = **19 文件（12 新增 + 7 授权修改）**——12 新增 = 根 README、docs/deployment.md、docs/handoffs/p6-completion.md、docs/smoke/P6-cessna-172.md、CHANGELOG/RELEASING、deploy/systemd/ 单元、evals/×3、scripts/×2；7 授权修改 = pyproject/`__init__`/uv.lock 版本同步 + config.py 端口默认 + server.py docstring + test_skeleton 端口断言 + harness README。P1–P5 受保护路径（tools/client/guardrails/ears/lint/report/runtime/其余 server 逻辑/docs/specs/p1–p5/docs/smoke/P1–P5/handoffs/p1–p5）**零改动**；reqmesh/ 目录与 DSH checkout 零改动；完成报告 §3 的「20 文件/13 新增」计数差 1，已在本会话确认中修正（记录口径）。
+2. **测试**：离线复跑 **533 passed / 3 skipped / 2 deselected**（16.95s，P5 基线零回退）；evals 离线 **5/5 全绿**（exit 0）+ `--selftest` 通过；evals 不进 pytest 集合。
+3. **部署实测**：run_server.sh 生命周期本会话实跑通过（start→status（127.0.0.1:8081 LISTEN）→stop→端口释放/pidfile 清理→status 未运行）；`systemd-analyze verify` exit 0（唯一输出为系统自带 dbus.socket 提示）；`uv lock --check` exit 0；`uv build` 产出 dist/reqmesh_harness-0.2.0.{tar.gz,whl}（gitignored）。
+4. **DSH 集成零改动核对**：真实 `/home/user/.dsh/profiles/web/cordis.patch.yml` 仍仅 webserver 条目（本会话 cat 复核）；`dsh_register.sh --check` 正确报告「缺失」（exit 1）——开发会话未执行 --apply，符合 spec 决策 ③ 责任边界。
+5. **冒烟/live 状态**：`docs/smoke/P6-cessna-172.md` 完整——live G1–G4「待前置后执行」（部署前置未满足），残渣约定（SMOKE-EVAL-P6-G1/G3、G2 零残渣、G4 零落库）与 P5 B 段残渣（SMOKE-P5-001/total 62）均已注明；P1–P5 冒烟记录未动。
+6. **issues**：#45–#51 全部 CLOSED（回流结论评论齐全）；epic #6 OPEN（按 design §5 由方向层推送后关闭）。
+7. **2 项实测偏差全部确认接受**并回写 spec「实测偏差与决策」节（确认版）：
+   - ① G5 run.jsonl 无 question 事件（P5 LoggingSink.on_question 只转发不落盘）——spec 验收 2 措辞与 G5 行按实际形态回写；P5 spec ⑤ 与实现的既有差距以记录口径接受，P6 不改 runtime（零 diff 硬约束），未来如需 run 日志完整性另行立项；
+   - ② G4 fix_hint 无 --project（gate.py DRAFT 通配语义）——spec G4 行补注，措辞泛指原文与实际形态一致。
+
+确认摘要记 #45/#46 comment。方向层可执行：推送 origin（36bbf63..HEAD）→ 打 tag v0.2.0 + 挂 dist/ 双产物（按 reqmesh-harness/RELEASING.md）→ 关闭 epic #6；操作员按 docs/deployment.md 维护窗口执行 DSH 注册后补跑 `REQMESH_P5_SMOKE_B=1 uv run python scripts/smoke_p5.py`（B 段闭环）与 `uv run python evals/run_live.py`（G1–G4）。
