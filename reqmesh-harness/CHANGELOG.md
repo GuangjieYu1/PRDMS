@@ -50,7 +50,7 @@ P1–P6 里程碑首个可发布版本（大方向：reqmesh 工具层 + 写路�
 - 部署形态：正式端口收编 8081（默认 127.0.0.1；REQMESH_HARNESS_HOST/PORT + CLI --host/--port）；免 root scripts/run_server.sh（start|stop|status|logs）；systemd 单元模板 deploy/systemd/reqmesh-harness.service。
 - DSH 集成：scripts/dsh_register.sh（幂等 + dry-run diff + 备份；stdio 注册条目按 spec 决策③；应用/重启责任 = 操作员维护窗口）。
 - 文档：仓库根 README.md（项目地图 + phase 状态表）、reqmesh-harness/README.md 扩充（八节结构）、docs/deployment.md（部署/DSH 注册/LAN 安全口径/上游边界）。
-- 同步：uv.lock 补齐 websockets（P5 遗留漂移）。
+- 同步：uv.lock 版本同步 0.2.0（uv lock --check 通过；P5 遗留的 websockets 漂移已由父提交修复）。
 
 [Unreleased]: https://github.com/GuangjieYu1/PRDMS/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/GuangjieYu1/PRDMS/releases/tag/v0.2.0

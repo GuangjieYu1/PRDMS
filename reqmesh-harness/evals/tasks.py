@@ -46,14 +46,14 @@ def fixture(name: str) -> Any:
 
 
 # ------------------------------------------------------------------ 参数匹配器（数据化定义）
-class Any:
-    """任意值匹配（匹配器语义：字面量精确相等之外的全部放行）。"""
+class Wildcard:
+    """任意值匹配（匹配器语义：除字面量精确相等外的全部放行）；实例 = ANY。"""
 
     def __repr__(self) -> str:
         return "<any>"
 
 
-ANY = Any()
+ANY = Wildcard()
 
 
 @dataclass(frozen=True)
@@ -71,7 +71,7 @@ class Matcher:
 
 
 def matches(expected: Any, actual: Any) -> bool:
-    if isinstance(expected, Any):
+    if isinstance(expected, Wildcard):
         return True
     if isinstance(expected, Matcher):
         return expected.fn(actual)
@@ -172,12 +172,10 @@ def _setup_g1(env: EvalEnv) -> None:
 
 
 def _final_g1(env: EvalEnv) -> None:
-    import json as _json
-
     def call_text(seq: int) -> dict:
         rec = env.sink.tool_records[seq]
         assert rec is not None, f"G1 缺少第 {seq} 次工具结果"
-        return _json.loads(rec["text"])
+        return json.loads(rec["text"])
 
     # ① 落库实体：description 与 EARS 句相等、status=proposed、id 为残渣约定
     created = env.db["created"]
@@ -239,8 +237,13 @@ G1 = GoldenTask(
 def _live_g1(env: EvalEnv) -> None:
     req = env.registry.call("get_requirement", project_id=PROJECT_ID, req_id=SMOKE_ID_G1)
     description = (req.get("description") or "")
-    # EARS 渲染归一（关键字大写）：与金样例句子逐字一致（casefold 仅覆盖关键字大小写归一）
-    assert description.casefold() == EARS_NORMALIZED.casefold() or EARS_SENTENCE in description, req
+    # EARS 渲染归一（WHEN 关键字大写）：主断言 = casefold 归一后逐字相等（覆盖关键字大小写归一）；
+    # 兜底 = 精确子串——live 回读的 description 可能被上游包一层 HTML 包装（P1 fixture 形态），
+    # 子串命中即语义满足（离线侧已有逐字精确断言，见 _final_g1）。
+    assert (
+        description.casefold() == EARS_NORMALIZED.casefold()
+        or EARS_SENTENCE in description
+    ), req
     assert req.get("status") == "proposed", req
     calls = [e["name"] for e in env.sink.events if e["kind"] == "tool_call"]
     drafts = [n for n in calls if n == "draft_requirement"]
@@ -366,8 +369,6 @@ def _link_keys(links: list[Any]) -> list[tuple[str, str, str]]:
 
 
 def _final_g3(env: EvalEnv) -> None:
-    import json as _json
-
     old = _traces_old()
     put_body = env.db["put_body"]
     assert put_body is not None, "set_relations 未发出 PUT（读-改-写回放缺失）"
@@ -376,7 +377,7 @@ def _final_g3(env: EvalEnv) -> None:
         (NEW_LINK_G3["source"], NEW_LINK_G3["target"], NEW_LINK_G3["type"])
     ], f"put_body 与期望矩阵不一致: {_link_keys(put_body)}"
     # ② 新链接回读可见（执行器文本 = GET 响应形状）
-    readback = _json.loads(env.sink.tool_records[2]["text"])
+    readback = json.loads(env.sink.tool_records[2]["text"])
     keys = _link_keys(readback["links"])
     assert keys == _link_keys(old) + [
         (NEW_LINK_G3["source"], NEW_LINK_G3["target"], NEW_LINK_G3["type"])

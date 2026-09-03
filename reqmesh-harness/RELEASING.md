@@ -4,7 +4,7 @@
 > `reqmesh/RELEASING.md` / `reqmesh/DEPLOYMENT.md` 是上游克隆自带文档
 > （reqmesh/ 目录 gitignored，**不得修改**）；reqmesh 实例的安装/升级引用上游文档为前置。
 > 发布动作（推送、打 tag、发 GitHub Release）属**方向层唯一职责**（design §5）；
-> 需求/开发/审核/测试任何会话不得 push、不得发 Release。
+> 任何需求/开发会话及审核/测试子代理不得 push、不得发 Release。
 
 ## 1. 交付物（每次版本发布）
 

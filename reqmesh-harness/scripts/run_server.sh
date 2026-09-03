@@ -27,11 +27,11 @@ XDG_STATE="${XDG_STATE_HOME:-${HOME}/.local/state}/reqmesh-harness"
 PIDFILE="${XDG_STATE}/server.pid"
 LOGFILE="${XDG_STATE}/server.log"
 
-# ---- 便携端口探测（python3 socket；无 lsof/ss 依赖）
+# ---- 便携端口探测（python3 socket；无 lsof/ss 依赖；host 参数化——LAN 绑定路径同用）
 port_open() {
-  python3 - "$1" <<'PYEOF'
+  python3 - "$1" "$2" <<'PYEOF'
 import socket, sys
-host, port = "127.0.0.1", int(sys.argv[1])
+host, port = sys.argv[1], int(sys.argv[2])
 try:
     with socket.create_connection((host, port), timeout=1.0):
         sys.exit(0)
@@ -41,8 +41,13 @@ PYEOF
 }
 
 pid_alive() {
-  local pid="$1"
-  kill -0 "$pid" 2>/dev/null
+  # 存活判定：kill -0 之外必须排除僵尸（子进程瞬时退出会短暂为僵尸态，kill -0 误报存活）
+  local pid="$1" stat
+  kill -0 "$pid" 2>/dev/null || return 1
+  stat="$(ps -o stat= -p "$pid" 2>/dev/null | tr -d ' ')"
+  [ -z "$stat" ] && return 1
+  case "$stat" in Z*|z*) return 1 ;; esac
+  return 0
 }
 
 read_pid() {
@@ -57,7 +62,7 @@ status_cmd() {
     echo "状态：未运行（pidfile ${PIDFILE} 缺失或进程已退出）"
     return 1
   fi
-  if port_open "${PORT}"; then
+  if port_open "${HOST}" "${PORT}"; then
     echo "状态：运行中 pid=${pid} pidfile=${PIDFILE}；streamable-HTTP 监听 ${HOST}:${PORT}（/mcp 端点）"
     echo "日志：${LOGFILE}"
     return 0
@@ -76,22 +81,29 @@ start_cmd() {
     echo "已在运行（pid=${pid}，${HOST}:${PORT}）；如需重启请先 stop（幂等 start 不重复拉起）"
     return 0
   fi
+  # 预检：端口已被其他进程监听 → 拒绝启动（不覆盖既有监听；避免 spawn 后误报成功）
+  if port_open "${HOST}" "${PORT}"; then
+    echo "错误：端口 ${HOST}:${PORT} 已被其他进程监听（先停占用者或换 REQMESH_HARNESS_PORT；日志 ${LOGFILE}）" >&2
+    rm -f "${PIDFILE}"
+    return 1
+  fi
   mkdir -p "${XDG_STATE}"
   # 凭据经 shell 环境/.env（cwd=HARNESS_DIR）；host/port 经 CLI 覆盖（settings 优先级 CLI > env）
   nohup "${VENV_BIN}" --transport http --host "${HOST}" --port "${PORT}" >>"${LOGFILE}" 2>&1 &
   local new_pid=$!
   echo "${new_pid}" >"${PIDFILE}"
-  # 等待端口就绪（≤10s；失败则回滚 pidfile）
+  # 等待端口就绪（≤10s；失败则回滚 pidfile）。先验 pid 存活：端口被其他进程占用时
+  # 本进程会以 Errno 98 退出——占位端口探测命中也不得误报成功（评审关注项）。
   for _ in $(seq 1 20); do
-    if port_open "${PORT}"; then
-      echo "已启动 pid=${new_pid}；streamable-HTTP 监听 ${HOST}:${PORT}（/mcp）；日志 ${LOGFILE}"
-      return 0
-    fi
     if ! pid_alive "${new_pid}"; then
       rm -f "${PIDFILE}"
-      echo "错误：进程启动即退出（日志末尾见下）：" >&2
+      echo "错误：进程启动即退出（端口被占用请先停旧进程；日志末尾见下）：" >&2
       tail -n 20 "${LOGFILE}" >&2 || true
       return 1
+    fi
+    if port_open "${HOST}" "${PORT}"; then
+      echo "已启动 pid=${new_pid}；streamable-HTTP 监听 ${HOST}:${PORT}（/mcp）；日志 ${LOGFILE}"
+      return 0
     fi
     sleep 0.5
   done

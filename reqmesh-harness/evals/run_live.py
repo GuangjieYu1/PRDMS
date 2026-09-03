@@ -189,7 +189,7 @@ async def run_live_task(task: GoldenTask, settings: Settings, counts: dict) -> d
         "calls": calls,
         "audit_delta": actual,
         "residue": list(task.live_residue),
-        "dsn_sessions": list(env.dsh_session_ids),
+        "dsh_sessions": list(env.dsh_session_ids),
         "status": result.status,
         "final_text": result.final_text[:200],
         "total_after": total_after,
@@ -210,7 +210,7 @@ def _run_live_sequence(settings: Settings, counts: dict, task_ids: list[str]) ->
                     "calls": [],
                     "audit_delta": [],
                     "residue": [],
-                    "dsn_sessions": [],
+                    "dsh_sessions": [],
                     "status": "exception",
                     "final_text": "",
                     "total_after": None,
@@ -321,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
                 (
                     f"运行状态={info.get('status')}；工具序列 {info.get('calls')}；"
                     f"审计 delta {info.get('audit_delta')}；残渣 {info.get('residue') or '无'}；"
-                    f"DSH session×{len(info.get('dsn_sessions') or [])}"
+                    f"DSH session×{len(info.get('dsh_sessions') or [])}"
                 ),
             )
         )
