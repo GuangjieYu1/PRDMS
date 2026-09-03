@@ -4,7 +4,7 @@
   （逐次调用仍有 401 重登兜底）；
 - streamable-HTTP：stateless（每个请求作用域构建客户端会话，会话文件共享，
   无服务端长驻项目上下文——project context 属 P5 memory 范围）；
-- host/port 经 REQMESH_HARNESS_HOST/REQMESH_HARNESS_PORT 配置（默认 127.0.0.1:8123）。
+- host/port 经 REQMESH_HARNESS_HOST/REQMESH_HARNESS_PORT 配置（正式端口默认 127.0.0.1:8081；P6 收编，spec p6 决策②）。
 """
 
 from __future__ import annotations

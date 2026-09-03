@@ -17,7 +17,7 @@ def test_settings_defaults() -> None:
     assert s.base_url == DEFAULT_BASE_URL
     assert s.timeout == 30.0
     assert s.harness_host == "127.0.0.1"
-    assert s.harness_port == 8123
+    assert s.harness_port == 8081
     assert s.resolved_session_file().name == "session.json"
     assert s.resolved_session_file().parts[-3:-1] == ("reqmesh-harness",) or "reqmesh-harness" in str(
         s.resolved_session_file()

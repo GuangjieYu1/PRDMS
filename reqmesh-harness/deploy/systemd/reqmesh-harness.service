@@ -1,0 +1,28 @@
+# reqmesh-harness MCP server 单元模板（root 级；spec p6 决策②——本机免 root 路径见
+# scripts/run_server.sh，本单元供可装 systemd 的主机使用；安装属操作员责任边界）。
+# 安装步骤（sudo 操作，见 docs/deployment.md）：
+#   sudo cp deploy/systemd/reqmesh-harness.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now reqmesh-harness
+# 占位符（安装前按目标主机替换）：User、WorkingDirectory、ExecStart、EnvironmentFile。
+[Unit]
+Description=reqmesh-harness MCP server (streamable-HTTP 127.0.0.1:8081)
+Documentation=file:/home/user/DeepseekHarnessProjects/PRDMS/docs/deployment.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# 占位符：运行用户（示例本机 uid=1000；目标主机按实际用户替换）
+User=1000
+# 占位符：仓库路径（cwd 使 reqmesh-harness/.env 生效）
+WorkingDirectory=/home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness
+# 占位符：凭据/配置 env 文件（0600；可选——以 - 前缀容忍缺失；凭据不进单元文件）
+EnvironmentFile=-%h/.config/reqmesh-harness/env
+# 占位符：venv console script（--transport http --host 127.0.0.1 --port 8081）
+ExecStart=/home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness/.venv/bin/reqmesh-harness --transport http --host 127.0.0.1 --port 8081
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target

@@ -47,9 +47,9 @@ class Settings(BaseSettings):
     audit_file: Path | None = None
     enable_admin: bool = False
 
-    # streamable-HTTP transport
+    # streamable-HTTP transport（P6 收编正式端口 8081；P1 期 8123 为开发默认 — spec p6 决策②）
     harness_host: str = "127.0.0.1"
-    harness_port: int = 8123
+    harness_port: int = 8081
 
     # P3 复合技能：本地 quality lint 过线标准与确定性修正轮数上限
     lint_min_score: int = 90
