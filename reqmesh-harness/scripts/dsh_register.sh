@@ -24,8 +24,10 @@ TARGET="${DEFAULT_TARGET}"
 BACKUP_DIR=""
 ACTION="dry-run"
 
-# 注册条目（决策③ 片段；缩进与语序保持逐字一致）
-ENTRY_BLOCK=$'- id: mcp-reqmesh\n  name: \'@deepseek-ai/dsh-mcp-client\'\n  config:\n    serverName: reqmesh\n    transport: stdio\n    command: /home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness/.venv/bin/reqmesh-harness\n    args: [\'--transport\', \'stdio\']\n    cwd: /home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness\n    env:\n      REQMESH_USERNAME: !!js process.env.REQMESH_USERNAME\n      REQMESH_PASSWORD: !!js process.env.REQMESH_PASSWORD'
+# 注册条目（决策③ 片段；条目内容与 spec 逐字一致，仅按 dsh patch 格式补 `insert:` 包装——
+# 2026-09-03 实测：非 insert 的新 id 条目会被 dsh-app-boot patch 算法以「entry not found」跳过；
+# dump-config 验证见 docs/deployment.md 相关段落）
+ENTRY_BLOCK=$'- insert:\n    - id: mcp-reqmesh\n      name: \'@deepseek-ai/dsh-mcp-client\'\n      config:\n        serverName: reqmesh\n        transport: stdio\n        command: /home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness/.venv/bin/reqmesh-harness\n        args: [\'--transport\', \'stdio\']\n        cwd: /home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness\n        env:\n          REQMESH_USERNAME: !!js process.env.REQMESH_USERNAME\n          REQMESH_PASSWORD: !!js process.env.REQMESH_PASSWORD'
 MARKER='- id: mcp-reqmesh'
 
 # ---- 参数
