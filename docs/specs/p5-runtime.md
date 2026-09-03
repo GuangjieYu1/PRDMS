@@ -137,8 +137,8 @@ class StreamSink(Protocol):         # 流式回调（CLI 渲染与测试断言�
 class Provider(Protocol):
     name: str
     execution: Literal["delegated", "tool-loop"]  # 执行所有权：DSH=delegated；openai/fake=tool-loop
-    def run_agentic(self, request: AgentRequest, sink: StreamSink, *,
-                    cancel: threading.Event) -> RunResult: ...
+    async def run_agentic(self, request: AgentRequest, sink: StreamSink, *,
+                          cancel: threading.Event) -> RunResult: ...
 
 @dataclass(frozen=True)
 class RunResult:
@@ -148,6 +148,8 @@ class RunResult:
     questions: int
     error: ProviderError | None
 ```
+
+（**2026-09-02 开发会话实测回写，需求会话确认**：`run_agentic` 实现为 **async**——DSH 路线需 WS 帧循环/轮询、OpenAI 路线需 SSE 流解析，均为异步 IO；StreamSink 回调保持同步、由 provider 异步循环触发。契约只约束调用形状与返回类型，type 层面无破坏；见文末实测偏差 6。）
 
 - **执行所有权语义（provider 契约的核心）**：`delegated`（DSH）——provider 全权执行工具并在会话内闭环，harness loop 只做指令装配/流式中继/审批确认/完成判定；`tool-loop`（openai/fake）——provider 产出文本与 tool_calls（`ToolCallRequest` 序列），由 harness 自驱 executor 执行（见 ①/④），结果回灌 provider 继续。
 - **FakeProvider**（`runtime/fake.py`，测试资产）：脚本化 turn 序列——预置文本块/工具调用/工具错误/问题；**断言能力**：按脚本顺序消费 executor 回灌的工具结果（`next_result` 期望匹配，不匹配即 `AssertionError` 归一为 ProviderError(protocol)）——「含工具调用序列断言」落在此处；无网络、无随机。
@@ -286,20 +288,20 @@ class RunResult:
 - 开发会话按 design §5：实施后自动启动审核子代理与测试子代理；每轮循环结论记对应 ticket comment；超 5 轮仍失败回到需求会话（入口即交接文本）。
 - 实测偏差回写惯例：开发会话对真实 DSH 宿主/实例实测的偏差（如帧形状、完成判定时序、部署前置状态）记入 docs/smoke/P5-cessna-172.md「实测偏差」节，需求会话确认后回写本 spec「实测偏差与决策」节（P1–P4 同款流程）。
 
-## 实测偏差与决策（开发会话核实后回写，待需求会话确认）
+## 实测偏差与决策（开发会话核实后回写，需求会话确认，2026-09-02）
 
-开发会话实测（2026-09-02，本机宿主 v0.1.1-rc.2 / DSH 127.0.0.1:8080 / reqmesh 172.16.100.2:8000）：
+开发会话实测（本机宿主 v0.1.1-rc.2 / DSH 127.0.0.1:8080 / reqmesh 172.16.100.2:8000）共 9 项，需求会话独立复核（git 逐项核验 + 离线复跑 533 passed / 3 skipped / 2 deselected + 冒烟记录与 issue 状态核对）后**全部确认接受**：
 
-| # | 偏差/澄清 | 处理 | 待需求会话确认 |
-|---|---|---|---|
-| 1 | events.mux 实测为**全局多路复用流**：每个连接打开时宿主回放全部 running 会话的 `session/subscribed`（含 lastSeq）与 `session/projection` 帧，随后持续广播各会话 `session/event` | 适配器与冒烟断言均按 sessionId 过滤（本会话帧计数只含被统计会话）；与 spec 事实 4 一致，非偏差 | 确认记录口径（冒烟帧计数=按会话过滤） |
-| 2 | 完成判定时序：turn/end 到达后 `session.list` running 立即转 false（无额外延迟） | 按事实 5 实现（turn/end + running=false 两条件），轮询周期 0.3s | — |
-| 3 | B 段部署前置未满足：`/home/user/.dsh/profiles/web/cordis.patch.yml` 无 mcp-reqmesh 条目（本 phase 硬约束不得修改运行中宿主配置） | A 段通过并落盘；B 段以 `REQMESH_P5_SMOKE_B=1` 待前置后重跑（步骤见「DSH 部署步骤」）；B 段审批/审计改为共享 XDG 文件 + 基线差断言（run CLI 与 DSH 侧 MCP server 进程共享同一文件——spec ④ 注记的落地形态） | 确认 B 段基线差断言口径（共享文件下「恰 2 行」不可行） |
-| 4 | 离线基线：P1–P4 396 passed → P5 后 **533 passed / 3 skipped / 2 deselected**（新增 137 用例；registry/export/server/client/guardrails 裁决路径零 diff——git diff 逐项核验） | — | — |
-| 5 | A 段实测帧计数随回复长度浮动（chunk 数 55–130+，模型回答长度不同）；断言只要求 >0 | — | — |
-| 6 | ③ 契约 L140–141 的 `run_agentic` 以 `def`（同步）书写；实现为 **async**（DSH 路线需 WS 帧循环/轮询，工具层调用同步——Provider 契约只约束调用形状与返回类型，原实现注明） | 全部 provider 实现 async run_agentic；`threading.Event` cancel 语义不变；测试经 pytest-asyncio | 确认 async 偏差写入 ③（type 层面无破坏） |
-| 7 | ①/验收 8：CLI 增 `--max-rounds`（防御上限显式化；默认仍 REQMESH_DSH_MAX_ROUNDS=8）；`--provider fake` 在 CLI 接受但拒绝执行（fake 需脚本化步骤，仅库接口可用）——spec 未明文 | CLI 参数契约保持（`--project/--provider/--resume/--yes` 不变），两处为显式附加；`QuestionOption` 为 DSH `question/requested` 帧 options 字段的契约映射（wire fidelity） | 确认（如不需要 `--max-rounds` 可删） |
-| 9 | ④ 时序与 tool-loop 确认触发点（测试子代理回流发现）：OpenAI 自驱路线无 DSH question/requested 帧，TTY 逐条通道原无触发点（pending 滞留） | `ConfirmedToolExecutor` 在 **denial 即确认**（relay.confirm_now：--yes 已 append 幂等；TTY 立即提示 y/N；错误文本原样回灌，模型自行重试——命中白名单）；与 DSH 委托路线「isError 之后」的确认时序同构；fake 脚本的问题步骤此后走通用回答 | 确认 |
-| 8 | 术语：代码标识符沿用 DSH RPC 契约字段名（sessionId/session.prompt/session.list），与 CONTEXT.md「harness 侧运行时会话称 run」不冲突（DSH session 加限定词仅限文本文档场合）；`on_session`/`session_live_check` 指 DSH 宿主侧会话 | 工作会话内文档（spec/handoff/smoke）均用「DSH session」限定词 | 确认 |
+| # | 偏差/澄清 | 需求会话确认结论 |
+|---|---|---|
+| 1 | events.mux 实测为**全局多路复用流**：每个连接打开时宿主回放全部 running 会话的 `session/subscribed`（含 lastSeq）与 `session/projection` 帧，随后持续广播各会话 `session/event` | **确认**。与 spec 事实 4 一致（需求会话此前已实测 WS-only）；适配器与冒烟断言按 sessionId 过滤，「帧计数=按会话过滤」为记录口径，冒烟记录已注明（本机宿主 30+ 会话零触碰） |
+| 2 | 完成判定时序：turn/end 到达后 `session.list` running 立即转 false（无额外延迟） | **确认**（记录口径）。实现按事实 5 双条件 + 0.3s 轮询，无 spec 变更 |
+| 3 | B 段部署前置未满足（cordis.patch.yml 无 mcp-reqmesh 条目；本 phase 硬约束不得修改运行中宿主配置） | **确认**。A 段通过落盘、B 段以 `REQMESH_P5_SMOKE_B=1` 待前置后重跑（属 P6 部署输入）。**B 段审计断言「恰 2 行」→「基线差 Δ2 行」接受**：run CLI 与 DSH 侧 MCP server 进程共享同一 XDG 审批/审计文件（B 段 smoke 在启用时置 `approvals_file/audit_file=None` 走真实 XDG，两进程同源），操作员真实审计文件可能已有历史行——基线差断言（`decision ∈ [denied, approved]` 顺序 + tool/version 字段）是共享文件下的正确口径，且比绝对行数更强（不依赖历史行数） |
+| 4 | 离线基线：P1–P4 396 → P5 后 **533 passed / 3 skipped / 2 deselected**（新增 137 用例；P1–P4 资产零 diff） | **确认**（需求会话独立复跑 533/3/2 一致；`git diff f8c7ee7..HEAD` 对 tools/client/server/guardrails/ears/lint/report 为空） |
+| 5 | A 段帧计数随回复长度浮动（chunk 55–130+），断言只要求 >0 | **确认**（记录口径；断言 >0 是流式可达性的正确断言） |
+| 6 | ③ 契约 `run_agentic` 以 `def`（同步）书写；实现为 **async**（WS 帧循环/SSE 解析均为异步 IO） | **确认接受并回写 ③**：签名改为 `async def run_agentic`（StreamSink 回调保持同步、由 provider 异步循环触发；`threading.Event` cancel 语义不变）。契约只约束调用形状与返回类型，type 层面无破坏 |
+| 7 | CLI 增 `--max-rounds`（防御上限显式化，默认仍 8）；`--provider fake` 接受但拒绝执行（fake 需脚本化步骤，仅库接口）；`QuestionOption` 为 DSH `question/requested` options 字段的契约映射 | **确认保留**。`--max-rounds` 是 spec ③ max_rounds 的 CLI 显式化（有用，不删）；fake 仅库接口符合其测试资产定位，CLI 拒绝消息已明示；QuestionOption 是帧 schema 的 wire fidelity（askUserQuestionItemSchema.options 已核实） |
+| 8 | 术语：代码标识符沿用 DSH RPC 契约字段名（sessionId/session.prompt/session.list 等） | **确认**。CONTEXT.md 词表约束文档用语（工作会话内文档均已用「DSH session」限定词）；代码标识符跟随 wire 契约是协议 fidelity，二者不冲突（与 client/session.py 先例一致） |
+| 9 | ④ tool-loop 路线确认触发点：OpenAI 自驱路线无 DSH question 帧，TTY 逐条通道原无触发点 | **确认**。`ConfirmedToolExecutor` 在 **denial 即确认**（relay.confirm_now：--yes 幂等 append、TTY 立即 y/N、错误文本原样回灌、模型重试命中白名单）——与 DSH 委托路线「isError 之后」的确认时序同构，正是 spec ④「tool-loop 路线同构」的落地形态 |
 
-（占位：开发会话完成后由需求会话确认并回写；本节的「处理」列已按 P5 开发会话执行；第 6/7/8 行为 P5 审核子代理回流核验补充。）
+以上已回写本 spec 对应小节（③ async 签名注记）；确认摘要记 #36/#38/#40/#41/#44 comment；方向层可执行：推送 origin（8eb24d7..HEAD）→ 关闭 epic #5。

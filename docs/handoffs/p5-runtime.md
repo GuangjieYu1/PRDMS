@@ -144,3 +144,22 @@ B 段冒烟与「DSH 会话内驱动 40 工具」的前置（硬约束：不得�
 - 内置 loop 能驱动 P1–P4 工具完成一个真实任务：离线 FakeProvider 任务用例（追踪缺口→评审建议 denied→确认→approved，断言工具序列/审计双行/流式顺序）全绿 + live 冒烟 A 段零副作用必过；B 段（SMOKE-P5-001 落库回读、total 61→62）在部署前置满足后通过。
 - provider 切换（DSH ↔ Fake/OpenAI）不改工具层：同一注册表、同一审批门，P1–P4 资产零 diff。
 - spec 验收标准 1–14 全部满足、无未决项；P1–P4 既有 396 passed 不回退。
+
+## 需求会话回流确认（2026-09-02，开发会话完成报告核实后）
+
+完成报告已实测核验（本会话独立复核，非仅读报告；入口 `docs/handoffs/p5-completion.md`）：
+
+1. **git**：本地 main 领先 origin/main **3 commits**（e34d7fd→8eb24d7→9632874，未 push）；工作树干净；`git diff f8c7ee7..HEAD` 对 P1–P4 资产（tools/ client/ server.py guardrails/ ears/ lint/ report/）**为空**；P5 提交仅白名单内 errors.py/config.py/cli.py/pyproject.toml（+websockets）+ 新 runtime/ 包与测试/fixtures/冒烟/文档；reqmesh/ 上游目录未动；DSH checkout 未动。
+2. **测试**：离线复跑 **533 passed / 3 skipped / 2 deselected**（16.7s，P4 基线 396 零回退；新增 137 用例 = 开发会话 115 + 测试子代理 22）。
+3. **冒烟**：`docs/smoke/P5-cessna-172.md` 完整——A 段 live 通过（WS 流式 chunk×55、turn/end、running=false、cancel 归闲；对 reqmesh 零请求、审计 0 行、零副作用，且对宿主既有 30+ 会话零触碰）；B 段按部署前置状态记录「待前置后执行」（`REQMESH_P5_SMOKE_B=1` 重跑路径已备），符合 spec ⑥ 与本 phase 硬约束。
+4. **issues**：#36–#44 全部 CLOSED（回流结论评论齐全）；epic #5 OPEN（按 design §5 由方向层推送后关闭）。
+5. **9 项实测偏差全部确认接受**并回写 spec「实测偏差与决策」节（确认版）：
+   - ①②⑤ 记录口径确认（全局 mux 流按 sessionId 过滤、完成判定双条件 + 0.3s 轮询、chunk 断言 >0）；
+   - ③ B 段审计断言「恰 2 行」→**基线差 Δ2 行**（共享 XDG 文件下正确口径；B 段启用时 approvals/audit 走真实 XDG 使 run CLI 与 DSH 侧 MCP server 同源）；
+   - ⑥ ③ 契约 `run_agentic` 改 **async**（已回写 spec 签名 + 注记；StreamSink 同步回调不变）；
+   - ⑦ `--max-rounds` 显式化保留、`--provider fake` 仅库接口、`QuestionOption` wire fidelity；
+   - ⑧ 代码标识符沿用 DSH RPC 字段名（协议 fidelity，与 CONTEXT.md 文档用语不冲突）；
+   - ⑨ tool-loop 确认触发点 = denial 即确认（`confirm_now`，与 spec ④「同构」语义一致）。
+6. **design doc**：D10 实现注记已回写（events.mux WebSocket-only，宿主版本相关）——方向层收口时随推送一并入库。
+
+确认摘要记 #36/#38/#40/#41/#44 comment。方向层可执行：推送 origin（8eb24d7..HEAD）→ 关闭 epic #5。
