@@ -10,7 +10,7 @@
 #   dsh_register.sh --check         报告当前状态（已存在/缺失），exit 0=已存在
 #   dsh_register.sh --dry-run（默认）打印将插入的条目与 diff（绝对不写文件）
 #   dsh_register.sh --apply         备份后插入；重复执行不产生重复条目（幂等，先检查后插入）
-#   --target FILE                   目标 patch 文件（默认 /home/user/.dsh/profiles/web/cordis.patch.yml；
+#   --target FILE                   目标 patch 文件（默认 $DSH_HOME/profiles/web/cordis.patch.yml；
 #                                   另设路径用于测试/并行安装验证）
 #   --backup-dir DIR                备份目录（默认 <target 同目录>/.dsh-register-backups/）
 #
@@ -19,15 +19,20 @@
 # 不承担重启；备份与回滚步骤见 docs/deployment.md「DSH 注册」。
 set -u
 
-DEFAULT_TARGET="/home/user/.dsh/profiles/web/cordis.patch.yml"
+# ── 自定位（主机/虚拟机通用，不再硬编码 /home/user/...）───────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+HARNESS_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DSH_HOME_DIR="${DSH_HOME:-$HOME/.dsh}"
+DEFAULT_TARGET="${DSH_HOME_DIR}/profiles/web/cordis.patch.yml"
 TARGET="${DEFAULT_TARGET}"
 BACKUP_DIR=""
 ACTION="dry-run"
 
-# 注册条目（决策③ 片段；条目内容与 spec 逐字一致，仅按 dsh patch 格式补 `insert:` 包装——
-# 2026-09-03 实测：非 insert 的新 id 条目会被 dsh-app-boot patch 算法以「entry not found」跳过；
-# dump-config 验证见 docs/deployment.md 相关段落）
-ENTRY_BLOCK=$'- insert:\n    - id: mcp-reqmesh\n      name: \'@deepseek-ai/dsh-mcp-client\'\n      config:\n        serverName: reqmesh\n        transport: stdio\n        command: /home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness/.venv/bin/reqmesh-harness\n        args: [\'--transport\', \'stdio\']\n        cwd: /home/user/DeepseekHarnessProjects/PRDMS/reqmesh-harness\n        env:\n          REQMESH_USERNAME: !!js process.env.REQMESH_USERNAME\n          REQMESH_PASSWORD: !!js process.env.REQMESH_PASSWORD'
+# 注册条目（决策③ 片段；command/cwd 由脚本位置推导；条目内容与 spec 逐字一致，
+# 仅按 dsh patch 格式补 `insert:` 包装——2026-09-03 实测：非 insert 的新 id 条目
+# 会被 dsh-app-boot patch 算法以「entry not found」跳过；dump-config 验证见
+# docs/deployment.md 相关段落）
+ENTRY_BLOCK="$(printf -- '- insert:\n    - id: mcp-reqmesh\n      name: '\''@deepseek-ai/dsh-mcp-client'\''\n      config:\n        serverName: reqmesh\n        transport: stdio\n        command: %s/.venv/bin/reqmesh-harness\n        args: ['\''--transport'\'', '\''stdio'\'']\n        cwd: %s\n        env:\n          REQMESH_USERNAME: !!js process.env.REQMESH_USERNAME\n          REQMESH_PASSWORD: !!js process.env.REQMESH_PASSWORD' "$HARNESS_DIR" "$HARNESS_DIR")"
 MARKER='- id: mcp-reqmesh'
 
 # ---- 参数

@@ -57,6 +57,9 @@ curl -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/   # 200（UI 首页
 
 > 注意：若端口/路径与本机不同，`RT_BASE_URL`、harness 的 `REQMESH_BASE_URL` 与
 > `docs/deployment.md` 中的地址都要同步修改。
+>
+> **部署到自己的本机（非虚拟机）请改用 [`docs/deployment-host.md`](../deployment-host.md)**
+> —— 提供一键引导脚本 `scripts/bootstrap-host.sh`、Windows(WSL2)/macOS/Linux 分平台说明与验证清单。
 
 ---
 
