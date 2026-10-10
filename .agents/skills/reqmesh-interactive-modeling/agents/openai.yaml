@@ -1,0 +1,4 @@
+interface:
+  display_name: "ReqMesh 交互式建模"
+  short_description: "自然语言需求建模、问题裁决、校验、批准写入与回读核对的完整流程"
+  default_prompt: "使用 $reqmesh-interactive-modeling 将我的需求文档建模到指定 ReqMesh 项目，先展示问题与候选变更，经明确批准后写入并回读核对。"
