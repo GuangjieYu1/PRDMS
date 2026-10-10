@@ -1,5 +1,5 @@
 """#27/#28/#29 复合技能工具：draft_requirement 三终态 + 门/审计/409 + 弱词修正闭环；
-get_requirement_quality 过滤与缺失两态；注册表/导出对账由既有测试套件覆盖（39→40 工具，P4）。
+get_requirement_quality 过滤与缺失两态；注册表/导出对账由既有测试套件覆盖（39→41 工具：P4 的 40 + check_expressions）。
 
 全部离线（respx 打桩）；金样例文本来自 spec ⑥。
 """

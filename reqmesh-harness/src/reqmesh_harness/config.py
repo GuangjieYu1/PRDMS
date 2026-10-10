@@ -51,6 +51,21 @@ class Settings(BaseSettings):
     harness_host: str = "127.0.0.1"
     harness_port: int = 8081
 
+    # MCP 端点的 Host 白名单（**可选，默认关闭**）：逗号分隔的域名列表。
+    # 经反向代理 / 隧道暴露时，请求的 Host 是公网域名；而 MCP SDK 的 DNS 重绑定
+    # 保护默认**只**放行 127.0.0.1 / localhost / [::1]，不放行就返回
+    # 421 "Invalid Host header"（实测：Cloudflare Tunnel 场景）。
+    # 本机直连时留空即可——留空则完全沿用 SDK 默认，行为零变化。
+    mcp_allowed_hosts: str = ""
+
+    # MCP 端点鉴权（**可选，默认关闭**）：设置后 streamable-HTTP 要求
+    # `Authorization: Bearer <token>`，不匹配一律 401。
+    # 留空 = 不鉴权——保持本机开发与 stdio 用法完全不变（默认 127.0.0.1 仅本机可达）。
+    # MCP 协议本身无认证层，且本 harness 的 READ 工具（28 个）不受审批门保护：
+    # 一旦把端点暴露到本机之外（0.0.0.0 / 反向代理 / 云主机），**必须**设置本项，
+    # 否则全部项目数据对任何可达客户端可见。凭据只经环境变量或 .env（0600）。
+    mcp_token: SecretStr = SecretStr("")
+
     # P3 复合技能：本地 quality lint 过线标准与确定性修正轮数上限
     lint_min_score: int = 90
     lint_max_rounds: int = 3

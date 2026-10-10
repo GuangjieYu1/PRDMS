@@ -46,7 +46,7 @@ def test_assemble_request_tool_hints_from_registry() -> None:
     names = {h.name for h in request.tools}
     assert "get_traceability_gap_report" in names
     assert "draft_requirement" in names
-    assert len(request.tools) == 40  # P1–P4 契约：40 个工具
+    assert len(request.tools) == 41  # 契约：41 个工具（P4 的 40 + check_expressions）
     hint = next(h for h in request.tools if h.name == "review_item")
     assert hint.level == "DRAFT"
     assert hint.description.startswith("DRAFT")  # description 首行 = docstring 首行

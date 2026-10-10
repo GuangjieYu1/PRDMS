@@ -1,4 +1,4 @@
-"""工具层：注册表（唯一事实源）+ 27 个 READ 工具 + 13 个写工具（含 P3/P4 复合技能）。
+"""工具层：注册表（唯一事实源）+ 28 个 READ 工具 + 13 个写工具（含 P3/P4 复合技能）。
 
 全部工具按 ADR-0002 命名（verb_entity、无权限前缀）；description 唯一来源 =
 处理器 docstring：READ 层以 READ-ONLY 开头、写层以 DRAFT/MUTATE 开头（中文书写）；
@@ -10,7 +10,7 @@ ADMIN 分区（P2 不注册任何 ADMIN 工具）：`add_admin` + `REQMESH_ENABL
 
 from .registry import ToolRegistry, ToolSpec, annotations_for
 from .groups import auth_project, requirements, tracking, risk_decision, components_report
-from .groups import writes, skills, reporting
+from .groups import writes, skills, reporting, checks
 
 __all__ = ["ToolRegistry", "ToolSpec", "annotations_for", "build_registry"]
 
@@ -86,6 +86,11 @@ def build_registry(enable_admin: bool | None = None) -> ToolRegistry:
     # P4 复合技能②：追踪/覆盖缺口报告（READ 层；客户端六源聚合，独立工具——
     # 不扩展 get_project_report 的 report 枚举，见 ADR-0002 P4 实现注记与 spec ④）
     registry.add(_spec("get_traceability_gap_report", "追踪/覆盖缺口报告", "复合技能", reporting.get_traceability_gap_report))
+
+    # 候选检查（READ 层；客户端 AST 计算，独立工具——同样不扩展 get_project_report
+    # 的 report 枚举：那是服务端计算型报告的 1:1 透传，本工具是本地结构遍历，
+    # 两种计算模型。见 ADR-0002 P4 实现注记确立的边界）
+    registry.add(_spec("check_expressions", "表达式结构检查", "复合技能", checks.check_expressions))
 
     for spec in ADMIN_TOOL_SPECS:
         registry.add_admin(spec)

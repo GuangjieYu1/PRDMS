@@ -44,7 +44,7 @@ scripts/run_server.sh stop                         # 终止 + pidfile 清理
 - pidfile/日志落 XDG state：`~/.local/state/reqmesh-harness/server.pid` / `server.log`。
 - 凭据经 shell 环境或 `reqmesh-harness/.env` 注入（脚本不含凭据字面量）；`scripts/run_server.sh` 本身不加载凭据。
 - 端口覆盖：`REQMESH_HARNESS_HOST=0.0.0.0 REQMESH_HARNESS_PORT=8081 scripts/run_server.sh start`（LAN 暴露见 §4）。
-- 验证 40 工具：
+- 验证 41 工具：
 
 ```python
 # 任意 MCP client（mcp SDK 安装于 venv）：
@@ -57,8 +57,8 @@ async def check():
         async with ClientSession(read, write) as s:
             await s.initialize()
             names = [t.name for t in (await s.list_tools()).tools]
-            assert len(names) == 40, len(names)
-            print(f"工具数 {len(names)}（mcp__reqmesh__ 注册面 40：27 READ + 7 DRAFT + 6 MUTATE）")
+            assert len(names) == 41, len(names)
+            print(f"工具数 {len(names)}（mcp__reqmesh__ 注册面 41：28 READ + 7 DRAFT + 6 MUTATE）")
 
 asyncio.run(check())
 ```
@@ -120,11 +120,11 @@ scripts/dsh_register.sh --apply        # 备份（.dsh-register-backups/）+ 幂
 
 **验证三步（操作员执行）**：
 
-1. DSH 新会话内可见 `mcp__reqmesh__*` 40 工具（`whoami` 返回 `reqmesh-harness`/maintainer）。
+1. DSH 新会话内可见 `mcp__reqmesh__*` 41 工具（`whoami` 返回 `reqmesh-harness`/maintainer）。
 2. `cd reqmesh-harness && REQMESH_P5_SMOKE_B=1 uv run python scripts/smoke_p5.py` → SMOKE-P5-001：落库回读（description == EARS 句、status=proposed）、total 61→62、审计基线差 Δ2 行（denied+approved）、无 approval/requested 帧。
 3. `uv run python evals/run_live.py` → G1–G4 全绿（残渣 `SMOKE-EVAL-P6-G1/G3-*` 入残渣清单；记录落盘 `docs/smoke/P6-cessna-172.md`）。
 
-**回滚**：`cp .dsh-register-backups/cordis.patch.yml.<时间戳> /home/user/.dsh/profiles/web/cordis.patch.yml` → 重启宿主 → 验证 40 工具消失。
+**回滚**：`cp .dsh-register-backups/cordis.patch.yml.<时间戳> /home/user/.dsh/profiles/web/cordis.patch.yml` → 重启宿主 → 验证 41 工具消失。
 
 ## 7. 安全边界汇总
 

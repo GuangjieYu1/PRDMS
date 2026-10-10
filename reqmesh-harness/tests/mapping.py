@@ -53,6 +53,9 @@ TOOLS: tuple[ToolMap, ...] = (
     ToolMap(
         name="whoami",
         domain="认证/项目",
+        # 剥离会话凭据（token / csrf_token）后返回，非逐字透传——见
+        # auth_project._CREDENTIAL_FIELDS 与 test_auth_tools.py
+        passthrough=False,
         params=(),
         cases=(
             Case("baseline", {}, "/api/auth/whoami", None, "whoami.json"),
@@ -398,6 +401,25 @@ TOOLS: tuple[ToolMap, ...] = (
                     ("GET", "/api/projects/cessna-172/allocation-matrix", "allocation_matrix.json"),
                 ),
             ),
+        ),
+    ),
+
+    ToolMap(
+        name="check_expressions",
+        domain="复合技能",
+        # 结果 = 客户端 AST 结构检查报告（requirements/components/definitions 三源全量
+        # 翻页聚合），非上游响应逐字透传——通用透传断言跳过；检查语义由 test_checks.py
+        # 专用测试覆盖（本工具不看取值，与求值类报告的判定完全不同）
+        passthrough=False,
+        params=(
+            Param("project_id", S, required=True),
+            Param("limit", I, required=False, default=200),
+        ),
+        # passthrough=False 故本 case 不参与透传断言；它只提供 schema 校验用的
+        # 已知参数实例（test_openai_export.test_parameters_validate_known_instances）
+        cases=(
+            Case("full", {"project_id": "cessna-172"},
+                 "/api/projects/cessna-172/requirements", None, "requirements_list.json"),
         ),
     ),
 )
@@ -765,15 +787,14 @@ WRITE_TOOLS: tuple[ToolMap, ...] = (
                 routes=(("GET", "/api/projects/cessna-172/quality", "report_quality.json"),),
             ),
         ),
-    ),
-)
+    ),)
 
 
 def by_name() -> dict[str, ToolMap]:
     return {t.name: t for t in TOOLS}
 
 
-READ_TOOL_COUNT = 27
+READ_TOOL_COUNT = 28
 WRITE_TOOL_COUNT = 13
 EXPECTED_TOOL_COUNT = READ_TOOL_COUNT + WRITE_TOOL_COUNT
 REPORT_ENUM = ["quality", "compliance", "metrics", "evaluation", "validation", "workflow"]

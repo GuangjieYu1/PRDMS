@@ -101,9 +101,9 @@ async def test_request_shape_matches_export_openai_functions(reqmesh_env) -> Non
     body = captured["body"]
     assert body["model"] == "deepseek-chat"
     assert body["stream"] is True
-    # tools == export_openai_functions（40 个工具 1:1，无 $defs 残留）
+    # tools == export_openai_functions（41 个工具 1:1，无 $defs 残留）
     assert body["tools"] == export_openai_functions(registry)
-    assert len(body["tools"]) == 40
+    assert len(body["tools"]) == 41
     # messages：system（指令）+ history + user（任务）
     messages = body["messages"]
     assert messages[0]["role"] == "system"

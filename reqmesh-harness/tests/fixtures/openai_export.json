@@ -1,5 +1,24 @@
 [
   {
+    "name": "check_expressions",
+    "description": "READ-ONLY 静态结构检查：不看取值地遍历项目全部表达式，返回发现清单。\n\n    覆盖：每个需求与组件的 ``parameters[].expr``、``constraints[].expr`` 与\n    ``constraints[].assume``，以及被 ``calc_def`` / ``constraint_def`` 引用的\n    Definition 表达式。检查语法、原生支持的语法节点与常量、函数白名单、\n    参数引用是否存在（含 ENTITY.parameter 跨对象引用）、以及循环依赖。\n\n    关键语义：**不依赖任何取值**，因此不会因 ``unknown``、条件短路或\n    ``not_applicable`` 跳过任何表达式——这正是它与求值类报告的区别。\n    返回含 ``checked_against`` 与 ``source_of_truth``，显式声明白名单绑定的\n    reqmesh 求值器来源与核实版本；上游求值器变更后须重新核对。\n\n    ``limit`` 仅限制返回的 findings 条数（默认 200），summary 始终为全量统计。",
+    "parameters": {
+      "properties": {
+        "project_id": {
+          "type": "string"
+        },
+        "limit": {
+          "default": 200,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "type": "object"
+    }
+  },
+  {
     "name": "create_comment",
     "description": "DRAFT 给任一实体附加讨论评论（工具层强制校验 entity_kind/entity_id/text 必填——上游 schema 未标 required；entity_kind 取值来自上游 422 校验词表）。dry_run=true 只返回 would_send 与本地校验，不写库、不产生 git 提交；未获审批门白名单批准将被拒绝。",
     "parameters": {
@@ -3382,7 +3401,7 @@
   },
   {
     "name": "whoami",
-    "description": "READ-ONLY 返回当前登录用户与角色（身份核验）。",
+    "description": "READ-ONLY 返回当前登录用户与角色（身份核验）。\n\n    **凭据字段被剥离**：上游响应中的会话 `token` / `csrf_token` 不返回给调用方。\n    会话凭据不属于身份核验所需信息，且持有它即可冒充服务账号直接调用 reqmesh。\n    这是本工具**唯一**相对上游响应的加工（故 mapping 中 passthrough=False）。",
     "parameters": {
       "properties": {},
       "type": "object"

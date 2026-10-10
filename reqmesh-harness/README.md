@@ -1,7 +1,7 @@
 # reqmesh-harness
 
 reqmesh 需求管理工具的 Agentic 编排运行时（见 `docs/reqmesh-harness-design.md`；P1 范围见 `docs/specs/p1-tool-layer-mvp.md`，P2 范围见 `docs/specs/p2-write-path.md`，P3 范围见 `docs/specs/p3-nl-requirements.md`，P4 范围见 `docs/specs/p4-traceability-report.md`，P5 范围见 `docs/specs/p5-runtime.md`，P6 范围见 `docs/specs/p6-delivery.md`）。
-本目录实现：P1 工具层 MVP（认证客户端 + 27 个 READ 工具 + MCP 双 transport + OpenAI 导出）+ P2 受控写路径（7 个 DRAFT + 6 个 MUTATE 工具 + 白名单审批门 + dry-run 预览 + 工具调用级审计日志 + 四级权限元数据 + 服务账号约定）+ P3 复合技能①（`draft_requirement` 自然语言建需求：EARS 五句式 + 本地 quality lint 闭环 + 落库（DRAFT 审批门复用）+ `get_requirement_quality` 需求级品质反馈）+ P4 复合技能②（`get_traceability_gap_report` 追踪/覆盖缺口报告：六源客户端聚合 + 12 类缺口维度 + 规则驱动建议，全 READ 零写）+ P5 内置运行时（planner→executor loop + DSH/OpenAI/Fake provider + 会话内存 + run CLI）+ P6 交付（evals 黄金任务集 + 部署形态 + 文档/版本 0.2.0）。
+本目录实现：P1 工具层 MVP（认证客户端 + 28 个 READ 工具 + MCP 双 transport + OpenAI 导出）+ P2 受控写路径（7 个 DRAFT + 6 个 MUTATE 工具 + 白名单审批门 + dry-run 预览 + 工具调用级审计日志 + 四级权限元数据 + 服务账号约定）+ P3 复合技能①（`draft_requirement` 自然语言建需求：EARS 五句式 + 本地 quality lint 闭环 + 落库（DRAFT 审批门复用）+ `get_requirement_quality` 需求级品质反馈）+ P4 复合技能②（`get_traceability_gap_report` 追踪/覆盖缺口报告：六源客户端聚合 + 12 类缺口维度 + 规则驱动建议，全 READ 零写）+ P5 内置运行时（planner→executor loop + DSH/OpenAI/Fake provider + 会话内存 + run CLI）+ P6 交付（evals 黄金任务集 + 部署形态 + 文档/版本 0.2.0）。
 
 ## 安装
 
@@ -53,7 +53,7 @@ uv run python -m reqmesh_harness.server --transport http          # streamable-H
 
 - **stdio**：供 DSH 等 MCP client 进程内消费（零端口零 LAN 面）；DSH 注册见 `scripts/dsh_register.sh` 与 docs/deployment.md。
 - **streamable-HTTP**：默认 `127.0.0.1:8081`（P6 收编正式端口；P1 期 8123 仅剩历史语义），stateless（每个请求作用域构建会话，会话文件共享）。
-- 工具注册表 = 40 个工具（27 READ + 7 DRAFT + 6 MUTATE）唯一事实源：`tools/list` 与 stdio/OpenAI 导出同源。
+- 工具注册表 = 41 个工具（28 READ + 7 DRAFT + 6 MUTATE）唯一事实源：`tools/list` 与 stdio/OpenAI 导出同源。
 
 ## evals（P6 黄金任务集）
 
@@ -95,7 +95,7 @@ uv run python evals/run_live.py       # P6 evals live（同前置）
 | `src/reqmesh_harness/client/` | 薄 HTTP 客户端：认证会话（cookie/CSRF）、只读视图（仅 `get()`）、写视图（仅 post/put/patch/delete，构造需 GateToken） |
 | `src/reqmesh_harness/client/generated/` | 生成产物（提交入库，**禁止手改**） |
 | `src/reqmesh_harness/guardrails/` | 审批门（白名单 fail-closed 裁决 + GateToken 签发）+ JSONL 审计日志 + `approvals` CLI |
-| `src/reqmesh_harness/tools/` | 工具注册表（唯一事实源）+ 40 个工具（27 READ + 7 DRAFT + 6 MUTATE；含 P3/P4 复合技能） |
+| `src/reqmesh_harness/tools/` | 工具注册表（唯一事实源）+ 41 个工具（28 READ + 7 DRAFT + 6 MUTATE；含 P3/P4 复合技能与候选检查） |
 | `src/reqmesh_harness/ears/` | EARS 五句式解析/渲染（P3；纯确定性，无 LLM，英文槽位） |
 | `src/reqmesh_harness/lint/` | 本地 quality lint（20 条规则镜像 + 6 类确定性修正表；独立重写，不复制上游 GPL 源码） |
 | `src/reqmesh_harness/report/` | 追踪/覆盖缺口报告聚合内核（P4；纯函数零网络，12 类缺口维度 + 建议模板表独立编写） |
