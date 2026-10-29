@@ -2,7 +2,65 @@
 
 > 适用：把 PRDMS 部署到**你自己的本机**（虚拟机之外）。
 > 前置阅读：`docs/manual/MANUAL.md`（功能与手动测试）、`docs/deployment.md`（harness 部署细节，systemd/8081）。
-> 包来源：共享文件夹 `mnt/linux_share/prdms-full-*.tar.gz`，或 GitHub `GuangjieYu1/PRDMS`（tag `v0.2.0`）。
+
+## 0. 交付物：你需要的是「源码包」，不是 GitHub 仓库
+
+**只 clone GitHub 是跑不起来的。** 原因：`reqmesh/` 是**独立的上游克隆**
+（`CallumNunesVaz/reqmesh`，**私有仓库**，公网 404/401），被 `.gitignore` 排除，
+本仓库历史里从来没有它。缺了它，`bootstrap-host.sh` 会在第 1 步报
+`reqmesh/backend 不存在`——**这不是没找对路径，是真的没有**。
+
+所以交付物是二者合成的**源码包**：
+
+```
+prdms-src-<日期>.tar.gz          ← 约 8 MB
+└── PRDMS/
+    ├── （仓库全部已跟踪文件）
+    ├── reqmesh/                 ← 上游源码（v0.5.0 + 本地 3 个补丁）
+    └── MANIFEST.txt             ← 来源、commit、补丁清单
+```
+
+**包里刻意不含**：
+
+| 不含 | 原因 |
+|---|---|
+| `.venv` / `node_modules` / `dist` | 与 CPU 架构绑定（旧 full 包里的 aarch64 二进制在 Windows/macOS 上直接不可用）；由目标机 `bootstrap-host.sh` 自建 |
+| `data/` / `.rt-secret` / `.rt-admin-pw` / `.env` | 业务数据与凭据，不跨机搬运；目标机首次启动自动生成 |
+
+### 0.1 拿到包并校验
+
+向交付方索取 `prdms-src-*.tar.gz` **及其 sha256**：
+
+```bash
+shasum -a 256 prdms-src-*.tar.gz     # macOS
+sha256sum prdms-src-*.tar.gz         # Linux
+# 与交付方给的 sha256 逐字比对，不一致就不要用
+```
+
+### 0.2 预检（30 秒，别跳过）
+
+```bash
+tar xzf prdms-src-*.tar.gz && cd PRDMS
+for p in reqmesh/backend/requirements.txt reqmesh/frontend/package.json \
+         reqmesh/LICENSE reqmesh-harness/pyproject.toml \
+         scripts/bootstrap-host.sh MANIFEST.txt; do
+  [ -e "$p" ] && echo "  ok   $p" || echo "  缺!! $p"
+done
+cat MANIFEST.txt        # 核对 commit 与补丁清单
+```
+
+`reqmesh/LICENSE` 显示 **GPL-3.0** 是正常的——那是上游许可证，随源码分发。
+
+### 0.3 没有包怎么办
+
+本仓库**不提供、也不能提供**这个包：`reqmesh/` 来自私有上游，不能公开分发。
+唯一办法是找一台**已经有 `reqmesh/` 的机器**（比如原交付机），在那里生成后再拷过来：
+
+```bash
+./scripts/pack-full.sh -o /tmp/out     # 产出 prdms-src-<日期>.tar.gz + sha256
+```
+
+跨机拷贝用你能控制的渠道（U 盘、内网共享、企业网盘）。**不要**放到公开仓库或公网网盘。
 
 ## 1. 前置要求（按主机系统）
 
@@ -17,11 +75,11 @@
 ## 2. 快速开始（一键引导）
 
 ```bash
-# 1) 取包（共享文件夹路径，宿主侧自行拷贝；或在 WSL2 内直接访问 /mnt/*）
-tar xzf prdms-full-2026-09-03.tar.gz
+# 1) 解包（前提：已完成 §0.1 校验与 §0.2 预检）
+tar xzf prdms-src-<日期>.tar.gz
 cd PRDMS
 
-# 2) 一键引导：装依赖 + 构建前端 + 生成密钥/种子 + 配置 harness + 校验 40 工具
+# 2) 一键引导：装依赖 + 构建前端 + 生成密钥/种子 + 配置 harness + 校验 41 工具
 ./scripts/bootstrap-host.sh
 
 # 3) 引导并立即启动 reqmesh
@@ -29,6 +87,7 @@ cd PRDMS
 ```
 
 引导脚本幂等可重跑；`--skip-ui-build` 复用已有 `dist/`；`--port` 换端口（默认 8000）。
+首次运行会下载后端依赖并构建前端，**需要联网**（npm 与 pip 走各自源）。
 
 ## 3. 分步详解（等价手工步骤）
 
@@ -54,8 +113,8 @@ cd PRDMS
 | 4.1 | 健康 | `curl http://127.0.0.1:8000/health` | `{"status":"ok","version":"0.5.0","profile":"personal"}` |
 | 4.2 | UI | 浏览器打开 `http://127.0.0.1:8000` | 项目列表（Cessna 172S）；admin 密码在 `reqmesh/.rt-admin-pw`，首次登录会要求改密 |
 | 4.3 | 服务账号 | UI → Users 创建 `reqmesh-harness`（角色 **maintainer**），密码取 `reqmesh-harness/.env` | 写工具的最小权限角色（P2 实测：contributor 不够，必须 maintainer） |
-| 4.4 | harness 工具 | 见 §4.4 命令 | 40 个工具 |
-| 4.5 | 测试基线 | `cd reqmesh-harness && uv run pytest -q` | 533 passed, 3 skipped, 2 deselected |
+| 4.4 | harness 工具 | 见 §4.4 命令 | 41 个工具 |
+| 4.5 | 测试基线 | `cd reqmesh-harness && uv run pytest -q` | 567 passed, 5 skipped, 2 deselected（`test_skeleton::test_settings_defaults` 可能因 cwd 的 `.env` 失败，属既有环境依赖，与本栈无关） |
 | 4.6 | 网络冒烟 | `uv run python scripts/smoke_p1.py` | 通过（requirements total=57 起，视数据而定） |
 | 4.7 | 写路径 | `uv run reqmesh-harness approvals add create_requirement --project cessna-172 --yes` 后经 MCP 调一次 dry_run | 返回 `{dry_run:true, would_send:...}` 且不落库 |
 
@@ -67,7 +126,7 @@ printf '%s\n' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
  '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
  | .venv/bin/reqmesh-harness --transport stdio | tail -1
-# → 40 个工具（create_comment 起，含 draft_requirement/get_traceability_gap_report）
+# → 41 个工具（含 check_expressions 结构检查、draft_requirement、get_traceability_gap_report）
 ```
 
 ## 5. DSH 集成（可选：把 harness 变成本机 DSH 的「需求创造模式」）
@@ -85,7 +144,7 @@ dsh --profile web --no-open --port 8080
 cd reqmesh-harness && ./scripts/dsh_register.sh --check   # 缺失
 ./scripts/dsh_register.sh --apply                          # 幂等插入 + 备份
 
-# 4) 重启 8080 宿主 → 新对话里 mcp__reqmesh__* 40 工具可用（stdin 子进程由宿主托管）
+# 4) 重启 8080 宿主 → 新对话里 mcp__reqmesh__* 41 工具可用（stdin 子进程由宿主托管）
 ```
 
 验证：新对话问「列出你的 mcp__reqmesh__* 工具」，或按 `docs/manual/MANUAL.md` §4.4 的
@@ -93,10 +152,11 @@ cd reqmesh-harness && ./scripts/dsh_register.sh --check   # 缺失
 
 ## 6. 与 VM 版的关键差异（务必阅读）
 
-1. **不要复用 VM 的 `.venv` / `node_modules`**：包内这些目录是 aarch64 Linux 二进制，
-   在本机（尤其 Windows/macOS）会直接失败——一律重跑引导脚本重建。
-2. **密钥建议重生成**：`.rt-secret`/`.rt-admin-pw` 与 `reqmesh-harness/.env` 随包分发过，
-   敏感环境请删除后重跑引导（脚本发现缺失会自动生成）。
+1. **包里不含 `.venv` / `node_modules` / `dist`**：`prdms-src-*.tar.gz` 是纯源码包，
+   依赖与前端由 `bootstrap-host.sh` 在目标机构建。若你手上是旧 `prdms-full-*.tar.gz`，
+   它里面的这些目录是 aarch64 Linux 二进制，在 Windows/macOS 上必然失败——删掉重跑引导。
+2. **密钥在目标机生成**：源码包不含 `.rt-secret`/`.rt-admin-pw`/`.env`，首次引导自动生成。
+   若从旧 full 包升级，请删除这三个文件后重跑（别人用过的密钥不应继续使用）。
 3. **路径全部参数化**：`dsh_register.sh` 已改为自定位（本提交起）；`run_server.sh`、
    smoke 脚本均为相对路径；唯一需要改的是各 URL 配置（`REQMESH_BASE_URL`、`RT_BASE_URL`）。
 4. **端口冲突**：8000/8080/8081 被占用时用 `--port` / 环境变量换端口，并同步
@@ -117,3 +177,6 @@ cd reqmesh-harness && ./scripts/dsh_register.sh --check   # 缺失
 | harness 写工具 401 | `REQMESH_BASE_URL` 指向不对、或服务账号未建/角色不是 maintainer（§4.3） |
 | DSH 新对话没有 mcp 工具 | 宿主启动早于 patch 应用（重启即可）；或宿主进程环境没有 `REQMESH_*`（§5 第 2 步） |
 | 端口被占 | `ss -ltnp | grep -E ':(8000|8080|8081)'` 找占用者；换端口并同步两个 BASE_URL |
+| `bootstrap-host.sh` 报 `reqmesh/backend 不存在` | 你只有 GitHub 仓库，没有源码包——`reqmesh/` 是私有上游克隆，仓库里没有。按 §0 取包，或在有 `reqmesh/` 的机器上 `./scripts/pack-full.sh` 生成 |
+| 找不到 `prdms-full-*.tar.gz` | 旧命名。现在应找 `prdms-src-*.tar.gz`（纯源码，约 8 MB）；两者不通用，见 §0 |
+| 包里 `reqmesh/` 存在但仍报依赖失败 | 确认没有复用别人的 `.venv`（架构不符）；`rm -rf reqmesh/backend/.venv reqmesh/frontend/node_modules` 后重跑 |

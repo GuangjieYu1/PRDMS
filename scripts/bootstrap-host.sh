@@ -37,9 +37,33 @@ die() { printf '\033[1;31m[错误]\033[0m %s\n' "$*" >&2; exit 1; }
 OS="$(uname -s)"
 case "$OS" in
   MINGW*|MSYS*|CYGWIN*) die "Windows 原生不支持本栈（weasyprint/pango 依赖、POSIX 脚本、VM 包内 aarch64 产物均不适用）。请在 Windows 上启用 WSL2，把 PRDMS 目录放进 WSL 文件系统后重跑本脚本（详见 docs/deployment-host.md §1）。" ;;
-  Linux|Darwin) log "平台：$OS（$(uname -m)）" ;;
+  Linux|Darwin) log "平台：${OS}（$(uname -m)）" ;;
   *) die "不支持的操作系统：$OS" ;;
 esac
+
+# ── 0. 交付物完整性检查（最先做，避免装完依赖才发现缺源码）─────────────────────
+# reqmesh/ 是独立的上游私有克隆，不在本仓库历史里。只 clone GitHub 会缺它。
+MISSING=""
+for p in reqmesh/backend/requirements.txt reqmesh/frontend/package.json \
+         reqmesh/LICENSE reqmesh-harness/pyproject.toml; do
+  [ -e "$ROOT/$p" ] || MISSING="$MISSING $p"
+done
+if [ -n "$MISSING" ]; then
+  printf '\033[1;31m[错误]\033[0m 交付物不完整，缺少：%s\n' "$MISSING" >&2
+  cat >&2 <<'EOF'
+
+原因：reqmesh/ 是独立的上游克隆（CallumNunesVaz/reqmesh，**私有仓库**），
+被 .gitignore 排除，GitHub 上从来没有它。只 clone 本仓库是跑不起来的。
+
+怎么办：你需要「源码包」 prdms-src-<日期>.tar.gz（约 8 MB，= 仓库 + reqmesh 源码）。
+  · 向交付方索取，并核对 sha256
+  · 或在已有 reqmesh/ 的机器上执行 ./scripts/pack-full.sh 生成后拷过来
+
+详见 docs/deployment-host.md §0。
+EOF
+  exit 1
+fi
+log "交付物完整：reqmesh/ 与 reqmesh-harness/ 均在位"
 
 # ── 1. 工具检查 ──────────────────────────────────────────────────────────────
 need() { command -v "$1" >/dev/null 2>&1 || die "缺少 $1 —— 安装方法见 docs/deployment-host.md §1（$2）"; }
@@ -49,7 +73,7 @@ need npm "Node 18+"
 need git "git"
 need openssl "openssl"
 PY_MAJOR="$(python3 -c 'import sys;print(sys.version_info[1])' 2>/dev/null || echo 0)"
-[ "$PY_MAJOR" -ge 11 ] 2>/dev/null || die "Python 3.11+ 必需（当前 3.$PY_MAJOR）"
+[ "$PY_MAJOR" -ge 11 ] 2>/dev/null || die "Python 3.11+ 必需（当前 3.${PY_MAJOR}）"
 command -v uv >/dev/null 2>&1 || { log "未装 uv —— 尝试 python3 -m pip install --user uv"; python3 -m pip install --user uv >/dev/null 2>&1 || die "uv 安装失败，请手动安装（docs/deployment-host.md §1）"; }
 export PATH="$HOME/.local/bin:$PATH"
 
