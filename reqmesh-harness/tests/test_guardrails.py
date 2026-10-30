@@ -56,6 +56,52 @@ def test_draft_project_specific_pins_one_project(tmp_path) -> None:
     assert gate.decide("create_requirement", "other", dry_run=False, level="DRAFT").status == "denied"
 
 
+def test_draft_wrong_project_reports_miss_not_dry_run_only(tmp_path) -> None:
+    """回归：DRAFT 工具**有**条目但不覆盖当前项目时，必须报"未命中条目"。
+
+    实测事故（2026-10-10，IATA_TEST_001）：白名单只授权了别的项目，agent 传
+    dry_run=true 仍被拒，而报错说"白名单条目为 dry_run_only"——于是它去排查
+    dry_run 参数，方向完全错了。根因是 DRAFT 分支缺少 `if not hit` 判断，
+    空 hit 直接落到 dry_run_only 兜底分支。
+    """
+    gate = _gate(tmp_path, [WhitelistEntry(tool="create_requirement", project="bfip-reqmesh")])
+    for dry in (True, False):
+        d = gate.decide("create_requirement", "IATA_TEST_001", dry_run=dry, level="DRAFT")
+        assert d.status == "denied"
+        assert "未命中条目" in d.deny_reason, d.deny_reason
+        assert "dry_run_only" not in d.deny_reason, f"dry_run={dry} 时仍报 dry_run_only：{d.deny_reason}"
+        # 报错要指出该项目确实没被覆盖，而不是笼统"没有条目"
+        assert "IATA_TEST_001" in d.deny_reason
+        assert "bfip-reqmesh" in d.deny_reason, "应列出已有条目覆盖了哪些项目"
+
+
+def test_draft_no_entries_at_all_still_says_no_entry(tmp_path) -> None:
+    """工具完全没条目时，仍应报"白名单无该工具的条目"（与"未命中"区分开）。"""
+    gate = _gate(tmp_path, [WhitelistEntry(tool="create_component", project="x")])
+    d = gate.decide("create_requirement", "x", dry_run=False, level="DRAFT")
+    assert d.status == "denied"
+    assert "白名单无该工具的条目" in d.deny_reason
+
+
+def test_draft_dry_run_only_entry_still_blocks_real_write(tmp_path) -> None:
+    """修 bug 不能放宽语义：条目命中且 dry_run_only=true 时，dry_run 放行、真实写入仍拒。"""
+    gate = _gate(tmp_path, [WhitelistEntry(tool="create_requirement", project="p1", dry_run_only=True)])
+    assert gate.decide("create_requirement", "p1", dry_run=True, level="DRAFT").approved
+    d = gate.decide("create_requirement", "p1", dry_run=False, level="DRAFT")
+    assert d.status == "denied"
+    assert "dry_run_only" in d.deny_reason
+
+
+def test_deny_hint_always_scopes_project(tmp_path) -> None:
+    """修复建议必须带 --project：不带会生成通配全部项目的条目（最小权限的反面）。"""
+    for level, tool in (("DRAFT", "create_requirement"), ("MUTATE", "update_requirement")):
+        gate = _gate(tmp_path, [])
+        d = gate.decide(tool, "proj-a", dry_run=False, level=level)
+        assert d.status == "denied"
+        assert "--project proj-a" in d.fix_hint, f"{level} 的修复建议缺 --project：{d.fix_hint}"
+        assert 'project = "proj-a"' in d.fix_hint
+
+
 def test_mutate_requires_exact_project_no_wildcard(tmp_path) -> None:
     gate = _gate(tmp_path, [WhitelistEntry(tool="update_requirement")])  # 通配条目对 MUTATE 无效
     decision = gate.decide("update_requirement", "cessna-172", dry_run=False, level="MUTATE")

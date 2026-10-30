@@ -101,6 +101,21 @@ class ApprovalGate:
             return self._deny(tool, project_id, dry_run, level, "白名单无该工具的条目")
         if level == "DRAFT":
             hit = [e for e in matched if e.project is None or e.project == project_id]
+            if not hit:
+                # 该工具**有**条目，但没有一条覆盖当前项目。必须在这里拦下，否则会落到
+                # 下面的 dry_run_only 分支，报出"只放行 dry_run 调用"——而调用方可能
+                # 已经传了 dry_run=true。实测事故（2026-10-10）：IATA_TEST_001 的白名单
+                # 条目只授权了别的项目，agent 传 dry_run=true 仍被拒并被告知是
+                # dry_run_only，于是去排查 dry_run 参数，方向完全错了。
+                covered = sorted({e.project or "（通配全部项目）" for e in matched})
+                return self._deny(
+                    tool,
+                    project_id,
+                    dry_run,
+                    level,
+                    f"未命中条目（该工具已有条目，但都不覆盖 project={project_id}；"
+                    f"现有条目覆盖：{', '.join(covered)}）",
+                )
         else:  # MUTATE / ADMIN：tool + 具体 project 必填（禁止通配）
             hit = [e for e in matched if e.project == project_id]
             if not hit:
@@ -135,13 +150,13 @@ class ApprovalGate:
     def _deny(
         self, tool: str, project_id: str, dry_run: bool, level: str, reason: str
     ) -> ApprovalDecision:
-        if level == "MUTATE":
+        # 三个层级都显式给出 project。旧实现只在 MUTATE/ADMIN 带 --project，DRAFT 不带，
+        # 而按提示执行 `approvals add <tool>`（无 project）会生成**通配全部项目**的条目
+        # ——正好是最小权限的反面，且事后很难发现。项目已知时一律写具体值。
+        if project_id:
             project_arg = f" --project {project_id}"
             project_line = f'\n     project = "{project_id}"'
-        elif level == "ADMIN":
-            project_arg = f" --project {project_id}"
-            project_line = f'\n     project = "{project_id}"'
-        else:  # DRAFT：project 可省略（建议给出，便于最小权限）
+        else:
             project_arg = ""
             project_line = ""
         return ApprovalDecision(
