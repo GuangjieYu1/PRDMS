@@ -152,9 +152,22 @@ UNIT
     ok "已启动 reqmesh-harness"
   fi
 else
-  warn "未使用 systemd。请自行托管，启动命令："
-  echo "       cd $HARNESS_DIR && set -a && . ./.env && set +a && \\"
-  echo "         .venv/bin/reqmesh-harness --transport http --host $BIND_HOST --port $BIND_PORT"
+  # 无 systemd：自己后台起一个，否则下面的验收无从谈起（否则脚本只能打印命令就退出）
+  PID_FILE="$STATE_DIR/harness.pid"
+  if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+    ok "已在运行（pid $(cat "$PID_FILE")），跳过启动"
+  else
+    mkdir -p "$STATE_DIR"
+    (
+      cd "$HARNESS_DIR"
+      set -a; . "$ENV_FILE"; set +a
+      nohup .venv/bin/reqmesh-harness --transport http --host "$BIND_HOST" --port "$BIND_PORT" \
+        > "$STATE_DIR/harness.log" 2>&1 &
+      echo $! > "$PID_FILE"
+    )
+    ok "已后台启动（pid $(cat "$PID_FILE")，日志 $STATE_DIR/harness.log）"
+    warn "本机重启后不会自动拉起。生产环境建议改用 systemd。"
+  fi
 fi
 
 # ── 4. 等待就绪 ─────────────────────────────────────────────────────────────
