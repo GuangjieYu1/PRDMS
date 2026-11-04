@@ -66,6 +66,20 @@ class Settings(BaseSettings):
     # 否则全部项目数据对任何可达客户端可见。凭据只经环境变量或 .env（0600）。
     mcp_token: SecretStr = SecretStr("")
 
+    # MCP 端点的**路径 token**（可选，默认关闭）：给**只能填一个服务地址**的客户端用。
+    #
+    # 实测依据：通义灵码 / Qoder CN 的 SSE 配置项只有"名称 + 服务地址"两个字段，
+    # **没有自定义 header**（官方文档：仅支持 STDIO 与 SSE 两种模式）。设置本项后，
+    # harness 额外暴露 `GET /mcp/<path-token>/sse`，客户端把整个 URL 填进去即可。
+    #
+    # 为什么放路径而不是 query：SSE 握手时服务端在 `endpoint` 事件里宣告后续
+    # message POST 的路径，该路径**不含 query**；客户端照它发第二个请求时 query 里的
+    # token 就丢了。放路径则子路径被继承，两个请求都带上凭据。
+    #
+    # ⚠️ 代价：路径会进访问日志 / 代理日志 / 客户端历史，泄漏面大于请求头。因此应与
+    # `mcp_token` **分开取值**，以便独立轮换与独立废止。
+    mcp_path_token: SecretStr = SecretStr("")
+
     # P3 复合技能：本地 quality lint 过线标准与确定性修正轮数上限
     lint_min_score: int = 90
     lint_max_rounds: int = 3

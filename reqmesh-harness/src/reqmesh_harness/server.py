@@ -1,14 +1,16 @@
-"""MCP server：server 名 reqmesh；stdio（默认）与 streamable-HTTP 双 transport。
+"""MCP server：server 名 reqmesh；stdio（默认）与 HTTP（streamable + 可选 SSE）双 transport。
 
 - stdio：启动时以 whoami 校验持久化会话（失效则重登一次），失败仅告警不阻断
   （逐次调用仍有 401 重登兜底）；
-- streamable-HTTP：stateless（每个请求作用域构建客户端会话，会话文件共享，
+- HTTP：stateless（每个请求作用域构建客户端会话，会话文件共享，
   无服务端长驻项目上下文——project context 属 P5 memory 范围）；
 - host/port 经 REQMESH_HARNESS_HOST/REQMESH_HARNESS_PORT 配置（正式端口默认 127.0.0.1:8081；P6 收编，spec p6 决策②）。
-- **可选 Bearer 鉴权**：设置 REQMESH_MCP_TOKEN 后，streamable-HTTP 要求
-  `Authorization: Bearer <token>`（见 mcp_auth）。未设置 = 不鉴权，保持本机开发
-  与 stdio 用法零变化。MCP 协议无认证层，且 READ 工具不受审批门保护——端点一旦
-  暴露到本机之外就必须设置本项。
+- **可选鉴权**（见 mcp_auth）：设置 REQMESH_MCP_TOKEN 后要求
+  `Authorization: Bearer <token>`；设置 REQMESH_MCP_PATH_TOKEN 后额外暴露
+  `GET /mcp/<path-token>/sse`（给只能填服务地址、无自定义 header 的客户端，
+  实测如通义灵码 / Qoder CN）。两者都未设置 = 不鉴权，保持本机开发与 stdio
+  用法零变化。MCP 协议无认证层，且 READ 工具不受审批门保护——端点一旦
+  暴露到本机之外就必须设置其中之一。
 """
 
 from __future__ import annotations
@@ -91,8 +93,44 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _run_http_with_auth(mcp: FastMCP, token: str) -> None:
-    """streamable-HTTP + Bearer 鉴权：自行托管 uvicorn，以便在 ASGI app 外层包中间件。
+def _build_http_app(mcp: FastMCP, path_token: str):
+    """组合 HTTP 端点：`/mcp`（streamable-HTTP）+ 可选 `/mcp/<path-token>/sse`（SSE）。
+
+    SSE 端点为什么挂在 **token 子路径**下：通义灵码 / Qoder CN 的 SSE 配置只有
+    "名称 + 服务地址"两个字段，**没有自定义 header**，凭据只能随路径传递
+    （详见 mcp_auth 模块文档）。
+
+    两个容易踩的坑（均已实测确认，改动时别退回去）：
+
+    1. **`sse_app()` 不能传 `mount_path`**。`SseServerTransport` 自己会拼
+       `scope["root_path"] + endpoint`（见 mcp/server/sse.py）；外层 `Mount` 已经把
+       前缀写进 root_path，若再把同一个前缀传给 mount_path，宣告出来的 message 路径
+       就会**重复一次**（实测：`/mcp/<t>/mcp/<t>/messages/`），客户端 POST 必然 404。
+
+    2. **外层 Starlette 必须显式接管 streamable app 的 lifespan**。Starlette 的
+       `Mount` 不向子 app 传播 lifespan，而 streamable 的 SessionManager 依赖 lifespan
+       启动内部 task group；不接管就会在首个请求上抛
+       `RuntimeError: Task group is not initialized. Make sure to use run()`。
+    """
+    streamable = mcp.streamable_http_app()
+
+    if not path_token:
+        return streamable
+
+    from starlette.applications import Starlette
+    from starlette.routing import Mount
+
+    prefix = f"/mcp/{path_token}"
+    sse = mcp.sse_app()  # 坑 1：不传 mount_path，前缀由外层 Mount 的 root_path 提供
+    # 顺序要紧：先匹配更具体的 token 子路径，再落到 streamable 的根挂载
+    return Starlette(
+        routes=[Mount(prefix, app=sse), Mount("/", app=streamable)],
+        lifespan=streamable.router.lifespan_context,  # 坑 2：接管 session manager 的启动
+    )
+
+
+def _run_http_with_auth(mcp: FastMCP, token: str, path_token: str = "") -> None:
+    """HTTP transport + 鉴权：自行托管 uvicorn，以便在 ASGI app 外层包中间件。
 
     镜像 `FastMCP.run_streamable_http_async` 的 uvicorn 配置（host/port/log_level），
     只在 app 外层多包一层准入控制——不改变 MCP 协议行为。
@@ -101,8 +139,13 @@ def _run_http_with_auth(mcp: FastMCP, token: str) -> None:
 
     from .mcp_auth import wrap_with_bearer_auth
 
-    app = wrap_with_bearer_auth(mcp.streamable_http_app(), token)
-    logger.info("MCP 端点已启用 Bearer 鉴权（REQMESH_MCP_TOKEN 已设置）")
+    app = wrap_with_bearer_auth(_build_http_app(mcp, path_token), token, path_token)
+    if token:
+        logger.info("MCP 端点已启用 Bearer 鉴权（REQMESH_MCP_TOKEN 已设置）")
+    if path_token:
+        logger.info(
+            "MCP 端点已启用 SSE（路径 token）：/mcp/<REQMESH_MCP_PATH_TOKEN>/sse"
+        )
     config = uvicorn.Config(
         app,
         host=mcp.settings.host,
@@ -132,10 +175,13 @@ def main(argv: list[str] | None = None) -> None:
 
     mcp = create_server(settings)
 
-    # 端点暴露到本机之外时用 REQMESH_MCP_TOKEN 开启鉴权（默认关闭，见 mcp_auth）
+    # 端点暴露到本机之外时用 REQMESH_MCP_TOKEN（Bearer 头）或
+    # REQMESH_MCP_PATH_TOKEN（URL 路径，给只能填服务地址的客户端）开启鉴权。
+    # 两者都未设置 = 不鉴权（默认关闭，见 mcp_auth）。
     token = settings.mcp_token.get_secret_value()
-    if args.transport == "http" and token:
-        _run_http_with_auth(mcp, token)
+    path_token = settings.mcp_path_token.get_secret_value()
+    if args.transport == "http" and (token or path_token):
+        _run_http_with_auth(mcp, token, path_token)
         return
 
     mcp.run(transport=MCP_TRANSPORT[args.transport])
