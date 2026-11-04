@@ -22,6 +22,7 @@ dist/
 # ── Secrets & local env ─────────────────────────────────────────────────
 .env
 .env.*
+.state/
 !.env.example
 *.local
 

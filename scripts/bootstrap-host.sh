@@ -132,7 +132,7 @@ TOOL_COUNT="$(printf '%s\n' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
   | .venv/bin/reqmesh-harness --transport stdio 2>/dev/null \
   | tail -1 | python3 -c "import json,sys; print(len(json.loads(sys.stdin.read())['result']['tools']))" 2>/dev/null || echo 0)"
-log "  MCP 工具数：${TOOL_COUNT}（预期 40）"
+log "  MCP 工具数：${TOOL_COUNT}（预期 41）"
 
 # ── 6. （可选）启动 ──────────────────────────────────────────────────────────
 if [ "$DO_START" = 1 ]; then
